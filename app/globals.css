@@ -1,22 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --bg:    #0D0F0B;
-  --surf:  #121410;
-  --surf2: #181B14;
-  --bdr:   #1E221A;
-  --bdr2:  #252B20;
-  --t1:    #F0EDE8;
-  --t2:    #8A8680;
-  --t3:    #4A4740;
-  --t4:    #2E2C28;
-  --acc:   #4A7A2A;
-  --acc-l: #162010;
-  --cat-ai:       #6EB5E8;
-  --cat-health:   #7A9E6E;
-  --cat-creative: #C8955A;
-  --cat-design:   #9B8FD4;
-  --cat-market:   #C49A6E;
+  --bg:    #0A0A08;
+  --surf:  #101010;
+  --surf2: #171715;
+  --bdr:   #1A1A17;
+  --bdr2:  #232320;
+  --t1:    #EDEBE5;
+  --t2:    #8D8B86;
+  --t3:    #514F4B;
+  --t4:    #2E2D2A;
+  --acc:   #6CB842;
+  --acc-l: #0D1C08;
+
+  /* 11 category accent colors */
+  --cat-policy:            #7B9EC8;
+  --cat-ai:                #5BB5E8;
+  --cat-design-industry:   #A892D4;
+  --cat-creative-practice: #D4A76A;
+  --cat-market:            #D4956A;
+  --cat-health:            #7AB87A;
+  --cat-company:           #D4846A;
+  --cat-design-leadership: #CC7A9E;
+  --cat-creative-tech:     #5EC4C4;
+  --cat-culture:           #C47A7A;
+  --cat-data:              #7AC4A8;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,13 +38,34 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-::selection { background: var(--acc-l); color: var(--t1); }
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 2px; }
+::selection { background: var(--acc-l); color: var(--acc); }
 
-.cat-ai       { color: var(--cat-ai); }
-.cat-health   { color: var(--cat-health); }
-.cat-creative { color: var(--cat-creative); }
-.cat-design   { color: var(--cat-design); }
-.cat-market   { color: var(--cat-market); }
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 1px; }
+
+/* Category dot colors */
+.dot-policy            { background: var(--cat-policy); }
+.dot-ai                { background: var(--cat-ai); }
+.dot-design-industry   { background: var(--cat-design-industry); }
+.dot-creative-practice { background: var(--cat-creative-practice); }
+.dot-market            { background: var(--cat-market); }
+.dot-health            { background: var(--cat-health); }
+.dot-company           { background: var(--cat-company); }
+.dot-design-leadership { background: var(--cat-design-leadership); }
+.dot-creative-tech     { background: var(--cat-creative-tech); }
+.dot-culture           { background: var(--cat-culture); }
+.dot-data              { background: var(--cat-data); }
+
+/* Category text colors */
+.cat-policy            { color: var(--cat-policy); }
+.cat-ai                { color: var(--cat-ai); }
+.cat-design-industry   { color: var(--cat-design-industry); }
+.cat-creative-practice { color: var(--cat-creative-practice); }
+.cat-market            { color: var(--cat-market); }
+.cat-health            { color: var(--cat-health); }
+.cat-company           { color: var(--cat-company); }
+.cat-design-leadership { color: var(--cat-design-leadership); }
+.cat-creative-tech     { color: var(--cat-creative-tech); }
+.cat-culture           { color: var(--cat-culture); }
+.cat-data              { color: var(--cat-data); }
