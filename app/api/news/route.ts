@@ -42,6 +42,7 @@ interface Article {
   summary: string
   category: string
   tag: string
+  imageUrl?: string
 }
 
 // Compress article to 2-3 sentence summary for token efficiency
@@ -71,7 +72,7 @@ async function fetchCategory(category: typeof CATEGORIES[0]): Promise<Article[]>
     return (data.articles || [])
       .filter((a: { title?: string; url?: string }) => a.title && a.url && !a.title.includes("[Removed]"))
       .slice(0, 5)
-      .map((a: { title: string; source: { name: string }; url: string; publishedAt: string; description?: string }, i: number) => ({
+      .map((a: { title: string; source: { name: string }; url: string; publishedAt: string; description?: string; urlToImage?: string }, i: number) => ({
         id: `${category.id}-${i}`,
         title: a.title,
         source: a.source?.name || "Unknown",
@@ -80,6 +81,7 @@ async function fetchCategory(category: typeof CATEGORIES[0]): Promise<Article[]>
         summary: compressSummary(a.description || null, a.title),
         category: category.label,
         tag: category.tag,
+        imageUrl: a.urlToImage || undefined,
       }))
   } catch {
     return getStubArticles(category)

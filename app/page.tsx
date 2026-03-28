@@ -11,6 +11,7 @@ interface Article {
   summary: string
   category: string
   tag: string
+  imageUrl?: string
 }
 
 interface Category {
@@ -59,17 +60,33 @@ function ArticleCard({ article }: { article: Article }) {
           </span>
         </div>
 
-        {/* Headline */}
-        <p
-          className="text-[14.5px] leading-[1.55] group-hover:opacity-70 transition-opacity duration-150"
-          style={{
-            color: "var(--t1)",
-            fontWeight: 500,
-            letterSpacing: "-0.015em",
-          }}
-        >
-          {article.title}
-        </p>
+        {/* Headline + optional thumbnail */}
+        <div className="flex items-start gap-4">
+          <p
+            className="flex-1 text-[14.5px] leading-[1.55] group-hover:opacity-70 transition-opacity duration-150"
+            style={{
+              color: "var(--t1)",
+              fontWeight: 500,
+              letterSpacing: "-0.015em",
+            }}
+          >
+            {article.title}
+          </p>
+          {article.imageUrl && (
+            <div
+              className="shrink-0 rounded-sm overflow-hidden"
+              style={{ width: 64, height: 64, background: "var(--surf2)" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={article.imageUrl}
+                alt=""
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-50 transition-opacity duration-150"
+                onError={e => { (e.target as HTMLImageElement).style.display = "none" }}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Expanded */}
         {expanded && (
