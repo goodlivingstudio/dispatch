@@ -42,47 +42,51 @@ function ArticleCard({ article }: { article: Article }) {
       style={{ borderBottom: "0.5px solid var(--bdr)" }}
       onClick={() => setExpanded(e => !e)}
     >
-      <div className="px-7 py-5">
-        {/* Meta line */}
-        <div className="flex items-baseline gap-2 mb-2.5">
-          <span
-            className={`cat-${article.tag} text-[10px] font-mono uppercase tracking-[0.1em]`}
-          >
-            {article.category}
-          </span>
-          <span style={{ color: "var(--bdr2)" }}>·</span>
-          <span className="text-[11px]" style={{ color: "var(--t3)" }}>
-            {article.source}
-          </span>
-          <span style={{ color: "var(--bdr2)" }}>·</span>
-          <span className="text-[11px]" style={{ color: "var(--t3)" }}>
-            {timeAgo(article.publishedAt)}
-          </span>
-        </div>
-
+      <div
+        className="px-7 py-4 transition-colors duration-100"
+        style={{ background: expanded ? "var(--surf2)" : "transparent" }}
+      >
         {/* Headline + optional thumbnail */}
         <div className="flex items-start gap-4">
-          <p
-            className="flex-1 text-[14.5px] leading-[1.55] group-hover:opacity-70 transition-opacity duration-150"
-            style={{
-              color: "var(--t1)",
-              fontWeight: 500,
-              letterSpacing: "-0.015em",
-            }}
-          >
-            {article.title}
-          </p>
+          <div className="flex-1 min-w-0">
+            {/* Meta line */}
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span
+                className={`cat-${article.tag} text-[10px] font-mono uppercase tracking-[0.1em]`}
+              >
+                {article.category}
+              </span>
+              <span style={{ color: "var(--bdr2)" }}>·</span>
+              <span className="text-[11px]" style={{ color: "var(--t3)" }}>
+                {article.source}
+              </span>
+              <span style={{ color: "var(--bdr2)" }}>·</span>
+              <span className="text-[11px]" style={{ color: "var(--t3)" }}>
+                {timeAgo(article.publishedAt)}
+              </span>
+            </div>
+            <p
+              className="text-[14px] leading-[1.5] group-hover:opacity-70 transition-opacity duration-150"
+              style={{
+                color: "var(--t1)",
+                fontWeight: 500,
+                letterSpacing: "-0.014em",
+              }}
+            >
+              {article.title}
+            </p>
+          </div>
           {article.imageUrl && (
             <div
               className="shrink-0 rounded-sm overflow-hidden"
-              style={{ width: 64, height: 64, background: "var(--surf2)" }}
+              style={{ width: 80, height: 54, background: "var(--surf2)" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={article.imageUrl}
                 alt=""
-                className="w-full h-full object-cover opacity-80 group-hover:opacity-50 transition-opacity duration-150"
-                onError={e => { (e.target as HTMLImageElement).style.display = "none" }}
+                className="w-full h-full object-cover opacity-75 group-hover:opacity-40 transition-opacity duration-150"
+                onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = "none" }}
               />
             </div>
           )}
@@ -90,9 +94,9 @@ function ArticleCard({ article }: { article: Article }) {
 
         {/* Expanded */}
         {expanded && (
-          <div className="mt-4 pt-4" style={{ borderTop: "0.5px solid var(--bdr)" }}>
+          <div className="mt-3 pt-3" style={{ borderTop: "0.5px solid var(--bdr)" }}>
             <p
-              className="text-[13px] leading-[1.85] mb-3"
+              className="text-[12.5px] leading-[1.8] mb-2.5"
               style={{ color: "var(--t2)" }}
             >
               {article.summary}

@@ -1,35 +1,50 @@
 export const revalidate = 3600 // 1 hour cache
 
+// Quality source allowlist — press releases and content farms excluded
+const BLOCKED_DOMAINS = [
+  "globenewswire.com", "prnewswire.com", "businesswire.com", "accesswire.com",
+  "einpresswire.com", "prlog.org", "newswire.com", "prweb.com",
+  "elearningindustry.com", "express-press-release.net", "trysight.ai",
+  "nggroup.com", "css-tricks.com",
+]
+
+const QUALITY_SOURCES = "wired,the-verge,techcrunch,ars-technica,fast-company,reuters,the-guardian,bloomberg,fortune,mit-technology-review,hacker-news,mashable"
+
 const CATEGORIES = [
   {
     id: "ai-design",
     label: "AI & Design",
     tag: "ai",
-    queries: ["artificial intelligence design UX", "generative AI creative tools"],
+    query: "AI design OR generative AI OR LLM product",
+    sources: "wired,the-verge,techcrunch,ars-technica,fast-company,mit-technology-review",
   },
   {
     id: "health-pharma",
     label: "Healthcare & Pharma",
     tag: "health",
-    queries: ["pharmaceutical digital health", "Eli Lilly drug discovery"],
+    query: "pharmaceutical OR digital health OR FDA OR drug approval",
+    sources: "reuters,the-guardian,bloomberg",
   },
   {
     id: "creative-tech",
     label: "Creative Technology",
     tag: "creative",
-    queries: ["creative technology innovation", "design technology future"],
+    query: "design tools OR creative AI OR Figma OR product design",
+    sources: "wired,techcrunch,the-verge,fast-company",
   },
   {
     id: "design-industry",
     label: "Design Industry",
     tag: "design",
-    queries: ["design industry trends UX", "product design leadership"],
+    query: "UX design OR product design OR design leadership OR design strategy",
+    sources: "fast-company,wired,fortune,the-guardian",
   },
   {
     id: "market",
     label: "Market Trends",
     tag: "market",
-    queries: ["tech market trends 2025", "venture capital design startup"],
+    query: "venture capital OR startup funding OR tech market OR AI investment",
+    sources: "bloomberg,reuters,fortune,techcrunch",
   },
 ]
 
@@ -57,8 +72,7 @@ async function fetchCategory(category: typeof CATEGORIES[0]): Promise<Article[]>
   const apiKey = process.env.NEWSAPI_KEY
   if (!apiKey) return getStubArticles(category)
 
-  const query = category.queries[0]
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(category.query)}&sources=${encodeURIComponent(category.sources)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${apiKey}`
 
   try {
     const controller = new AbortController()
@@ -70,7 +84,12 @@ async function fetchCategory(category: typeof CATEGORIES[0]): Promise<Article[]>
     const data = await res.json()
 
     return (data.articles || [])
-      .filter((a: { title?: string; url?: string }) => a.title && a.url && !a.title.includes("[Removed]"))
+      .filter((a: { title?: string; url?: string }) => {
+        if (!a.title || !a.url) return false
+        if (a.title.includes("[Removed]")) return false
+        const domain = new URL(a.url).hostname.replace("www.", "")
+        return !BLOCKED_DOMAINS.includes(domain)
+      })
       .slice(0, 5)
       .map((a: { title: string; source: { name: string }; url: string; publishedAt: string; description?: string; urlToImage?: string }, i: number) => ({
         id: `${category.id}-${i}`,
