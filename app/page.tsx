@@ -95,6 +95,65 @@ const CATEGORY_CONFIG = [
 ]
 
 
+// ─── Annotation cache helpers ─────────────────────────────────────────────────
+// Annotations live in localStorage with a 2-hour TTL.
+// Single-user tool; 5-10 visits/day — fresh enough, eliminates every load cost.
+
+const ANNOTATION_CACHE_KEY = "dispatch-annotations-v1"
+const ANNOTATION_TTL_MS    = 2 * 60 * 60 * 1000 // 2 hours
+
+interface AnnotationEntry {
+  id: string
+  relevance: string
+  signalType: string
+  signalLens: string
+  signalScores?: { lilly: number; hod: number; urgency: number }
+}
+
+function loadAnnotationCache(): AnnotationEntry[] | null {
+  try {
+    const raw = localStorage.getItem(ANNOTATION_CACHE_KEY)
+    if (!raw) return null
+    const { ts, data } = JSON.parse(raw)
+    if (Date.now() - ts > ANNOTATION_TTL_MS) return null
+    return data
+  } catch { return null }
+}
+
+function saveAnnotationCache(data: AnnotationEntry[]) {
+  try { localStorage.setItem(ANNOTATION_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })) }
+  catch { /* quota exceeded — silently skip */ }
+}
+
+function mergeAnnotations(articles: Article[], annotations: AnnotationEntry[]): Article[] {
+  const map = new Map(annotations.map(a => [a.id, a]))
+  return articles.map(a => {
+    const ann = map.get(a.id)
+    return ann ? { ...a, ...ann } : a
+  })
+}
+
+async function fetchAnnotations(articles: Article[]): Promise<AnnotationEntry[] | null> {
+  // Return cached if still fresh
+  const cached = loadAnnotationCache()
+  if (cached) return cached
+
+  try {
+    const res = await fetch("/api/annotate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        articles: articles.slice(0, 40).map(a => ({ id: a.id, title: a.title, category: a.category })),
+      }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    const annotations: AnnotationEntry[] = data.annotations || []
+    if (annotations.length > 0) saveAnnotationCache(annotations)
+    return annotations
+  } catch { return null }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function timeAgo(iso: string): string {
@@ -246,7 +305,7 @@ function LeftRail({
               background: feedLoading
                 ? "var(--text-tertiary)"
                 : isLive
-                ? "var(--accent-secondary)"
+                ? "var(--live)"
                 : "var(--text-tertiary)",
               flexShrink: 0,
             }}
@@ -260,7 +319,7 @@ function LeftRail({
               color: feedLoading
                 ? "var(--text-tertiary)"
                 : isLive
-                ? "var(--accent-muted)"
+                ? "var(--live)"
                 : "var(--text-tertiary)",
             }}
           >
@@ -1252,9 +1311,18 @@ export default function Page() {
     fetch("/api/news")
       .then(r => r.json())
       .then(data => {
-        setArticles(data.articles || [])
+        const fresh: Article[] = data.articles || []
         setIsLive(data.isLive || false)
+
+        // Merge any cached annotations immediately before render
+        const cached = loadAnnotationCache()
+        setArticles(cached ? mergeAnnotations(fresh, cached) : fresh)
         setFeedLoading(false)
+
+        // Fetch fresh annotations (uses localStorage cache, 2hr TTL)
+        fetchAnnotations(fresh).then(annotations => {
+          if (annotations) setArticles(mergeAnnotations(fresh, annotations))
+        })
       })
       .catch(() => setFeedLoading(false))
   }, [])

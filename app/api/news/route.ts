@@ -471,11 +471,8 @@ export async function GET() {
     )
   )
 
-  // Annotate with Haiku relevance hooks (one API call, cached for 30 min)
-  const annotated = await addRelevanceAnnotations(sorted)
-
   return Response.json({
-    articles: annotated,
+    articles: sorted,
     fetchedAt: new Date().toISOString(),
     isLive: liveCount > 0,
   })

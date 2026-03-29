@@ -15,6 +15,7 @@
   --text-secondary:   #A8A29B;
   --text-tertiary:    #6B6460;
   --border:           #2C2820;
+  --live:             #4ade80;  /* accessible green on dark — ~10:1 contrast */
 }
 
 /* ─── Base ─────────────────────────────────────────────────────── */
@@ -101,6 +102,7 @@ html, body {
   --text-secondary:   #332F2A;
   --text-tertiary:    #5A5450;
   --border:           #DDD9D0;
+  --live:             #166534;  /* accessible green on light — ~8:1 contrast */
 }
 
 /* ─── Slate skin ───────────────────────────────────────────────── */
@@ -115,6 +117,7 @@ html, body {
   --text-secondary:   #9AA0B8;
   --text-tertiary:    #606880;
   --border:           #252840;
+  --live:             #4ade80;
 }
 
 :root.skin-slate.day {
@@ -128,6 +131,7 @@ html, body {
   --text-secondary:   #2A3048;
   --text-tertiary:    #4A5270;
   --border:           #CDD4E4;
+  --live:             #166534;
 }
 
 /* ─── Forest skin ──────────────────────────────────────────────── */
@@ -142,6 +146,7 @@ html, body {
   --text-secondary:   #A5A09A;
   --text-tertiary:    #686460;
   --border:           #2A2720;
+  --live:             #4ade80;
 }
 
 :root.skin-forest.day {
@@ -155,6 +160,7 @@ html, body {
   --text-secondary:   #2E2C28;
   --text-tertiary:    #54504A;
   --border:           #D8D4CC;
+  --live:             #166534;
 }
 
 /* ─── Ticker scroll ────────────────────────────────────────────── */
