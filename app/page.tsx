@@ -1014,6 +1014,36 @@ function Cerebro({ articles, pendingPrompt }: {
   const [speechSupported, setSpeechSupported] = useState(false)
   useEffect(() => { setSpeechSupported(hasSpeechSupport()) }, [])
 
+  // Rotating provocations — keep the mind active
+  const PROVOCATIONS = [
+    "What's the sharpest thing you read today?",
+    "What would Rau ask you in the first five minutes?",
+    "Where does design sit in Lilly's AI stack?",
+    "What's the difference between your pitch and everyone else's?",
+    "What signal are you ignoring?",
+    "If you had the role today, what's day-one?",
+    "What's the question you're afraid they'll ask?",
+    "Who else is circling this opportunity?",
+    "What does 'Head of Design' mean at a pharma company?",
+    "What would you kill from your portfolio right now?",
+    "What's the systems argument, not the craft argument?",
+    "Where does patient experience break down first?",
+    "What's the five-year move if Lilly doesn't happen?",
+    "What does design leadership look like without a team?",
+    "What are you over-indexing on?",
+    "What would make them say no?",
+    "How do you talk about AI without sounding like everyone else?",
+    "What's the organizational layer no one is designing?",
+  ]
+  const [placeholderIdx, setPlaceholderIdx] = useState(0)
+  useEffect(() => {
+    setPlaceholderIdx(Math.floor(Math.random() * PROVOCATIONS.length))
+    const t = setInterval(() => {
+      setPlaceholderIdx(i => (i + 1) % PROVOCATIONS.length)
+    }, 12000)
+    return () => clearInterval(t)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, loading])
@@ -1445,7 +1475,7 @@ function Cerebro({ articles, pendingPrompt }: {
                   send(input)
                 }
               }}
-              placeholder="Message Cerebro..."
+              placeholder={PROVOCATIONS[placeholderIdx]}
               rows={2}
               style={{
                 width: "100%", resize: "none", background: "transparent", border: "none", outline: "none",
