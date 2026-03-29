@@ -566,7 +566,13 @@ function useChiefOfStaff(articles: Article[]) {
 
 // ─── Chief of Staff Band — desktop horizontal grid ────────────────────────────
 
-const SCAN_STATUSES = ["Scanning feed", "Clustering signals", "Composing brief"]
+const SCAN_STATUSES = [
+  "$ dispatch --init",
+  "▸ scanning feed [27 sources]",
+  "▸ clustering signals",
+  "▸ cross-referencing mandate",
+  "▸ composing brief",
+]
 
 function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
   signals: Signal[]
@@ -583,7 +589,7 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
     if (!briefLoading) return
     setStatusIdx(0)
     wasLoading.current = true
-    const t = setInterval(() => setStatusIdx(i => Math.min(i + 1, SCAN_STATUSES.length - 1)), 1700)
+    const t = setInterval(() => setStatusIdx(i => Math.min(i + 1, SCAN_STATUSES.length - 1)), 900)
     return () => clearInterval(t)
   }, [briefLoading])
 
@@ -612,28 +618,32 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
       }}
     >
       {isLoading ? (
-        /* ── Loading state: status text + horizontal scan bar ── */
+        /* ── Loading state: terminal boot sequence ── */
         <>
           <div style={{
-            padding: "16px 20px",
+            padding: "14px 20px",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            gap: 3,
             minHeight: 80,
+            justifyContent: "center",
           }}>
-            <div
-              key={statusIdx}
-              style={{
-                fontSize: 10,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                color: "var(--accent-muted)",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                animation: "status-fade 0.3s ease both",
-              }}
-            >
-              {SCAN_STATUSES[statusIdx]}
-            </div>
+            {SCAN_STATUSES.slice(0, statusIdx + 1).map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize: 10,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  color: i === statusIdx ? "var(--accent-muted)" : "var(--text-tertiary)",
+                  letterSpacing: "0.03em",
+                  opacity: i === statusIdx ? 1 : 0.5,
+                  animation: i === statusIdx ? "status-fade 0.2s ease both" : "none",
+                }}
+              >
+                {line}{i === statusIdx && i < SCAN_STATUSES.length - 1 && <span className="cursor-blink" style={{ marginLeft: 2 }}>_</span>}
+                {i === statusIdx && i === SCAN_STATUSES.length - 1 && <span className="loading-pulse" style={{ marginLeft: 4, fontSize: 9, opacity: 0.6 }}>…</span>}
+              </div>
+            ))}
           </div>
           {/* Scan bar */}
           <div style={{
@@ -643,7 +653,7 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
             width: "25%",
             height: 1,
             background: "var(--accent-secondary)",
-            opacity: 0.5,
+            opacity: 0.4,
             animation: "band-scan 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }} />
         </>
