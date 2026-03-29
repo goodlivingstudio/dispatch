@@ -210,30 +210,17 @@ function LiveClock() {
   if (!time) return null
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-      <div
-        style={{
-          fontSize: 13,
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-          color: "var(--text-secondary)",
-          letterSpacing: "0.02em",
-          fontVariantNumeric: "tabular-nums",
-          fontWeight: 600,
-        }}
-      >
-        {time}
-      </div>
-      <div
-        style={{
-          fontSize: 11,
-          color: "var(--text-tertiary)",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-          fontWeight: 600,
-        }}
-      >
-        {tzLabel}
-      </div>
+    <div
+      style={{
+        fontSize: 13,
+        fontFamily: "'SF Mono', 'Fira Code', monospace",
+        color: "var(--text-tertiary)",
+        letterSpacing: "0.02em",
+        fontVariantNumeric: "tabular-nums",
+        fontWeight: 400,
+      }}
+    >
+      {time}
     </div>
   )
 }
