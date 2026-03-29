@@ -646,7 +646,7 @@ function AnalyticsCard({ card, analytics, onClick }: {
 }) {
   const [hovered, setHovered] = useState(false)
   const accent   = CARD_ACCENT[card.id]   || "var(--accent-secondary)"
-  const gradient = CARD_GRADIENT[card.id] || ""
+  const gradient = ""
 
   return (
     <div
@@ -655,7 +655,7 @@ function AnalyticsCard({ card, analytics, onClick }: {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: "relative",
-        background: `${gradient}, var(--bg-surface)`,
+        background: "var(--bg-surface)",
         borderRadius: 14,
         border: "1px solid var(--border)",
         padding: "22px 24px 24px",
