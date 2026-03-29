@@ -212,7 +212,7 @@ function LiveClock() {
   return (
     <div
       style={{
-        fontSize: 13,
+        fontSize: 11,
         fontFamily: "'SF Mono', 'Fira Code', monospace",
         color: "var(--text-tertiary)",
         letterSpacing: "0.02em",
@@ -388,7 +388,7 @@ function LeftRail({
         }}
       >
         {/* Top row: wordmark + clock */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <div
             style={{
               fontSize: 20,
