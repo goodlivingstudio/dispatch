@@ -69,11 +69,11 @@ html, body {
   --bg-surface:       #EFECE5;
   --bg-elevated:      #E6E2DC;
   --accent-primary:   #FBF0E4;
-  --accent-secondary: #8A6030;
-  --accent-muted:     #9A7040;
+  --accent-secondary: #7A5228;
+  --accent-muted:     #8A6030;
   --text-primary:     #1C1A17;
-  --text-secondary:   #4A4540;
-  --text-tertiary:    #7A736A;
+  --text-secondary:   #332F2A;
+  --text-tertiary:    #5A5450;
   --border:           #DDD9D0;
 }
 
@@ -96,11 +96,11 @@ html, body {
   --bg-surface:       #E8ECF4;
   --bg-elevated:      #DEE4F0;
   --accent-primary:   #E0EAF4;
-  --accent-secondary: #2B5C7A;
-  --accent-muted:     #4A7A9B;
+  --accent-secondary: #1E4A63;
+  --accent-muted:     #2B5C7A;
   --text-primary:     #1A1D24;
-  --text-secondary:   #404860;
-  --text-tertiary:    #6A7290;
+  --text-secondary:   #2A3048;
+  --text-tertiary:    #4A5270;
   --border:           #CDD4E4;
 }
 
@@ -123,11 +123,11 @@ html, body {
   --bg-surface:       #EDE9E2;
   --bg-elevated:      #E2DDD5;
   --accent-primary:   #E4F0E8;
-  --accent-secondary: #3A6B50;
-  --accent-muted:     #5A8B70;
+  --accent-secondary: #2A5A3E;
+  --accent-muted:     #3A6B50;
   --text-primary:     #1C1A17;
-  --text-secondary:   #4A4640;
-  --text-tertiary:    #7A736A;
+  --text-secondary:   #2E2C28;
+  --text-tertiary:    #54504A;
   --border:           #D8D4CC;
 }
 

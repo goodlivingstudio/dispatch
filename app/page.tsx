@@ -836,12 +836,25 @@ function clamp(val: number, min: number, max: number) {
   return Math.max(min, Math.min(max, val))
 }
 
+function useMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+  return isMobile
+}
+
 export default function Page() {
   const { skin, isDay, toggleMode, setSkin } = useTheme()
+  const isMobile = useMobile()
   const [articles,    setArticles]    = useState<Article[]>([])
   const [isLive,      setIsLive]      = useState(false)
   const [feedLoading, setFeedLoading] = useState(true)
   const [active,      setActive]      = useState("all")
+  const [mobileTab,   setMobileTab]   = useState<"feed" | "cerebro">("feed")
 
   // Resizable column widths
   const [leftWidth,  setLeftWidth]  = useState(220)
@@ -892,6 +905,108 @@ export default function Page() {
   const filtered =
     active === "all" ? articles : articles.filter(a => a.tag === active)
 
+  const feedContent = (
+    <main
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        minWidth: 0,
+      }}
+    >
+      <ChiefOfStaffBand articles={articles} />
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {feedLoading ? (
+          <div style={{ padding: "32px 20px" }}>
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="loading-pulse"
+                style={{
+                  padding: "14px 20px 14px 18px",
+                  borderBottom: "1px solid var(--border)",
+                  borderLeft: "2px solid transparent",
+                }}
+              >
+                <div style={{ height: 10, width: `${60 + (i % 3) * 15}%`, background: "var(--border)", borderRadius: 2, marginBottom: 8 }} />
+                <div style={{ height: 13, width: `${70 + (i % 4) * 8}%`, background: "var(--bg-elevated)", borderRadius: 2 }} />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 120, fontSize: 11, fontFamily: "'SF Mono', 'Fira Code', monospace", color: "var(--text-tertiary)" }}>
+            no articles
+          </div>
+        ) : (
+          filtered.map(a => <FeedCard key={a.id} article={a} />)
+        )}
+      </div>
+    </main>
+  )
+
+  if (isMobile) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden", background: "var(--bg-primary)" }}>
+        <Ticker isDay={isDay} onToggle={toggleMode} skin={skin} onSkinChange={setSkin} />
+
+        {/* Mobile: show active tab panel */}
+        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {mobileTab === "feed" ? feedContent : (
+            <div style={{ flex: 1, overflow: "hidden" }}>
+              <Cerebro articles={articles} />
+            </div>
+          )}
+        </div>
+
+        {/* Mobile bottom tab bar */}
+        <div
+          style={{
+            flexShrink: 0,
+            height: 52,
+            display: "flex",
+            alignItems: "stretch",
+            borderTop: "1px solid var(--border)",
+            background: "var(--bg-surface)",
+          }}
+        >
+          {(["feed", "cerebro"] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setMobileTab(tab)}
+              aria-label={tab === "feed" ? "Feed" : "Cerebro"}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                borderTop: `2px solid ${mobileTab === tab ? "var(--accent-secondary)" : "transparent"}`,
+              }}
+            >
+              <span style={{ fontSize: 15 }}>{tab === "feed" ? "≡" : "◈"}</span>
+              <span
+                style={{
+                  fontSize: 9,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: mobileTab === tab ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                }}
+              >
+                {tab}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       style={{
@@ -907,94 +1022,21 @@ export default function Page() {
 
       {/* Three-column workspace */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-      {/* Left Rail */}
-      <LeftRail
-        articles={articles}
-        active={active}
-        onSelect={setActive}
-        isLive={isLive}
-        feedLoading={feedLoading}
-        width={leftWidth}
-      />
-
-      {/* Left divider — draggable */}
-      <Divider onMouseDown={e => startResize("left", e)} />
-
-      {/* Center Column */}
-      <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          minWidth: 0,
-        }}
-      >
-        {/* Chief of Staff — auto-populates on load */}
-        <ChiefOfStaffBand articles={articles} />
-
-        {/* Feed */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {feedLoading ? (
-            <div style={{ padding: "32px 20px" }}>
-              {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className="loading-pulse"
-                  style={{
-                    padding: "14px 20px 14px 18px",
-                    borderBottom: "1px solid var(--border)",
-                    borderLeft: "2px solid transparent",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: 10,
-                      width: `${60 + (i % 3) * 15}%`,
-                      background: "var(--border)",
-                      borderRadius: 2,
-                      marginBottom: 8,
-                    }}
-                  />
-                  <div
-                    style={{
-                      height: 13,
-                      width: `${70 + (i % 4) * 8}%`,
-                      background: "var(--bg-elevated)",
-                      borderRadius: 2,
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: 120,
-                fontSize: 11,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                color: "var(--text-tertiary)",
-              }}
-            >
-              no articles
-            </div>
-          ) : (
-            filtered.map(a => <FeedCard key={a.id} article={a} />)
-          )}
+        <LeftRail
+          articles={articles}
+          active={active}
+          onSelect={setActive}
+          isLive={isLive}
+          feedLoading={feedLoading}
+          width={leftWidth}
+        />
+        <Divider onMouseDown={e => startResize("left", e)} />
+        {feedContent}
+        <Divider onMouseDown={e => startResize("right", e)} />
+        <div style={{ width: rightWidth, flexShrink: 0 }}>
+          <Cerebro articles={articles} />
         </div>
-      </main>
-
-      {/* Right divider — draggable */}
-      <Divider onMouseDown={e => startResize("right", e)} />
-
-      {/* Right Rail — Cerebro */}
-      <div style={{ width: rightWidth, flexShrink: 0 }}>
-        <Cerebro articles={articles} />
       </div>
-      </div> {/* end three-column wrapper */}
     </div>
   )
 }
