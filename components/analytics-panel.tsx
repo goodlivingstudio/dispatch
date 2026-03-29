@@ -566,8 +566,8 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
         background: "var(--bg-surface)",
         borderRadius: 16,
         border: "1px solid var(--border)",
-        width: "min(92vw, 1160px)",
-        height: "82vh",
+        width: "min(96vw, 1440px)",
+        height: "90vh",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -578,7 +578,6 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "18px 28px",
           borderBottom: "1px solid var(--border)",
-          background: `linear-gradient(90deg, ${accent}11 0%, transparent 50%)`,
           flexShrink: 0,
         }}>
           <div>
@@ -664,7 +663,7 @@ function AnalyticsCard({ card, analytics, onClick }: {
         transition: "transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1)",
         transform: hovered ? "translateY(-3px)" : "translateY(0)",
         boxShadow: hovered
-          ? `0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px ${accent}22`
+          ? `0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06)`
           : "0 1px 3px rgba(0,0,0,0.07)",
         height: "100%",
         minHeight: 230,
@@ -672,15 +671,6 @@ function AnalyticsCard({ card, analytics, onClick }: {
         overflow: "hidden",
       }}
     >
-      {/* Accent strip — top edge */}
-      <div style={{
-        position: "absolute",
-        top: 0, left: 0, right: 0,
-        height: 3,
-        background: `linear-gradient(90deg, ${accent} 0%, transparent 70%)`,
-        borderRadius: "14px 14px 0 0",
-        opacity: 0.9,
-      }} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <span style={{
