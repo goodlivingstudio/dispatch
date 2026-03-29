@@ -213,22 +213,24 @@ function LiveClock() {
     <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <div
         style={{
-          fontSize: 11,
+          fontSize: 12,
           fontFamily: "'SF Mono', 'Fira Code', monospace",
           color: "var(--text-secondary)",
           letterSpacing: "0.04em",
           fontVariantNumeric: "tabular-nums",
+          fontWeight: 600,
         }}
       >
         {time}
       </div>
       <div
         style={{
-          fontSize: 9,
+          fontSize: 10,
           fontFamily: "'SF Mono', 'Fira Code', monospace",
           color: "var(--text-tertiary)",
-          letterSpacing: "0.06em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
+          fontWeight: 600,
         }}
       >
         {tzLabel}
@@ -304,11 +306,12 @@ function FeedStatus({ isLive, feedHealth, feedLoading }: {
         }}
       />
       <span style={{
-        fontSize: 9,
+        fontSize: 11,
         fontFamily: "'SF Mono', 'Fira Code', monospace",
-        letterSpacing: "0.08em",
+        letterSpacing: "0.1em",
         textTransform: "uppercase",
         color: dotColor,
+        fontWeight: 700,
       }}>
         {label}
       </span>
@@ -418,10 +421,11 @@ function LeftRail({
         <div
           style={{
             marginTop: 8,
-            fontSize: 10,
+            fontSize: 11,
             fontFamily: "'SF Mono', 'Fira Code', monospace",
             color: "var(--text-tertiary)",
             letterSpacing: "0.02em",
+            fontWeight: 500,
           }}
         >
           {day}, {date}
@@ -467,16 +471,16 @@ function LeftRail({
                     transition: "background 0.15s",
                   }}
                 >
-                  <span style={{ fontSize: 11, color: isTab ? "var(--text-primary)" : "var(--text-tertiary)" }}>
+                  <span style={{ fontSize: 12, color: isTab ? "var(--text-primary)" : "var(--text-tertiary)" }}>
                     {tab.icon}
                   </span>
                   <span style={{
-                    fontSize: 9,
+                    fontSize: 11,
                     fontFamily: "'SF Mono', 'Fira Code', monospace",
-                    letterSpacing: "0.06em",
+                    letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     color: isTab ? "var(--text-primary)" : "var(--text-tertiary)",
-                    fontWeight: isTab ? 500 : 400,
+                    fontWeight: isTab ? 700 : 500,
                   }}>
                     {tab.label}
                   </span>

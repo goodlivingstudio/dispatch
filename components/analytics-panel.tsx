@@ -194,7 +194,7 @@ function ProportionBar({ segments }: { segments: { flex: number; color: string }
   const total = segments.reduce((s, seg) => s + seg.flex, 0)
   if (total === 0) return null
   return (
-    <div style={{ display: "flex", height: 5, borderRadius: 3, overflow: "hidden", gap: 2 }}>
+    <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", gap: 2 }}>
       {segments.filter(s => s.flex > 0).map((s, i) => (
         <div key={i} style={{ flex: s.flex, background: s.color, borderRadius: 2 }} />
       ))}
@@ -213,7 +213,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           <div style={{ fontSize: 64, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.04em", lineHeight: 1 }}>
             {analytics.total}
           </div>
-          <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 6, marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 6, marginBottom: 16, fontWeight: 700 }}>
             signals tracked today
           </div>
           <ProportionBar segments={[
@@ -225,7 +225,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             {(["LILLY", "HOD", "BOTH"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.04em", fontWeight: 600 }}>
                   {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} {analytics.lens[k]}
                 </span>
               </div>
@@ -251,13 +251,13 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {pct}%
             </div>
-            <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4, marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
               {dominant[0] === "HOD" ? "HoD" : dominant[0] === "BOTH" ? "Both" : "Lilly"} dominant
             </div>
             {(["LILLY","HOD","BOTH"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.03em" }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.03em", fontWeight: 600 }}>
                   {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} — {analytics.lens[k]}
                 </span>
               </div>
@@ -275,20 +275,21 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           <div style={{ fontSize: 42, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
             {top?.label || "—"}
           </div>
-          <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 5, marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 5, marginBottom: 14, fontWeight: 700 }}>
             most active · {top?.count || 0} articles
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {analytics.categoryData.map(cat => (
               <div key={cat.tag} style={{
-                padding: "3px 8px",
+                padding: "4px 9px",
                 borderRadius: 4,
-                background: `rgba(74,222,128,${0.08 + (cat.count / max) * 0.55})`,
-                fontSize: 10,
+                background: `rgba(74,222,128,${0.10 + (cat.count / max) * 0.55})`,
+                fontSize: 11,
                 fontFamily: "'SF Mono','Fira Code',monospace",
                 color: "var(--text-secondary)",
-                letterSpacing: "0.03em",
+                letterSpacing: "0.05em",
                 textTransform: "uppercase",
+                fontWeight: 600,
               }}>
                 {cat.label}
               </div>
@@ -319,12 +320,12 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
               }}>
                 {article.title}
               </div>
-              <div style={{ height: 2, borderRadius: 1, background: "var(--border)" }}>
+              <div style={{ height: 5, borderRadius: 3, background: "var(--border)" }}>
                 <div style={{
                   height: "100%",
                   width: `${((article.signalScores?.urgency || 0) / 10) * 100}%`,
                   background: CARD_ACCENT.urgency,
-                  borderRadius: 1,
+                  borderRadius: 3,
                 }} />
               </div>
             </div>
@@ -340,16 +341,16 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {top5.map(item => (
             <div key={item.source}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 12, color: "var(--text-secondary)", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "82%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 13, color: "var(--text-secondary)", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "82%", fontWeight: 500 }}>
                   {item.source}
                 </span>
-                <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", flexShrink: 0 }}>
+                <span style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", flexShrink: 0, fontWeight: 700 }}>
                   {item.count}
                 </span>
               </div>
-              <div style={{ height: 2, borderRadius: 1, background: "var(--border)" }}>
-                <div style={{ height: "100%", width: `${(item.count / max) * 100}%`, background: CARD_ACCENT.sources, borderRadius: 1 }} />
+              <div style={{ height: 5, borderRadius: 3, background: "var(--border)" }}>
+                <div style={{ height: "100%", width: `${(item.count / max) * 100}%`, background: CARD_ACCENT.sources, borderRadius: 3 }} />
               </div>
             </div>
           ))}
@@ -666,7 +667,7 @@ function AnalyticsCard({ card, analytics, onClick }: {
           ? `0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px ${accent}22`
           : "0 1px 3px rgba(0,0,0,0.07)",
         height: "100%",
-        minHeight: 180,
+        minHeight: 230,
         boxSizing: "border-box",
         overflow: "hidden",
       }}
@@ -675,20 +676,20 @@ function AnalyticsCard({ card, analytics, onClick }: {
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0,
-        height: 2,
+        height: 3,
         background: `linear-gradient(90deg, ${accent} 0%, transparent 70%)`,
         borderRadius: "14px 14px 0 0",
-        opacity: 0.7,
+        opacity: 0.9,
       }} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <span style={{
-          fontSize: 11,
+          fontSize: 12,
           fontFamily: "'SF Mono','Fira Code',monospace",
           color: accent,
-          letterSpacing: "0.08em",
+          letterSpacing: "0.1em",
           textTransform: "uppercase",
-          fontWeight: 600,
+          fontWeight: 700,
         }}>
           {card.label}
         </span>
