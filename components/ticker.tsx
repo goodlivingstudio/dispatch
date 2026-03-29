@@ -262,8 +262,8 @@ export function Ticker({
       )}
 
       <style>{`
-        .ticker-text { color: var(--text-secondary); transition: color 0.15s; }
-        .ticker-item:hover .ticker-text { color: var(--text-primary); }
+        .ticker-text { color: var(--text-secondary); transition: color 0.15s; text-decoration: none; }
+        .ticker-item:hover .ticker-text { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--border); }
       `}</style>
     </div>
   )

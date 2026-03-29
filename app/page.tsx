@@ -548,36 +548,40 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
       borderLeft: `3px solid ${accentColor}`,
       overflow: "hidden",
     }}>
-      {/* Header: signal type + lens — categorical context, NOT the source */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "6px 10px 5px",
-        borderBottom: "1px solid var(--border)",
-      }}>
-        <span style={{
-          fontSize: 9,
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: typeLabel ? "var(--text-secondary)" : "var(--text-tertiary)",
-          opacity: typeLabel ? 1 : 0.4,
+      {/* Header: signal type + lens — only render when at least one value is known */}
+      {(typeLabel || lens) && (
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 10px 5px",
+          borderBottom: "1px solid var(--border)",
         }}>
-          {typeLabel || "Signal"}
-        </span>
-        {lens && (
-          <span style={{
-            fontSize: 9,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: accentColor,
-          }}>
-            {LENS_LABEL[lens]}
-          </span>
-        )}
-      </div>
+          {typeLabel && (
+            <span style={{
+              fontSize: 9,
+              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--text-secondary)",
+            }}>
+              {typeLabel}
+            </span>
+          )}
+          {lens && (
+            <span style={{
+              fontSize: 9,
+              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: accentColor,
+              marginLeft: "auto",
+            }}>
+              {LENS_LABEL[lens]}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Hook — why this matters */}
       <div style={{ padding: "10px 12px 11px" }}>
@@ -591,7 +595,7 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         </div>
       </div>
 
-      {/* Footer: urgency tier + source as attribution */}
+      {/* Footer: urgency tier (only when annotated) + source */}
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -599,15 +603,17 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         padding: "5px 10px 6px",
         borderTop: "1px solid var(--border)",
       }}>
-        <span style={{
-          fontSize: 9,
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: urgency.color,
-        }}>
-          {urgency.label}
-        </span>
+        {scores ? (
+          <span style={{
+            fontSize: 9,
+            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: urgency.color,
+          }}>
+            {urgency.label}
+          </span>
+        ) : <span />}
         <span style={{
           fontSize: 9,
           fontFamily: "'SF Mono', 'Fira Code', monospace",
@@ -634,6 +640,7 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
   const isExternal = article.url !== "#"
   const [hovered, setHovered] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+  const signalActiveRef = useRef(false)
 
   const isLeftHalf = (clientX: number) => {
     if (!cardRef.current) return true
@@ -643,20 +650,32 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
 
   const handleMouseEnter = (e: React.MouseEvent) => {
     setHovered(true)
-    if (isExternal && isLeftHalf(e.clientX)) onSignalEnter(article, e.clientX, e.clientY)
+    if (isExternal && isLeftHalf(e.clientX)) {
+      signalActiveRef.current = true
+      onSignalEnter(article, e.clientX, e.clientY)
+    }
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isExternal) return
     if (isLeftHalf(e.clientX)) {
-      onSignalMove(e.clientX, e.clientY)
+      if (!signalActiveRef.current) {
+        signalActiveRef.current = true
+        onSignalEnter(article, e.clientX, e.clientY)
+      } else {
+        onSignalMove(e.clientX, e.clientY)
+      }
     } else {
-      onSignalLeave()
+      if (signalActiveRef.current) {
+        signalActiveRef.current = false
+        onSignalLeave()
+      }
     }
   }
 
   const handleMouseLeave = () => {
     setHovered(false)
+    signalActiveRef.current = false
     onSignalLeave()
   }
 
