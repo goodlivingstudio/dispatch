@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 
 // ─── Curated signal set — quintessential content for 5-year positioning ───────
 // Categories: AI · DESIGN · PHARMA · CAREER · CULTURE
@@ -51,19 +51,6 @@ const CAT_STYLE: Record<string, { bg: string; color: string }> = {
 
 export function Ticker() {
   const [paused, setPaused] = useState(false)
-  const [infoOpen, setInfoOpen] = useState(false)
-  const infoRef = useRef<HTMLDivElement>(null)
-
-  // Close tooltip on outside click
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
-        setInfoOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
 
   return (
     <div
@@ -78,54 +65,6 @@ export function Ticker() {
         position: "relative",
       }}
     >
-      {/* Live indicator */}
-      <div
-        style={{
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "0 12px 0 14px",
-          borderRight: "1px solid var(--border)",
-          height: "100%",
-        }}
-      >
-        <span style={{ position: "relative", display: "inline-flex", width: 6, height: 6 }}>
-          <span
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              background: "var(--accent-secondary)",
-              opacity: 0.5,
-              animation: "ping 1.5s ease-out infinite",
-            }}
-          />
-          <span
-            style={{
-              position: "relative",
-              borderRadius: "50%",
-              width: 6,
-              height: 6,
-              background: "var(--accent-secondary)",
-              display: "block",
-            }}
-          />
-        </span>
-        <span
-          style={{
-            fontSize: 9,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--accent-muted)",
-            userSelect: "none",
-          }}
-        >
-          Signal
-        </span>
-      </div>
-
       {/* Scrolling track */}
       <div
         style={{ flex: 1, overflow: "hidden", position: "relative", cursor: "default" }}
@@ -156,7 +95,7 @@ export function Ticker() {
             whiteSpace: "nowrap",
             willChange: "transform",
             animationName: "ticker-scroll",
-            animationDuration: `${HEADLINES.length * 5}s`,
+            animationDuration: `${Math.round(HEADLINES.length * 5 / 3)}s`,
             animationTimingFunction: "linear",
             animationIterationCount: "infinite",
             animationPlayState: paused ? "paused" : "running",
@@ -211,103 +150,6 @@ export function Ticker() {
         </div>
       </div>
 
-      {/* Info button */}
-      <div ref={infoRef} style={{ position: "relative", flexShrink: 0, paddingRight: 10 }}>
-        <button
-          onClick={() => setInfoOpen(v => !v)}
-          style={{
-            width: 24,
-            height: 24,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: infoOpen ? "var(--accent-muted)" : "var(--text-tertiary)",
-            fontSize: 13,
-            borderRadius: 2,
-            transition: "color 0.12s",
-          }}
-          title="About this signal feed"
-        >
-          ⓘ
-        </button>
-
-        {infoOpen && (
-          <div
-            style={{
-              position: "absolute",
-              right: 0,
-              top: "calc(100% + 8px)",
-              width: 280,
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border)",
-              borderRadius: 2,
-              padding: "14px 16px",
-              zIndex: 9999,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                letterSpacing: "0.1em",
-                color: "var(--accent-muted)",
-                textTransform: "uppercase",
-                marginBottom: 8,
-              }}
-            >
-              Signal Feed
-            </div>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-secondary)",
-                lineHeight: 1.65,
-                marginBottom: 10,
-              }}
-            >
-              Curated intelligence at the intersection of AI, design leadership, and healthcare — selected for direct relevance to the five-year positioning.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              {Object.entries(CAT_STYLE).map(([cat, s]) => (
-                <div key={cat} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <span
-                    style={{
-                      fontSize: 8,
-                      fontFamily: "'SF Mono', 'Fira Code', monospace",
-                      letterSpacing: "0.1em",
-                      padding: "1px 5px",
-                      borderRadius: 2,
-                      background: s.bg,
-                      color: s.color,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {cat}
-                  </span>
-                  <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-                    {cat === "AI"      && "Tools, models, design × AI intersection"}
-                    {cat === "DESIGN"  && "Leadership market, CDO signals, practice"}
-                    {cat === "PHARMA"  && "Lilly, patient experience, healthcare UX"}
-                    {cat === "CAREER"  && "Positioning, compensation, market shifts"}
-                    {cat === "CULTURE" && "Creative practice, cultural intelligence"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes ping {
-          0%   { transform: scale(1); opacity: 0.5; }
-          75%  { transform: scale(2); opacity: 0; }
-          100% { transform: scale(2); opacity: 0; }
-        }
-      `}</style>
     </div>
   )
 }
