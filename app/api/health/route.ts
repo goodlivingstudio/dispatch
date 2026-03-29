@@ -19,29 +19,25 @@ export async function GET() {
     node: process.version,
   }
 
-  // Ping Anthropic with minimal request to confirm key + connectivity
+  // List available models to find correct IDs for this account
   if (anthropicKey) {
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
+      const res = await fetch("https://api.anthropic.com/v1/models", {
         headers: {
           "x-api-key": anthropicKey,
           "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
         },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 10,
-          messages: [{ role: "user", content: "hi" }],
-        }),
         signal: AbortSignal.timeout(8000),
       })
 
       if (res.ok) {
-        status.anthropic = `ok (${res.status})`
+        const data = await res.json()
+        const models = (data.data || []).map((m: { id: string }) => m.id)
+        status.anthropic = `ok — ${models.length} models available`
+        ;(status as Record<string, unknown>).available_models = models
       } else {
         const body = await res.json().catch(() => ({}))
-        status.anthropic = `error ${res.status}: ${JSON.stringify(body).slice(0, 120)}`
+        status.anthropic = `error ${res.status}: ${JSON.stringify(body).slice(0, 200)}`
       }
     } catch (err) {
       status.anthropic = `exception: ${err instanceof Error ? err.message : String(err)}`
