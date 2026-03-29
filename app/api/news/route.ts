@@ -134,12 +134,34 @@ function parseRSS(xml: string, feed: FeedDef): Article[] {
       summary: summary || cleanTitle,
       category: feed.category,
       tag: feed.tag,
+      imageUrl: extractImage(block),
     })
 
     index++
   }
 
   return items
+}
+
+function extractImage(block: string): string | undefined {
+  // media:content url="..."
+  const mc = block.match(/<media:content[^>]+url=["']([^"']+)["'][^>]*/i)
+  if (mc?.[1]?.match(/\.(jpg|jpeg|png|webp)/i)) return mc[1]
+
+  // media:thumbnail url="..."
+  const mt = block.match(/<media:thumbnail[^>]+url=["']([^"']+)["'][^>]*/i)
+  if (mt?.[1]) return mt[1]
+
+  // enclosure url="..." type="image/..."
+  const enc = block.match(/<enclosure[^>]+type=["']image[^"']*["'][^>]+url=["']([^"']+)["'][^>]*/i)
+    || block.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']image[^"']*["'][^>]*/i)
+  if (enc?.[1]) return enc[1]
+
+  // First <img> inside description CDATA
+  const img = block.match(/<img[^>]+src=["']([^"']{20,})["'][^>]*/i)
+  if (img?.[1]?.startsWith("http")) return img[1]
+
+  return undefined
 }
 
 function extractField(block: string, field: string): string {

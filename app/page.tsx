@@ -76,69 +76,58 @@ function timeAgo(iso: string) {
 
 // ─── Article Tile ─────────────────────────────────────────────────
 
-function ArticleTile({ article }: { article: Article }) {
+function ArticleTile({ article, featured = false }: { article: Article; featured?: boolean }) {
   const isExternal = article.url !== "#"
+  const [imgFailed, setImgFailed] = useState(false)
+  const hasImage = !!article.imageUrl && !imgFailed
 
-  const tile = (
+  const hoverIn = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.boxShadow = "var(--shadow-hover)"
+    e.currentTarget.style.transform = "translateY(-2px)"
+  }
+  const hoverOut = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.boxShadow = "var(--shadow)"
+    e.currentTarget.style.transform = "translateY(0)"
+  }
+
+  const tile = hasImage ? (
+    /* ── Image tile ─────────────────────────────────────────── */
     <div
-      className="group flex flex-col overflow-hidden transition-all duration-250 cursor-pointer h-full"
+      className="group flex flex-col overflow-hidden cursor-pointer h-full"
       style={{
         background: "var(--surf)",
         borderRadius: "var(--radius)",
         boxShadow: "var(--shadow)",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
       }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-hover)"
-        ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow)"
-        ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
-      }}
+      onMouseEnter={hoverIn}
+      onMouseLeave={hoverOut}
     >
-      {/* Image */}
       <div
         className="relative overflow-hidden shrink-0"
         style={{
-          aspectRatio: "3 / 2",
-          background: "var(--surf2)",
+          aspectRatio: featured ? "16 / 7" : "3 / 2",
           borderRadius: "var(--radius) var(--radius) 0 0",
+          background: "var(--surf2)",
         }}
       >
-        {article.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={article.imageUrl}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-            onError={e => {
-              (e.target as HTMLImageElement).style.display = "none"
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span
-              className={`cat-${article.tag} text-[9px] font-mono uppercase tracking-[0.14em]`}
-              style={{ opacity: 0.5 }}
-            >
-              {article.category}
-            </span>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={article.imageUrl}
+          alt=""
+          className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+          onError={() => setImgFailed(true)}
+        />
       </div>
-
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-4 pb-4">
-        <span
-          className={`cat-${article.tag} text-[9.5px] font-mono uppercase tracking-[0.1em] mb-2 block`}
-        >
+      <div className="flex flex-col flex-1 p-4">
+        <span className={`cat-${article.tag} text-[9.5px] font-mono uppercase tracking-[0.1em] mb-2 block`}>
           {article.category}
         </span>
         <h3
-          className="flex-1 leading-[1.32] group-hover:opacity-65 transition-opacity duration-150"
+          className="flex-1 leading-[1.3] group-hover:opacity-60 transition-opacity duration-150"
           style={{
             color: "var(--t1)",
-            fontSize: "14.5px",
+            fontSize: featured ? "17px" : "14.5px",
             fontWeight: 600,
             letterSpacing: "-0.02em",
           }}
@@ -146,13 +135,47 @@ function ArticleTile({ article }: { article: Article }) {
           {article.title}
         </h3>
         <div className="flex items-center gap-1.5 mt-3">
-          <span className="text-[10.5px]" style={{ color: "var(--t3)" }}>
-            {article.source}
-          </span>
-          <span style={{ color: "var(--bdr2)", fontSize: 10 }}>·</span>
-          <span className="text-[10.5px]" style={{ color: "var(--t4)" }}>
-            {timeAgo(article.publishedAt)}
-          </span>
+          <span className="text-[10.5px]" style={{ color: "var(--t3)" }}>{article.source}</span>
+          <span style={{ color: "var(--bdr2)" }}>·</span>
+          <span className="text-[10.5px]" style={{ color: "var(--t4)" }}>{timeAgo(article.publishedAt)}</span>
+        </div>
+      </div>
+    </div>
+  ) : (
+    /* ── Text tile ─────────────────────────────────────────── */
+    <div
+      className="group flex flex-col cursor-pointer h-full"
+      style={{
+        background: "var(--surf)",
+        borderRadius: "var(--radius)",
+        boxShadow: "var(--shadow)",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+        padding: "22px 20px 20px",
+        minHeight: 172,
+        borderTop: `3px solid var(--cat-${article.tag})`,
+      }}
+      onMouseEnter={hoverIn}
+      onMouseLeave={hoverOut}
+    >
+      <h3
+        className="flex-1 leading-[1.3] group-hover:opacity-60 transition-opacity duration-150"
+        style={{
+          color: "var(--t1)",
+          fontSize: featured ? "20px" : "15.5px",
+          fontWeight: 650,
+          letterSpacing: "-0.022em",
+        }}
+      >
+        {article.title}
+      </h3>
+      <div className="mt-4 flex flex-col gap-1">
+        <span className={`cat-${article.tag} text-[9.5px] font-mono uppercase tracking-[0.1em]`}>
+          {article.category}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10.5px]" style={{ color: "var(--t3)" }}>{article.source}</span>
+          <span style={{ color: "var(--bdr2)" }}>·</span>
+          <span className="text-[10.5px]" style={{ color: "var(--t4)" }}>{timeAgo(article.publishedAt)}</span>
         </div>
       </div>
     </div>
@@ -160,12 +183,22 @@ function ArticleTile({ article }: { article: Article }) {
 
   if (isExternal) {
     return (
-      <a href={article.url} target="_blank" rel="noopener noreferrer" className="block h-full">
+      <a
+        href={article.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block h-full"
+        style={{ gridColumn: featured ? "span 2" : "span 1" }}
+      >
         {tile}
       </a>
     )
   }
-  return <div className="h-full">{tile}</div>
+  return (
+    <div className="h-full" style={{ gridColumn: featured ? "span 2" : "span 1" }}>
+      {tile}
+    </div>
+  )
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────
@@ -636,8 +669,8 @@ export default function Page() {
               gap: "16px",
             }}
           >
-            {filtered.map(a => (
-              <ArticleTile key={a.id} article={a} />
+            {filtered.map((a, i) => (
+              <ArticleTile key={a.id} article={a} featured={i === 0} />
             ))}
           </div>
         )}
