@@ -94,6 +94,7 @@ export function Ticker({
         display: "flex",
         alignItems: "center",
         background: "var(--bg-surface)",
+        borderTop: "1px solid var(--border)",
         borderBottom: "1px solid var(--border)",
         overflow: "hidden",
         position: "relative",
