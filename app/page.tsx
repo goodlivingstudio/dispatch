@@ -509,14 +509,12 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
   const vw   = typeof window !== "undefined" ? window.innerWidth : 1200
   const left = Math.min(x + 18, vw - 284)
   const top  = Math.max(8, y - 52)
-  const lens   = article.signalLens || ""
-  const type   = article.signalType || ""
-  const hook   = article.relevance || ""
-  const scores = article.signalScores
+  const lens        = article.signalLens || ""
+  const type        = article.signalType || ""
+  const hook        = article.relevance || ""
+  const scores      = article.signalScores
   const accentColor = LENS_COLOR[lens] || "var(--border)"
-
-  // Need at least a hook or scores to show the card
-  if (!hook && !scores) return null
+  const annotated   = !!hook
 
   return (
     <div
@@ -572,33 +570,45 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         }}>{LENS_LABEL[lens]}</span>}
       </div>
 
-      {/* Hook */}
-      {hook && (
-        <div style={{ padding: "9px 12px 10px", borderBottom: scores ? "1px solid var(--border)" : "none" }}>
-          <div style={{
-            fontSize: 11,
-            lineHeight: 1.6,
-            color: "var(--text-primary)",
-            letterSpacing: "-0.01em",
-          }}>
-            {hook}
-          </div>
-        </div>
-      )}
-
-      {/* Score bars */}
-      {scores && (
+      {/* Hook or summary fallback */}
+      <div style={{ padding: "9px 12px 10px", borderBottom: "1px solid var(--border)" }}>
         <div style={{
-          padding: "9px 12px 10px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
+          fontSize: 11,
+          lineHeight: 1.6,
+          color: annotated ? "var(--text-primary)" : "var(--text-secondary)",
+          letterSpacing: "-0.01em",
         }}>
-          <ScoreRow label="Lilly"    value={scores.lilly}   color="var(--accent-secondary)" />
-          <ScoreRow label="HoD Path" value={scores.hod}     color="var(--accent-muted)" />
-          <ScoreRow label="Urgency"  value={scores.urgency} color="var(--text-tertiary)" />
+          {hook || article.summary}
         </div>
-      )}
+      </div>
+
+      {/* Score bars — full when annotated, skeleton when pending */}
+      <div style={{ padding: "9px 12px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+        {scores ? (
+          <>
+            <ScoreRow label="Lilly"    value={scores.lilly}   color="var(--accent-secondary)" />
+            <ScoreRow label="HoD Path" value={scores.hod}     color="var(--accent-muted)" />
+            <ScoreRow label="Urgency"  value={scores.urgency} color="var(--text-tertiary)" />
+          </>
+        ) : (
+          // Skeleton bars — indicate structure before annotation arrives
+          ["Lilly", "HoD Path", "Urgency"].map(label => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{
+                fontSize: 7.5,
+                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--text-tertiary)",
+                opacity: 0.4,
+                width: 54,
+                flexShrink: 0,
+              }}>{label}</span>
+              <div style={{ flex: 1, height: 2, background: "var(--border)", borderRadius: 1, opacity: 0.5 }} />
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }
