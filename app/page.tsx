@@ -146,7 +146,7 @@ async function fetchAnnotations(articles: Article[]): Promise<AnnotationEntry[] 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        articles: articles.slice(0, 40).map(a => ({ id: a.id, title: a.title, category: a.category })),
+        articles: articles.slice(0, 20).map(a => ({ id: a.id, title: a.title, category: a.category })),
       }),
     })
     if (!res.ok) return null

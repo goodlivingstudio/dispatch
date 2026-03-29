@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 3000,
+        max_tokens: 6000,
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: items + "\n\nReturn JSON array." }],
       }),
