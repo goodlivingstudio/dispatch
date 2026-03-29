@@ -58,10 +58,11 @@ interface Article {
   source: string
   url: string
   publishedAt: string
-  summary: string
+  summary: string       // raw RSS description — used in feed row only
+  synopsis?: string     // AI-generated: what it's about, mandate-framed
   category: string
   tag: string
-  relevance?: string
+  relevance?: string    // AI-generated: why it matters to the mandate
   signalType?: string
   signalLens?: string
   signalScores?: { lilly: number; hod: number; urgency: number }
@@ -106,11 +107,12 @@ const CATEGORY_CONFIG = [
 // Annotations live in localStorage with a 2-hour TTL.
 // Single-user tool; 5-10 visits/day — fresh enough, eliminates every load cost.
 
-const ANNOTATION_CACHE_KEY = "dispatch-annotations-v2"
+const ANNOTATION_CACHE_KEY = "dispatch-annotations-v3"
 const ANNOTATION_TTL_MS    = 2 * 60 * 60 * 1000 // 2 hours
 
 interface AnnotationEntry {
   id: string
+  synopsis: string
   relevance: string
   signalType: string
   signalLens: string
@@ -124,7 +126,7 @@ function loadAnnotationCache(): AnnotationEntry[] | null {
     const { ts, data } = JSON.parse(raw)
     if (Date.now() - ts > ANNOTATION_TTL_MS) return null
     // Reject empty-content caches — these are artifacts of failed annotation runs
-    const hasContent = Array.isArray(data) && data.some((a: AnnotationEntry) => a.relevance && a.relevance.length > 10)
+    const hasContent = Array.isArray(data) && data.some((a: AnnotationEntry) => (a.synopsis && a.synopsis.length > 10) || (a.relevance && a.relevance.length > 10))
     if (!hasContent) return null
     return data
   } catch { return null }
@@ -739,31 +741,33 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
       borderLeft: `3px solid ${accentColor}`,
       overflow: "hidden",
     }}>
-      {/* Summary — what it is, factual, muted */}
-      {article.summary && (
+      {/* Synopsis — AI: what this article is about, mandate-framed */}
+      {article.synopsis && (
         <div style={{ padding: article.relevance ? "10px 12px 9px" : "10px 12px" }}>
           <div style={{
-            fontSize: 11.5,
+            fontSize: 12,
+            fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-tertiary)",
             letterSpacing: "-0.01em",
           }}>
-            {article.summary}
+            {article.synopsis}
           </div>
         </div>
       )}
 
-      {/* Relevance — why it matters, interpretive, pulls you in */}
+      {/* Relevance — AI: why it matters to the mandate */}
       {article.relevance && (
         <div style={{
           padding: "9px 12px 11px",
-          borderTop: "1px solid var(--border)",
+          borderTop: article.synopsis ? "1px solid var(--border)" : "none",
         }}>
           <div style={{
             fontSize: 12,
+            fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-primary)",
-            letterSpacing: "-0.015em",
+            letterSpacing: "-0.01em",
           }}>
             {article.relevance}
           </div>
@@ -783,7 +787,7 @@ type SignalCallbacks = {
 
 function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { article: Article } & SignalCallbacks) {
   const isExternal   = article.url !== "#"
-  const hasSignal    = !!(article.summary || article.relevance)
+  const hasSignal    = !!(article.synopsis || article.relevance)
   const [hovered, setHovered] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const signalActiveRef = useRef(false)

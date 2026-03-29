@@ -10,13 +10,14 @@ interface ArticleInput {
 
 interface Annotation {
   id: string
+  synopsis: string
   relevance: string
   signalType: string
   signalLens: string
   signalScores?: { lilly: number; hod: number; urgency: number }
 }
 
-const SYSTEM_PROMPT = `You annotate news articles for a design intelligence dispatch focused on two lenses:
+const SYSTEM_PROMPT = `You annotate news articles for a design intelligence dispatch. The dispatch serves a Senior Design Director tracking two mandates:
 
 LILLY — pharma design, patient experience, AI mandate, LillyDirect, Diogo Rau's strategy, Alzheimer's access gap, direct-to-patient models, healthcare innovation.
 HOD — design leadership evolution, AI × design, systems thinking, org influence, talent dynamics, creative practice at scale.
@@ -24,7 +25,8 @@ BOTH — strengthens both simultaneously.
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
-  "hook": "one sharp sentence explaining why this article was included — what signal it carries, what it reflects about the landscape, or why it matters to pharma design and design leadership even if the connection is indirect. Never say 'not relevant' — explain the actual context or signal instead.",
+  "synopsis": "one plain sentence describing what this article is actually about, framed for someone tracking design and healthcare innovation — not a restatement of the headline, but what it covers",
+  "hook": "one sharp sentence explaining why this signal matters to the dispatch mandate — what it reveals about the landscape, what it implies for pharma design or design leadership. Never say 'not relevant' — explain the actual context or indirect signal instead.",
   "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
   "lens": one of: LILLY | HOD | BOTH,
   "scores": { "lilly": 0-10, "hod": 0-10, "urgency": 0-10 }
@@ -88,14 +90,15 @@ export async function POST(req: Request) {
     const match = text.match(/\[[\s\S]*\]/)
     if (!match) return Response.json({ annotations: [] })
 
-    const raw: { hook?: string; type?: string; lens?: string; scores?: { lilly: number; hod: number; urgency: number } }[] =
+    const raw: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { lilly: number; hod: number; urgency: number } }[] =
       JSON.parse(match[0])
 
     const annotations: Annotation[] = articles.map((a, i) => ({
-      id:          a.id,
-      relevance:   raw[i]?.hook      || "",
-      signalType:  raw[i]?.type      || "",
-      signalLens:  raw[i]?.lens      || "",
+      id:           a.id,
+      synopsis:     raw[i]?.synopsis  || "",
+      relevance:    raw[i]?.hook      || "",
+      signalType:   raw[i]?.type      || "",
+      signalLens:   raw[i]?.lens      || "",
       signalScores: raw[i]?.scores,
     }))
 
