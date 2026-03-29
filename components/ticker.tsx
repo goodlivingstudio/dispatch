@@ -1,6 +1,19 @@
 "use client"
 
 import { useState } from "react"
+import type { Skin } from "@/app/page"
+
+// ─── Skin dot colours (fixed identifiers, not theme-relative) ──────────────
+const SKIN_DOT: Record<Skin, string> = {
+  mineral: "#B8956A",
+  slate:   "#4A7A9B",
+  forest:  "#5C8A6E",
+}
+const SKIN_LABEL: Record<Skin, string> = {
+  mineral: "Mineral",
+  slate:   "Slate",
+  forest:  "Forest",
+}
 
 // ─── Day-mode category palette ────────────────────────────────────────────────
 
@@ -62,9 +75,13 @@ const CAT_STYLE: Record<string, { bg: string; color: string }> = {
 export function Ticker({
   isDay = false,
   onToggle,
+  skin = "mineral",
+  onSkinChange,
 }: {
   isDay?: boolean
   onToggle?: () => void
+  skin?: Skin
+  onSkinChange?: (s: Skin) => void
 }) {
   const [paused, setPaused] = useState(false)
   const catStyle = isDay ? CAT_STYLE_DAY : CAT_STYLE
@@ -166,6 +183,56 @@ export function Ticker({
           })}
         </div>
       </div>
+
+      {/* Skin picker */}
+      {onSkinChange && (
+        <div
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "0 10px",
+            borderLeft: "1px solid var(--border)",
+            height: 36,
+          }}
+        >
+          {(["mineral", "slate", "forest"] as Skin[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => onSkinChange(s)}
+              title={SKIN_LABEL[s]}
+              style={{
+                width: 20,
+                height: 20,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  width:  skin === s ? 8 : 5,
+                  height: skin === s ? 8 : 5,
+                  borderRadius: "50%",
+                  background: SKIN_DOT[s],
+                  opacity: skin === s ? 1 : 0.35,
+                  outline: skin === s ? `1.5px solid ${SKIN_DOT[s]}` : "none",
+                  outlineOffset: 2,
+                  transition: "all 0.2s",
+                  flexShrink: 0,
+                }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Day / night toggle */}
       {onToggle && (

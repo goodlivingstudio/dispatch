@@ -3,34 +3,51 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Ticker } from "@/components/ticker"
 
-// ─── Day / Night parting ──────────────────────────────────────────────────────
+// ─── Skin + mode system ───────────────────────────────────────────────────────
 
-function useDayNight() {
-  const [isDay, setIsDay] = useState(false)
+export type Skin = "mineral" | "slate" | "forest"
+
+function applyThemeClasses(skin: Skin, day: boolean) {
+  const el = document.documentElement
+  el.classList.remove("day", "skin-slate", "skin-forest")
+  if (day) el.classList.add("day")
+  if (skin === "slate")  el.classList.add("skin-slate")
+  if (skin === "forest") el.classList.add("skin-forest")
+}
+
+function useTheme() {
+  const [skin, setSkinState] = useState<Skin>("mineral")
+  const [isDay, setIsDay]     = useState(false)
+  const skinRef               = useRef<Skin>("mineral")
 
   useEffect(() => {
-    const stored = localStorage.getItem("dispatch-theme")
-    let day: boolean
-    if (stored === "day" || stored === "night") {
-      day = stored === "day"
-    } else {
-      const h = new Date().getHours()
-      day = h >= 6 && h < 20
-    }
+    const storedSkin = (localStorage.getItem("dispatch-skin") as Skin) || "mineral"
+    const storedMode = localStorage.getItem("dispatch-theme")
+    const h   = new Date().getHours()
+    const day = storedMode === "day" ? true : storedMode === "night" ? false : h >= 6 && h < 20
+    skinRef.current = storedSkin
+    setSkinState(storedSkin)
     setIsDay(day)
-    document.documentElement.classList.toggle("day", day)
+    applyThemeClasses(storedSkin, day)
   }, [])
 
-  const toggle = useCallback(() => {
+  const toggleMode = useCallback(() => {
     setIsDay(prev => {
       const next = !prev
-      document.documentElement.classList.toggle("day", next)
+      applyThemeClasses(skinRef.current, next)
       localStorage.setItem("dispatch-theme", next ? "day" : "night")
       return next
     })
   }, [])
 
-  return { isDay, toggle }
+  const setSkin = useCallback((newSkin: Skin) => {
+    skinRef.current = newSkin
+    setSkinState(newSkin)
+    localStorage.setItem("dispatch-skin", newSkin)
+    setIsDay(prev => { applyThemeClasses(newSkin, prev); return prev })
+  }, [])
+
+  return { skin, isDay, toggleMode, setSkin }
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -819,7 +836,7 @@ function clamp(val: number, min: number, max: number) {
 }
 
 export default function Page() {
-  const { isDay, toggle: toggleTheme } = useDayNight()
+  const { skin, isDay, toggleMode, setSkin } = useTheme()
   const [articles,    setArticles]    = useState<Article[]>([])
   const [isLive,      setIsLive]      = useState(false)
   const [feedLoading, setFeedLoading] = useState(true)
@@ -885,7 +902,7 @@ export default function Page() {
       }}
     >
       {/* Signal ticker — full width, pinned top */}
-      <Ticker isDay={isDay} onToggle={toggleTheme} />
+      <Ticker isDay={isDay} onToggle={toggleMode} skin={skin} onSkinChange={setSkin} />
 
       {/* Three-column workspace */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>

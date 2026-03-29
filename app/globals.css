@@ -1,17 +1,20 @@
 @import "tailwindcss";
 
-/* ─── Terminal Design System ──────────────────────────────────── */
+/* ─── Skin system ─────────────────────────────────────────────── */
+/* Default skin: Mineral (warm amber). Slate and Forest override below. */
+
+/* Mineral — dark */
 :root {
-  --bg-primary:       #0F0F0D;
-  --bg-surface:       #161614;
-  --bg-elevated:      #1E1E1B;
-  --accent-primary:   #2A4A14;
-  --accent-secondary: #4A7A28;
-  --accent-muted:     #6B8F4A;
-  --text-primary:     #F0EBE0;
-  --text-secondary:   #A09890;
-  --text-tertiary:    #6B6560;
-  --border:           #2A2A26;
+  --bg-primary:       #0E0D0B;
+  --bg-surface:       #1A1815;
+  --bg-elevated:      #252220;
+  --accent-primary:   #2A1A0A;
+  --accent-secondary: #B8956A;
+  --accent-muted:     #C8A87A;
+  --text-primary:     #F0EDE8;
+  --text-secondary:   #A8A29B;
+  --text-tertiary:    #6B6460;
+  --border:           #2C2820;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────── */
@@ -60,18 +63,72 @@ html, body {
   animation: pulse-text 1.8s ease-in-out infinite;
 }
 
-/* ─── Day mode (warm light) ─────────────────────────────────────── */
+/* Mineral — light */
 :root.day {
-  --bg-primary:       #F8F6F2;
-  --bg-surface:       #EFECE6;
-  --bg-elevated:      #E6E3DD;
+  --bg-primary:       #F7F4EF;
+  --bg-surface:       #EFECE5;
+  --bg-elevated:      #E6E2DC;
+  --accent-primary:   #FBF0E4;
+  --accent-secondary: #8A6030;
+  --accent-muted:     #9A7040;
+  --text-primary:     #1C1A17;
+  --text-secondary:   #4A4540;
+  --text-tertiary:    #7A736A;
+  --border:           #DDD9D0;
+}
+
+/* ─── Slate skin ───────────────────────────────────────────────── */
+:root.skin-slate {
+  --bg-primary:       #0C0D10;
+  --bg-surface:       #141620;
+  --bg-elevated:      #1C1E2C;
+  --accent-primary:   #0D1A2E;
+  --accent-secondary: #4A7A9B;
+  --accent-muted:     #6A9ABB;
+  --text-primary:     #EEF0F6;
+  --text-secondary:   #9AA0B8;
+  --text-tertiary:    #606880;
+  --border:           #252840;
+}
+
+:root.skin-slate.day {
+  --bg-primary:       #F2F4F8;
+  --bg-surface:       #E8ECF4;
+  --bg-elevated:      #DEE4F0;
+  --accent-primary:   #E0EAF4;
+  --accent-secondary: #2B5C7A;
+  --accent-muted:     #4A7A9B;
+  --text-primary:     #1A1D24;
+  --text-secondary:   #404860;
+  --text-tertiary:    #6A7290;
+  --border:           #CDD4E4;
+}
+
+/* ─── Forest skin ──────────────────────────────────────────────── */
+:root.skin-forest {
+  --bg-primary:       #0F0E0C;
+  --bg-surface:       #191815;
+  --bg-elevated:      #222018;
+  --accent-primary:   #0D1F14;
+  --accent-secondary: #5C8A6E;
+  --accent-muted:     #7AAA8E;
+  --text-primary:     #EDEAE4;
+  --text-secondary:   #A5A09A;
+  --text-tertiary:    #686460;
+  --border:           #2A2720;
+}
+
+:root.skin-forest.day {
+  --bg-primary:       #F6F3EE;
+  --bg-surface:       #EDE9E2;
+  --bg-elevated:      #E2DDD5;
   --accent-primary:   #E4F0E8;
-  --accent-secondary: #2E6018;
-  --accent-muted:     #4A7A28;
+  --accent-secondary: #3A6B50;
+  --accent-muted:     #5A8B70;
   --text-primary:     #1C1A17;
   --text-secondary:   #4A4640;
-  --text-tertiary:    #8C8880;
-  --border:           #DDD9D2;
+  --text-tertiary:    #7A736A;
+  --border:           #D8D4CC;
 }
 
 /* ─── Ticker scroll ────────────────────────────────────────────── */
