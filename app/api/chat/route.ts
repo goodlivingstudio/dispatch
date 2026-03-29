@@ -1,6 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk"
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// Instantiate lazily so missing key gives a clear error at call time, not module load
+function getClient() {
+  const key = process.env.ANTHROPIC_API_KEY
+  if (!key) throw new Error("ANTHROPIC_API_KEY not configured in environment variables")
+  return new Anthropic({ apiKey: key })
+}
 
 const SYSTEM_PROMPT = `You are Cerebro — a personal strategic intelligence agent for Jeremy Grant.
 
@@ -57,8 +62,8 @@ export async function POST(req: Request) {
       return m
     })
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-5-20251001",
+    const response = await getClient().messages.create({
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 800,
       system: SYSTEM_PROMPT,
       messages: messagesWithContext.map((m: { role: string; content: string }) => ({
@@ -73,7 +78,8 @@ export async function POST(req: Request) {
 
     return Response.json({ text, inputTokens, outputTokens })
   } catch (err) {
-    console.error("Cerebro error:", err)
-    return Response.json({ error: "Failed to reach Cerebro" }, { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    console.error("Cerebro error:", message)
+    return Response.json({ error: message }, { status: 500 })
   }
 }

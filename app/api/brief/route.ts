@@ -1,6 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk"
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+function getClient() {
+  const key = process.env.ANTHROPIC_API_KEY
+  if (!key) throw new Error("ANTHROPIC_API_KEY not configured in environment variables")
+  return new Anthropic({ apiKey: key })
+}
 
 const BRIEF_SYSTEM = `You are the chief of staff for Jeremy Grant. Your job is to brief him on what matters most right now.
 
@@ -58,7 +62,7 @@ export async function POST(req: Request) {
       .map((a, i) => `${i + 1}. [${a.category}] ${a.source}: ${a.title}${a.summary ? ` — ${a.summary.slice(0, 120)}` : ""}`)
       .join("\n")
 
-    const response = await client.messages.create({
+    const response = await getClient().messages.create({
       model: "claude-3-5-haiku-20241022",
       max_tokens: 500,
       system: BRIEF_SYSTEM,
@@ -88,14 +92,16 @@ export async function POST(req: Request) {
 
     return Response.json({ signals })
   } catch (err) {
-    console.error("Brief error:", err)
+    const message = err instanceof Error ? err.message : String(err)
+    console.error("Brief error:", message)
     return Response.json(
       {
         signals: [
-          { label: "BRIEF UNAVAILABLE", body: "Could not reach intelligence layer." },
+          { label: "API UNAVAILABLE", body: message },
           { label: "—", body: "" },
           { label: "—", body: "" },
         ],
+        error: message,
       },
       { status: 200 }
     )

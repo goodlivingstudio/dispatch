@@ -56,6 +56,66 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
+// ─── Live Clock ───────────────────────────────────────────────────────────────
+
+function LiveClock() {
+  const [time, setTime] = useState("")
+  const [tzLabel, setTzLabel] = useState("")
+
+  useEffect(() => {
+    // Browser-native timezone — same signal as IP lookup, no external service
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    // Display city portion: "America/New_York" → "New York"
+    const city = tz.split("/").pop()?.replace(/_/g, " ") ?? tz
+    setTzLabel(city)
+
+    const tick = () => {
+      const now = new Date()
+      setTime(
+        now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: tz,
+          hour12: false,
+        })
+      )
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  if (!time) return null
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontFamily: "'SF Mono', 'Fira Code', monospace",
+          color: "var(--text-secondary)",
+          letterSpacing: "0.04em",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {time}
+      </div>
+      <div
+        style={{
+          fontSize: 9,
+          fontFamily: "'SF Mono', 'Fira Code', monospace",
+          color: "var(--text-tertiary)",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+        }}
+      >
+        {tzLabel}
+      </div>
+    </div>
+  )
+}
+
 // ─── Left Rail ────────────────────────────────────────────────────────────────
 
 function LeftRail({
@@ -71,7 +131,7 @@ function LeftRail({
   isLive: boolean
   feedLoading: boolean
 }) {
-  const now = new Date()
+  const now  = new Date()
   const date = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
   const day  = now.toLocaleDateString("en-US", { weekday: "long" })
 
@@ -90,27 +150,33 @@ function LeftRail({
         overflow: "hidden",
       }}
     >
-      {/* Wordmark */}
+      {/* Wordmark + Clock */}
       <div
         style={{
-          padding: "20px 20px 18px",
+          padding: "20px 20px 16px",
           borderBottom: "1px solid var(--border)",
         }}
       >
-        <div
-          style={{
-            fontSize: 17,
-            fontWeight: 700,
-            letterSpacing: "-0.04em",
-            color: "var(--text-primary)",
-            lineHeight: 1,
-          }}
-        >
-          Dispatch
+        {/* Top row: wordmark + clock */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              letterSpacing: "-0.04em",
+              color: "var(--text-primary)",
+              lineHeight: 1,
+            }}
+          >
+            Dispatch
+          </div>
+          <LiveClock />
         </div>
+
+        {/* Date */}
         <div
           style={{
-            marginTop: 6,
+            marginTop: 8,
             fontSize: 10,
             fontFamily: "'SF Mono', 'Fira Code', monospace",
             color: "var(--text-tertiary)",
@@ -119,6 +185,8 @@ function LeftRail({
         >
           {day}, {date}
         </div>
+
+        {/* Feed status */}
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
           <span
             style={{
@@ -491,10 +559,14 @@ function Cerebro({ articles }: { articles: Article[] }) {
           body: JSON.stringify({ messages: updated, feedContext }),
         })
         const data = await res.json()
-        setMessages(prev => [...prev, { role: "assistant", content: data.text || "No response." }])
-        setTokens(t => t + (data.inputTokens || 0) + (data.outputTokens || 0))
-      } catch {
-        setMessages(prev => [...prev, { role: "assistant", content: "Could not reach Cerebro." }])
+        if (!res.ok || data.error) {
+          setMessages(prev => [...prev, { role: "assistant", content: `// error: ${data.error || res.status}` }])
+        } else {
+          setMessages(prev => [...prev, { role: "assistant", content: data.text || "// empty response" }])
+          setTokens(t => t + (data.inputTokens || 0) + (data.outputTokens || 0))
+        }
+      } catch (err) {
+        setMessages(prev => [...prev, { role: "assistant", content: `// network error: ${err instanceof Error ? err.message : String(err)}` }])
       }
       setLoading(false)
     },
