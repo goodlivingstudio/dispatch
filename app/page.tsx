@@ -1143,17 +1143,21 @@ function Cerebro({ articles, pendingPrompt }: {
         }}
       >
         {messages.length === 0 && (
-          <div style={{ padding: "12px 16px" }}>
+          <div style={{ padding: "24px 16px" }}>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 12.5,
+                fontFamily: "'SF Mono', 'Fira Code', monospace",
                 color: "var(--text-tertiary)",
-                lineHeight: 1.7,
+                lineHeight: 1.8,
+                letterSpacing: "-0.01em",
               }}
             >
-              <span style={{ color: "var(--accent-muted)", fontWeight: 500 }}>Ready</span>
+              Strategic intelligence ready.
               <br />
-              Ask about the feed, the Lilly opportunity, or the five-year path.
+              <span style={{ color: "var(--accent-muted)" }}>
+                Feed analysis, Lilly positioning, career trajectory.
+              </span>
             </div>
           </div>
         )}
@@ -1180,6 +1184,7 @@ function Cerebro({ articles, pendingPrompt }: {
                 style={{
                   padding: "0 16px",
                   fontSize: 11,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
                   color: "var(--text-tertiary)",
                   lineHeight: 1.5,
                   display: "flex",
@@ -1188,18 +1193,20 @@ function Cerebro({ articles, pendingPrompt }: {
                 }}
               >
                 <span style={{ color: "var(--accent-muted)", opacity: 0.7 }}>↗</span>
-                <span style={{ opacity: 0.6 }}>Searched: &ldquo;{m.content}&rdquo;</span>
+                <span style={{ opacity: 0.6 }}>searched &ldquo;{m.content}&rdquo;</span>
               </div>
             ) : (
-              // Assistant response
+              // Assistant response — mono for machine voice
               <div
                 style={{
                   padding: "0 16px",
-                  fontSize: 13,
+                  fontSize: 12.5,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
                   color: "var(--text-secondary)",
-                  lineHeight: 1.7,
+                  lineHeight: 1.75,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
+                  letterSpacing: "-0.01em",
                 }}
               >
                 {m.content}
@@ -1213,7 +1220,8 @@ function Cerebro({ articles, pendingPrompt }: {
             <span
               className="cursor-blink"
               style={{
-                fontSize: 14,
+                fontSize: 13,
+                fontFamily: "'SF Mono', 'Fira Code', monospace",
               }}
             >
               ▊
@@ -1227,51 +1235,74 @@ function Cerebro({ articles, pendingPrompt }: {
       <div
         style={{
           flexShrink: 0,
+          padding: "12px 14px",
           borderTop: "1px solid var(--border)",
-          padding: "10px 16px",
-          display: "flex",
-          alignItems: "flex-end",
-          gap: 8,
         }}
       >
-        <span
+        <div
           style={{
-            fontSize: 13,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            color: "var(--accent-secondary)",
-            lineHeight: "22px",
-            flexShrink: 0,
-            paddingBottom: 1,
+            display: "flex",
+            alignItems: "flex-end",
+            gap: 10,
+            background: "var(--bg-elevated)",
+            borderRadius: 12,
+            padding: "10px 14px",
+            border: "1px solid var(--border)",
+            transition: "border-color 0.15s",
           }}
         >
-          {">"}
-        </span>
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault()
-              send(input)
-            }
-          }}
-          placeholder="ask anything"
-          rows={1}
-          style={{
-            flex: 1,
-            resize: "none",
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            fontSize: 13,
-            fontFamily: "inherit",
-            color: "var(--text-primary)",
-            caretColor: "var(--accent-secondary)",
-            lineHeight: "22px",
-            maxHeight: 96,
-          }}
-        />
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                send(input)
+              }
+            }}
+            placeholder="Message Cerebro..."
+            rows={1}
+            style={{
+              flex: 1,
+              resize: "none",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              fontSize: 13,
+              fontFamily: "inherit",
+              color: "var(--text-primary)",
+              caretColor: "var(--accent-secondary)",
+              lineHeight: "22px",
+              maxHeight: 96,
+            }}
+          />
+          {/* Send button */}
+          <button
+            onClick={() => send(input)}
+            disabled={!input.trim() || loading}
+            aria-label="Send message"
+            style={{
+              flexShrink: 0,
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 8,
+              border: "none",
+              background: input.trim() && !loading ? "var(--accent-secondary)" : "transparent",
+              color: input.trim() && !loading ? "var(--bg-primary)" : "var(--text-tertiary)",
+              cursor: input.trim() && !loading ? "pointer" : "default",
+              transition: "all 0.15s",
+              padding: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ display: "block" }}>
+              <path d="M3 13V3L14 8L3 13Z" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   )
