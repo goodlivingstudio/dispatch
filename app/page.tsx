@@ -824,8 +824,9 @@ function Divider({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => void }
           bottom: 0,
           left: 4,
           width: 1,
-          background: hovered ? "var(--bg-elevated)" : "var(--border)",
-          transition: "background 0.15s",
+          background: "var(--text-tertiary)",
+          opacity: hovered ? 0.45 : 0.2,
+          transition: "opacity 0.15s",
         }}
       />
     </div>

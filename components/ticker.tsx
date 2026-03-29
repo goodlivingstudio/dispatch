@@ -90,7 +90,7 @@ export function Ticker({
     <div
       style={{
         flexShrink: 0,
-        height: 36,
+        height: 42,
         display: "flex",
         alignItems: "center",
         background: "var(--bg-surface)",
@@ -194,7 +194,7 @@ export function Ticker({
             gap: 6,
             padding: "0 10px",
             borderLeft: "1px solid var(--border)",
-            height: 36,
+            height: 42,
           }}
         >
           {(["mineral", "slate", "forest"] as Skin[]).map((s) => (
@@ -241,8 +241,8 @@ export function Ticker({
           title={isDay ? "Switch to night mode" : "Switch to day mode"}
           style={{
             flexShrink: 0,
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -250,14 +250,14 @@ export function Ticker({
             border: "none",
             borderLeft: "1px solid var(--border)",
             cursor: "pointer",
-            fontSize: 13,
+            fontSize: 17,
             color: "var(--text-tertiary)",
             transition: "color 0.15s",
           }}
           onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
           onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
         >
-          {isDay ? "☾" : "⊙"}
+          {isDay ? "☾" : "☀"}
         </button>
       )}
 
