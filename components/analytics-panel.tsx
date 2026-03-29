@@ -213,7 +213,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           <div style={{ fontSize: 64, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.04em", lineHeight: 1 }}>
             {analytics.total}
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 6, marginBottom: 16, fontWeight: 700 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 6, marginBottom: 16, fontWeight: 700 }}>
             signals tracked today
           </div>
           <ProportionBar segments={[
@@ -225,7 +225,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             {(["LILLY", "HOD", "BOTH"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em", fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.04em", fontWeight: 600 }}>
                   {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} {analytics.lens[k]}
                 </span>
               </div>
@@ -251,13 +251,13 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {pct}%
             </div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
+            <div style={{ fontSize: 11, color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
               {dominant[0] === "HOD" ? "HoD" : dominant[0] === "BOTH" ? "Both" : "Lilly"} dominant
             </div>
             {(["LILLY","HOD","BOTH"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.03em", fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", fontWeight: 600 }}>
                   {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} — {analytics.lens[k]}
                 </span>
               </div>
@@ -275,7 +275,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           <div style={{ fontSize: 42, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
             {top?.label || "—"}
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 5, marginBottom: 14, fontWeight: 700 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 5, marginBottom: 14, fontWeight: 700 }}>
             most active · {top?.count || 0} articles
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -289,7 +289,6 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
                 color: "var(--text-secondary)",
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
-                fontWeight: 600,
               }}>
                 {cat.label}
               </div>
@@ -345,7 +344,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
                 <span style={{ fontSize: 13, color: "var(--text-secondary)", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "82%", fontWeight: 500 }}>
                   {item.source}
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-tertiary)", flexShrink: 0, fontWeight: 700 }}>
+                <span style={{ fontSize: 12, color: "var(--text-tertiary)", flexShrink: 0, fontWeight: 700 }}>
                   {item.count}
                 </span>
               </div>
@@ -581,7 +580,7 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
           flexShrink: 0,
         }}>
           <div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: accent, letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>
+            <span style={{ fontSize: 11, color: accent, letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>
               {card.label}
             </span>
             <span style={{ marginLeft: 16, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em" }}>
@@ -620,7 +619,6 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
               borderRadius: 8,
               padding: "11px 24px",
               fontSize: 11,
-              fontWeight: 600,
               letterSpacing: "0.03em",
               textTransform: "uppercase",
               cursor: "pointer",
@@ -675,7 +673,6 @@ function AnalyticsCard({ card, analytics, onClick }: {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <span style={{
           fontSize: 12,
-          fontWeight: 600,
           color: accent,
           letterSpacing: "0.03em",
           textTransform: "uppercase",
