@@ -99,7 +99,7 @@ const CATEGORY_CONFIG = [
 // Annotations live in localStorage with a 2-hour TTL.
 // Single-user tool; 5-10 visits/day — fresh enough, eliminates every load cost.
 
-const ANNOTATION_CACHE_KEY = "dispatch-annotations-v1"
+const ANNOTATION_CACHE_KEY = "dispatch-annotations-v2"
 const ANNOTATION_TTL_MS    = 2 * 60 * 60 * 1000 // 2 hours
 
 interface AnnotationEntry {
@@ -116,6 +116,9 @@ function loadAnnotationCache(): AnnotationEntry[] | null {
     if (!raw) return null
     const { ts, data } = JSON.parse(raw)
     if (Date.now() - ts > ANNOTATION_TTL_MS) return null
+    // Reject empty-content caches — these are artifacts of failed annotation runs
+    const hasContent = Array.isArray(data) && data.some((a: AnnotationEntry) => a.relevance && a.relevance.length > 10)
+    if (!hasContent) return null
     return data
   } catch { return null }
 }
@@ -766,7 +769,8 @@ type SignalCallbacks = {
 }
 
 function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { article: Article } & SignalCallbacks) {
-  const isExternal = article.url !== "#"
+  const isExternal   = article.url !== "#"
+  const hasSignal    = !!(article.summary || article.relevance)
   const [hovered, setHovered] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const signalActiveRef = useRef(false)
@@ -779,14 +783,14 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
 
   const handleMouseEnter = (e: React.MouseEvent) => {
     setHovered(true)
-    if (isExternal && isLeftHalf(e.clientX)) {
+    if (hasSignal && isLeftHalf(e.clientX)) {
       signalActiveRef.current = true
       onSignalEnter(article, e.clientX, e.clientY)
     }
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isExternal) return
+    if (!hasSignal) return
     if (isLeftHalf(e.clientX)) {
       if (!signalActiveRef.current) {
         signalActiveRef.current = true
@@ -820,7 +824,7 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
         borderBottom: "1px solid var(--border)",
         borderLeft: `2px solid ${article.signalLens === "LILLY" || article.signalLens === "BOTH" ? "var(--accent-secondary)" : "transparent"}`,
         background: hovered ? "var(--bg-surface)" : "transparent",
-        cursor: isExternal ? "pointer" : "default",
+        cursor: isExternal ? "pointer" : hasSignal ? "default" : "default",
         transition: "background 0.12s",
         gap: 0,
       }}
