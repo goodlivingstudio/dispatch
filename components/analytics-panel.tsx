@@ -210,11 +210,11 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
     case "snapshot": {
       return (
         <div>
-          <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.04em", lineHeight: 1 }}>
+          <div style={{ fontSize: 64, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.04em", lineHeight: 1 }}>
             {analytics.total}
           </div>
-          <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: 4, marginBottom: 14 }}>
-            signals in feed today
+          <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 6, marginBottom: 16 }}>
+            signals tracked today
           </div>
           <ProportionBar segments={[
             { flex: analytics.lens.LILLY, color: LENS_COLOR.LILLY },
@@ -248,10 +248,10 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             { value: analytics.lens.BOTH,  color: LENS_COLOR.BOTH  },
           ]} />
           <div>
-            <div style={{ fontSize: 30, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {pct}%
             </div>
-            <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 3, marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4, marginBottom: 12 }}>
               {dominant[0] === "HOD" ? "HoD" : dominant[0] === "BOTH" ? "Both" : "Lilly"} dominant
             </div>
             {(["LILLY","HOD","BOTH"] as const).map(k => (
@@ -272,10 +272,10 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
       const max  = top?.count || 1
       return (
         <div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+          <div style={{ fontSize: 42, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
             {top?.label || "—"}
           </div>
-          <div style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 3, marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 5, marginBottom: 14 }}>
             most active · {top?.count || 0} articles
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -307,11 +307,12 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           {top3.map((article, i) => (
             <div key={article.id}>
               <div style={{
-                fontSize: i === 0 ? 12 : 11,
+                fontSize: i === 0 ? 14 : 13,
+                fontWeight: i === 0 ? 550 : 400,
                 color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
                 lineHeight: 1.3,
                 letterSpacing: "-0.01em",
-                marginBottom: 4,
+                marginBottom: 6,
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
@@ -388,28 +389,28 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       ]
       return (
         <div>
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontFamily: "'SF Mono','Fira Code',monospace", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
-            Average signal scores · {analytics.annotatedCount} annotated articles
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontFamily: "'SF Mono','Fira Code',monospace", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+            Average AI-scored signal strength across {analytics.annotatedCount} annotated articles — scored 0–10 per dimension
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
-              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 10, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={130} />
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 32, top: 0, bottom: 0 }}>
+              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={150} />
               <Tooltip {...tooltipStyle} />
-              <Bar dataKey="value" radius={2} maxBarSize={14}>
+              <Bar dataKey="value" radius={4} maxBarSize={22}>
                 {data.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-          <div style={{ marginTop: 20, display: "flex", gap: 20 }}>
+          <div style={{ marginTop: 32, display: "flex", gap: 32 }}>
             {[
               { label: "Total signals", value: analytics.total },
-              { label: "Annotated", value: analytics.annotatedCount },
+              { label: "AI annotated", value: analytics.annotatedCount },
               { label: "Stub fallback", value: analytics.stubCount },
             ].map(stat => (
               <div key={stat.label}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>{stat.value}</div>
-                <div style={{ fontSize: 9, fontFamily: "monospace", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{stat.label}</div>
+                <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>{stat.value}</div>
+                <div style={{ fontSize: 11, fontFamily: "monospace", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4 }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -425,10 +426,10 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       ].filter(d => d.value > 0)
       const total = analytics.lens.LILLY + analytics.lens.HOD + analytics.lens.BOTH
       return (
-        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <ResponsiveContainer width={200} height={200}>
+        <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
+          <ResponsiveContainer width={280} height={280}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={58} outerRadius={82} paddingAngle={2} dataKey="value">
+              <Pie data={pieData} cx="50%" cy="50%" innerRadius={80} outerRadius={116} paddingAngle={3} dataKey="value">
                 {pieData.map((d, i) => <Cell key={i} fill={d.color} stroke="none" />)}
               </Pie>
               <Tooltip {...tooltipStyle} />
@@ -457,45 +458,60 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
     case "category": {
       const data = analytics.categoryData.map(c => ({ name: c.label, count: c.count }))
       return (
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
-            <XAxis type="number" tick={{ fontSize: 9, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={90} />
-            <Tooltip {...tooltipStyle} />
-            <Bar dataKey="count" fill={CARD_ACCENT.category} fillOpacity={0.75} radius={2} maxBarSize={13} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontFamily: "'SF Mono','Fira Code',monospace", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+            Article volume by category across {analytics.total} signals — darker fill = higher concentration
+          </div>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
+              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={100} />
+              <Tooltip {...tooltipStyle} />
+              <Bar dataKey="count" fill={CARD_ACCENT.category} fillOpacity={0.75} radius={4} maxBarSize={22} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )
     }
 
     case "urgency": {
       const data = analytics.urgencyTop.slice(0, 8).map(a => ({
-        name: a.title.slice(0, 32) + (a.title.length > 32 ? "…" : ""),
+        name: a.title.slice(0, 52) + (a.title.length > 52 ? "…" : ""),
         urgency: a.signalScores?.urgency || 0,
       }))
       return (
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
-            <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 9, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={170} />
-            <Tooltip {...tooltipStyle} />
-            <Bar dataKey="urgency" fill={CARD_ACCENT.urgency} fillOpacity={0.8} radius={2} maxBarSize={12} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontFamily: "'SF Mono','Fira Code',monospace", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+            Highest urgency signals today — AI-scored 0–10 (10 = act now, 0 = evergreen)
+          </div>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
+              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={220} />
+              <Tooltip {...tooltipStyle} />
+              <Bar dataKey="urgency" fill={CARD_ACCENT.urgency} fillOpacity={0.8} radius={4} maxBarSize={20} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )
     }
 
     case "sources": {
       const data = analytics.topSources.map(s => ({ name: s.source, count: s.count }))
       return (
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
-            <XAxis type="number" tick={{ fontSize: 9, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={130} />
-            <Tooltip {...tooltipStyle} />
-            <Bar dataKey="count" fill={CARD_ACCENT.sources} fillOpacity={0.8} radius={2} maxBarSize={12} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontFamily: "'SF Mono','Fira Code',monospace", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+            Publication volume across {analytics.topSources.length} sources — signals per outlet today
+          </div>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
+              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "monospace" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={150} />
+              <Tooltip {...tooltipStyle} />
+              <Bar dataKey="count" fill={CARD_ACCENT.sources} fillOpacity={0.8} radius={4} maxBarSize={20} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )
     }
 
@@ -549,59 +565,72 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
         background: "var(--bg-surface)",
         borderRadius: 16,
         border: "1px solid var(--border)",
-        borderLeft: `3px solid ${accent}`,
-        width: "min(820px, 92vw)",
-        maxHeight: "78vh",
+        width: "min(92vw, 1160px)",
+        height: "82vh",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)",
       }}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
-          <span style={{ fontSize: 10, fontFamily: "'SF Mono','Fira Code',monospace", color: accent, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            {card.label}
-          </span>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 6px", borderRadius: 3 }}>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "18px 28px",
+          borderBottom: "1px solid var(--border)",
+          background: `linear-gradient(90deg, ${accent}11 0%, transparent 50%)`,
+          flexShrink: 0,
+        }}>
+          <div>
+            <span style={{ fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: accent, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>
+              {card.label}
+            </span>
+            <span style={{ marginLeft: 16, fontSize: 11, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.04em" }}>
+              {analytics.annotatedCount} annotated · {analytics.total} total
+            </span>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", fontSize: 22, lineHeight: 1, padding: "4px 8px", borderRadius: 4 }}>
             ×
           </button>
         </div>
 
-        {/* Body */}
-        <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
-          {/* Chart */}
-          <div style={{ flex: 1, padding: "24px 24px", overflowY: "auto" }}>
-            <ModalChart id={card.id} analytics={analytics} />
-          </div>
+        {/* Chart — full width, fills height */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "32px 36px" }}>
+          <ModalChart id={card.id} analytics={analytics} />
+        </div>
 
-          {/* Deliberate sidebar */}
-          <div style={{ width: 220, borderLeft: "1px solid var(--border)", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 14, flexShrink: 0 }}>
-            <div style={{ fontSize: 10, fontFamily: "'SF Mono','Fira Code',monospace", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              Deliberate
-            </div>
-            <div style={{ fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
-              Send this signal to Cerebro for deeper analysis and strategic framing.
-            </div>
-            <button
-              onClick={() => { onDeliberate(buildPrompt(card.id, analytics)); onClose() }}
-              style={{
-                background: "var(--accent-secondary)",
-                color: "var(--bg-primary)",
-                border: "none",
-                borderRadius: 8,
-                padding: "10px 16px",
-                fontSize: 10,
-                fontFamily: "'SF Mono','Fira Code',monospace",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontWeight: 600,
-                marginTop: "auto",
-              }}
-            >
-              Deliberate →
-            </button>
+        {/* Footer — Deliberate CTA */}
+        <div style={{
+          flexShrink: 0,
+          borderTop: "1px solid var(--border)",
+          padding: "16px 28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "var(--bg-elevated)",
+        }}>
+          <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+            Send this signal to <span style={{ color: "var(--accent-muted)" }}>Cerebro</span> for deeper analysis and strategic framing.
           </div>
+          <button
+            onClick={() => { onDeliberate(buildPrompt(card.id, analytics)); onClose() }}
+            style={{
+              background: "var(--accent-secondary)",
+              color: "var(--bg-primary)",
+              border: "none",
+              borderRadius: 8,
+              padding: "11px 24px",
+              fontSize: 11,
+              fontFamily: "'SF Mono','Fira Code',monospace",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              fontWeight: 700,
+              flexShrink: 0,
+              marginLeft: 24,
+            }}
+          >
+            Deliberate →
+          </button>
         </div>
       </div>
     </div>
@@ -629,15 +658,15 @@ function AnalyticsCard({ card, analytics, onClick }: {
         background: `${gradient}, var(--bg-surface)`,
         borderRadius: 14,
         border: "1px solid var(--border)",
-        padding: "20px 22px 22px",
+        padding: "22px 24px 24px",
         cursor: "pointer",
-        transition: "transform 0.18s cubic-bezier(0.16,1,0.3,1), box-shadow 0.18s cubic-bezier(0.16,1,0.3,1)",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1)",
+        transform: hovered ? "translateY(-3px)" : "translateY(0)",
         boxShadow: hovered
-          ? `0 8px 28px rgba(0,0,0,0.28), 0 0 0 1px ${accent}33`
-          : "0 1px 4px rgba(0,0,0,0.15)",
+          ? `0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px ${accent}22`
+          : "0 1px 3px rgba(0,0,0,0.07)",
         height: "100%",
-        minHeight: 160,
+        minHeight: 180,
         boxSizing: "border-box",
         overflow: "hidden",
       }}
@@ -652,22 +681,25 @@ function AnalyticsCard({ card, analytics, onClick }: {
         opacity: 0.7,
       }} />
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <span style={{
-          fontSize: 10,
+          fontSize: 11,
           fontFamily: "'SF Mono','Fira Code',monospace",
           color: accent,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          opacity: 0.9,
+          fontWeight: 600,
         }}>
           {card.label}
         </span>
         <span style={{
           color: accent,
-          opacity: hovered ? 0.8 : 0,
-          transition: "opacity 0.15s",
-          fontSize: 11,
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.25s, transform 0.25s cubic-bezier(0.16,1,0.3,1)",
+          transform: hovered ? "translate(2px,-2px)" : "translate(0,0)",
+          fontSize: 18,
+          lineHeight: 1,
+          fontWeight: 400,
         }}>
           ↗
         </span>
