@@ -213,10 +213,10 @@ function LiveClock() {
     <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <div
         style={{
-          fontSize: 12,
+          fontSize: 13,
           fontFamily: "'SF Mono', 'Fira Code', monospace",
           color: "var(--text-secondary)",
-          letterSpacing: "0.04em",
+          letterSpacing: "0.02em",
           fontVariantNumeric: "tabular-nums",
           fontWeight: 600,
         }}
@@ -225,10 +225,9 @@ function LiveClock() {
       </div>
       <div
         style={{
-          fontSize: 10,
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
+          fontSize: 11,
           color: "var(--text-tertiary)",
-          letterSpacing: "0.08em",
+          letterSpacing: "0.02em",
           textTransform: "uppercase",
           fontWeight: 600,
         }}
@@ -307,8 +306,7 @@ function FeedStatus({ isLive, feedHealth, feedLoading }: {
       />
       <span style={{
         fontSize: 11,
-        fontFamily: "'SF Mono', 'Fira Code', monospace",
-        letterSpacing: "0.1em",
+        letterSpacing: "0.04em",
         textTransform: "uppercase",
         color: dotColor,
         fontWeight: 700,
@@ -331,17 +329,17 @@ function FeedStatus({ isLive, feedHealth, feedLoading }: {
           pointerEvents: "none",
         }}>
           <div style={{
-            fontSize: 9,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.08em",
+            fontSize: 11,
+            letterSpacing: "0.03em",
             textTransform: "uppercase",
             color: "#ef4444",
+            fontWeight: 600,
             marginBottom: 5,
           }}>
             Feed Offline
           </div>
           <div style={{
-            fontSize: 11,
+            fontSize: 12,
             lineHeight: 1.55,
             color: "var(--text-secondary)",
           }}>
@@ -405,7 +403,7 @@ function LeftRail({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div
             style={{
-              fontSize: 17,
+              fontSize: 20,
               fontWeight: 700,
               letterSpacing: "-0.04em",
               color: "var(--text-primary)",
@@ -421,10 +419,9 @@ function LeftRail({
         <div
           style={{
             marginTop: 8,
-            fontSize: 11,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            fontSize: 12,
             color: "var(--text-tertiary)",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.01em",
             fontWeight: 500,
           }}
         >
@@ -475,12 +472,10 @@ function LeftRail({
                     {tab.icon}
                   </span>
                   <span style={{
-                    fontSize: 11,
-                    fontFamily: "'SF Mono', 'Fira Code', monospace",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
+                    fontSize: 12,
+                    letterSpacing: "0.01em",
                     color: isTab ? "var(--text-primary)" : "var(--text-tertiary)",
-                    fontWeight: isTab ? 700 : 500,
+                    fontWeight: isTab ? 600 : 400,
                   }}>
                     {tab.label}
                   </span>
@@ -525,8 +520,8 @@ function LeftRail({
               {n > 0 && (
                 <span
                   style={{
-                    fontSize: 10,
-                    fontFamily: "'SF Mono', 'Fira Code', monospace",
+                    fontSize: 11,
+                    fontVariantNumeric: "tabular-nums",
                     color: isActive ? "var(--text-secondary)" : "var(--text-tertiary)",
                   }}
                 >
@@ -639,11 +634,11 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
             <div
               key={statusIdx}
               style={{
-                fontSize: 9,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 11,
                 color: "var(--accent-muted)",
-                letterSpacing: "0.12em",
+                letterSpacing: "0.04em",
                 textTransform: "uppercase",
+                fontWeight: 500,
                 animation: "status-fade 0.3s ease both",
               }}
             >
@@ -682,17 +677,17 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
                 }}
               >
                 <div style={{
-                  fontSize: 9,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontSize: 11,
                   color: "var(--accent-muted)",
-                  letterSpacing: "0.12em",
+                  letterSpacing: "0.03em",
                   textTransform: "uppercase",
+                  fontWeight: 600,
                   marginBottom: 8,
                 }}>
                   {signal.label}
                 </div>
                 {signal.body && (
-                  <div style={{ fontSize: 12, color: "var(--text-primary)", lineHeight: 1.6, letterSpacing: "-0.01em" }}>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6, letterSpacing: "-0.01em" }}>
                     {signal.body}
                   </div>
                 )}
@@ -708,10 +703,9 @@ function ChiefOfStaffBand({ signals, briefLoading, onDeliberate }: {
                       border: "none",
                       padding: "2px 0",
                       cursor: "pointer",
-                      fontSize: 9,
-                      fontFamily: "'SF Mono', 'Fira Code', monospace",
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
+                      fontSize: 11,
+                      letterSpacing: "0.02em",
+                      fontWeight: 500,
                       color: "var(--accent-secondary)",
                       opacity: isHovered ? 1 : 0,
                       transition: "opacity 0.2s",
@@ -747,11 +741,11 @@ function AnalysisPanel({ signals, briefLoading }: { signals: Signal[]; briefLoad
         >
           <div
             style={{
-              fontSize: 9,
-              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              fontSize: 11,
               color: "var(--accent-muted)",
-              letterSpacing: "0.12em",
+              letterSpacing: "0.03em",
               textTransform: "uppercase",
+              fontWeight: 600,
               marginBottom: 10,
             }}
             className={briefLoading && i === 0 ? "loading-pulse" : ""}
@@ -763,7 +757,7 @@ function AnalysisPanel({ signals, briefLoading }: { signals: Signal[]; briefLoad
               {signal.body}
             </div>
           ) : briefLoading ? (
-            <div className="loading-pulse" style={{ fontSize: 13, color: "var(--accent-muted)", opacity: 0.4, fontFamily: "'SF Mono', 'Fira Code', monospace" }}>
+            <div className="loading-pulse" style={{ fontSize: 13, color: "var(--accent-muted)", opacity: 0.4 }}>
               ▊
             </div>
           ) : null}
@@ -914,10 +908,9 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
         {/* Eyebrow: source · category · time */}
         <div
           style={{
-            fontSize: 10,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            fontSize: 12,
             color: "var(--text-tertiary)",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.01em",
             marginBottom: 6,
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -934,7 +927,7 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
         {/* Headline */}
         <div
           style={{
-            fontSize: 13.5,
+            fontSize: 15,
             fontWeight: 550,
             color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
             lineHeight: 1.4,
@@ -949,7 +942,7 @@ function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { art
         {article.summary && (
           <div
             style={{
-              fontSize: 11.5,
+              fontSize: 13,
               color: "var(--text-tertiary)",
               lineHeight: 1.55,
               letterSpacing: "-0.005em",
@@ -1099,10 +1092,10 @@ function Cerebro({ articles, pendingPrompt }: {
       >
         <span
           style={{
-            fontSize: 9,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.12em",
+            fontSize: 11,
+            letterSpacing: "0.04em",
             textTransform: "uppercase",
+            fontWeight: 600,
             color: "var(--accent-muted)",
           }}
         >
@@ -1113,10 +1106,9 @@ function Cerebro({ articles, pendingPrompt }: {
             <span
               title="Conversation memory active — Cerebro remembers previous sessions"
               style={{
-                fontSize: 8,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 10,
                 color: "var(--accent-muted)",
-                letterSpacing: "0.06em",
+                letterSpacing: "0.02em",
                 opacity: 0.7,
               }}
             >
@@ -1126,8 +1118,8 @@ function Cerebro({ articles, pendingPrompt }: {
           {tokens > 0 && (
             <span
               style={{
-                fontSize: 9,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 10,
+                fontVariantNumeric: "tabular-nums",
                 color: "var(--text-tertiary)",
               }}
             >
@@ -1146,20 +1138,17 @@ function Cerebro({ articles, pendingPrompt }: {
         }}
       >
         {messages.length === 0 && (
-          <div style={{ padding: "8px 16px" }}>
+          <div style={{ padding: "12px 16px" }}>
             <div
               style={{
-                fontSize: 11,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 13,
                 color: "var(--text-tertiary)",
-                lineHeight: 1.8,
+                lineHeight: 1.7,
               }}
             >
-              {"// "}<span style={{ color: "var(--accent-muted)" }}>ready</span>
+              <span style={{ color: "var(--accent-muted)", fontWeight: 500 }}>Ready</span>
               <br />
-              {"// "}Ask about the feed, the Lilly
-              <br />
-              {"// "}opportunity, or the five-year path.
+              Ask about the feed, the Lilly opportunity, or the five-year path.
             </div>
           </div>
         )}
@@ -1171,23 +1160,21 @@ function Cerebro({ articles, pendingPrompt }: {
               <div
                 style={{
                   padding: "0 16px",
-                  fontSize: 11,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
-                  color: "var(--text-tertiary)",
+                  fontSize: 13,
+                  color: "var(--text-primary)",
                   lineHeight: 1.6,
                   wordBreak: "break-word",
+                  fontWeight: 500,
                 }}
               >
-                <span style={{ color: "var(--accent-secondary)", marginRight: 6 }}>{">"}</span>
                 {m.content}
               </div>
             ) : m.role === "search" ? (
-              // Web search activity — shown as terminal comment
+              // Web search activity
               <div
                 style={{
                   padding: "0 16px",
-                  fontSize: 10,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontSize: 11,
                   color: "var(--text-tertiary)",
                   lineHeight: 1.5,
                   display: "flex",
@@ -1196,17 +1183,16 @@ function Cerebro({ articles, pendingPrompt }: {
                 }}
               >
                 <span style={{ color: "var(--accent-muted)", opacity: 0.7 }}>↗</span>
-                <span style={{ opacity: 0.6 }}>searched: &ldquo;{m.content}&rdquo;</span>
+                <span style={{ opacity: 0.6 }}>Searched: &ldquo;{m.content}&rdquo;</span>
               </div>
             ) : (
-              // Assistant response — monospace, full width
+              // Assistant response
               <div
                 style={{
                   padding: "0 16px",
-                  fontSize: 11.5,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontSize: 13,
                   color: "var(--text-secondary)",
-                  lineHeight: 1.75,
+                  lineHeight: 1.7,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
                 }}
@@ -1222,8 +1208,7 @@ function Cerebro({ articles, pendingPrompt }: {
             <span
               className="cursor-blink"
               style={{
-                fontSize: 13,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 14,
               }}
             >
               ▊
@@ -1246,12 +1231,12 @@ function Cerebro({ articles, pendingPrompt }: {
       >
         <span
           style={{
-            fontSize: 12,
+            fontSize: 13,
             fontFamily: "'SF Mono', 'Fira Code', monospace",
             color: "var(--accent-secondary)",
-            lineHeight: "20px",
+            lineHeight: "22px",
             flexShrink: 0,
-            paddingBottom: 2,
+            paddingBottom: 1,
           }}
         >
           {">"}
@@ -1274,11 +1259,11 @@ function Cerebro({ articles, pendingPrompt }: {
             background: "transparent",
             border: "none",
             outline: "none",
-            fontSize: 12,
+            fontSize: 13,
             fontFamily: "inherit",
             color: "var(--text-primary)",
             caretColor: "var(--accent-secondary)",
-            lineHeight: "20px",
+            lineHeight: "22px",
             maxHeight: 96,
           }}
         />
@@ -1456,8 +1441,8 @@ export default function Page() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 120, fontSize: 11, fontFamily: "'SF Mono', 'Fira Code', monospace", color: "var(--text-tertiary)" }}>
-            no articles
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 120, fontSize: 13, color: "var(--text-tertiary)" }}>
+            No articles
           </div>
         ) : (
           filtered.map(a => (
@@ -1522,10 +1507,10 @@ export default function Page() {
               <span style={{ fontSize: 15 }}>{tab.icon}</span>
               <span
                 style={{
-                  fontSize: 9,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
-                  letterSpacing: "0.08em",
+                  fontSize: 10,
+                  letterSpacing: "0.02em",
                   textTransform: "uppercase",
+                  fontWeight: 500,
                   color: mobileTab === tab.id ? "var(--accent-secondary)" : "var(--text-tertiary)",
                 }}
               >

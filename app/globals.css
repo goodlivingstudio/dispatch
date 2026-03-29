@@ -38,7 +38,7 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ─── Monospace stack ──────────────────────────────────────────── */
+/* ─── Monospace stack — reserved for clock digits + chat prompt only ── */
 .mono {
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
 }
