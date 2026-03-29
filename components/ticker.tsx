@@ -257,7 +257,7 @@ export function Ticker({
           onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
           onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
         >
-          {isDay ? "◐" : "◯"}
+          {isDay ? "☾" : "⊙"}
         </button>
       )}
 

@@ -358,7 +358,7 @@ function ChiefOfStaffBand({ articles }: { articles: Article[] }) {
       style={{
         flexShrink: 0,
         background: "var(--accent-primary)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid var(--border)",
         display: "grid",
         gridTemplateColumns: "1fr 1fr 1fr",
       }}
@@ -368,7 +368,7 @@ function ChiefOfStaffBand({ articles }: { articles: Article[] }) {
           key={i}
           style={{
             padding: "16px 20px",
-            borderRight: i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none",
+            borderRight: i < 2 ? "1px solid var(--border)" : "none",
             minHeight: 80,
           }}
         >
@@ -389,7 +389,7 @@ function ChiefOfStaffBand({ articles }: { articles: Article[] }) {
             <div
               style={{
                 fontSize: 12,
-                color: "rgba(240,235,224,0.88)",
+                color: "var(--text-primary)",
                 lineHeight: 1.6,
                 letterSpacing: "-0.01em",
               }}
@@ -402,7 +402,8 @@ function ChiefOfStaffBand({ articles }: { articles: Article[] }) {
               className="loading-pulse"
               style={{
                 fontSize: 12,
-                color: "rgba(107,143,74,0.4)",
+                color: "var(--accent-muted)",
+                opacity: 0.4,
                 lineHeight: 1.6,
                 fontFamily: "'SF Mono', 'Fira Code', monospace",
               }}
@@ -463,7 +464,7 @@ function FeedCard({ article }: { article: Article }) {
           style={{
             fontSize: 13.5,
             fontWeight: 550,
-            color: hovered ? "var(--text-primary)" : "rgba(240,235,224,0.85)",
+            color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
             lineHeight: 1.4,
             letterSpacing: "-0.02em",
             marginBottom: article.relevance ? 7 : 0,
