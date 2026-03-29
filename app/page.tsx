@@ -301,6 +301,7 @@ function LeftRail({
         {/* Feed status */}
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
           <span
+            className={isLive && !feedLoading ? "live-beacon" : undefined}
             style={{
               width: 5,
               height: 5,
