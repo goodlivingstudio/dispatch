@@ -42,6 +42,14 @@ html, body {
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
 }
 
+/* ─── Focus styles ─────────────────────────────────────────────── */
+/* Visible focus ring for keyboard navigation — all interactive elements */
+:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ─── Cursor blink ─────────────────────────────────────────────── */
 @keyframes blink {
   0%, 100% { opacity: 1; }

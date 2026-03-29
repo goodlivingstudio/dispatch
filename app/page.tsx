@@ -544,42 +544,6 @@ const LENS_LABEL: Record<string, string> = {
   BOTH:  "Lilly · HoD",
 }
 
-function ScoreRow({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{
-        fontSize: 7.5,
-        fontFamily: "'SF Mono', 'Fira Code', monospace",
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        color: "var(--text-tertiary)",
-        width: 54,
-        flexShrink: 0,
-      }}>
-        {label}
-      </span>
-      <div style={{ flex: 1, height: 2, background: "var(--border)", borderRadius: 1 }}>
-        <div style={{
-          width: `${value * 10}%`,
-          height: "100%",
-          background: color,
-          borderRadius: 1,
-          transition: "width 0.3s ease",
-        }} />
-      </div>
-      <span style={{
-        fontSize: 7.5,
-        fontFamily: "'SF Mono', 'Fira Code', monospace",
-        color: "var(--text-tertiary)",
-        width: 10,
-        textAlign: "right",
-        flexShrink: 0,
-      }}>
-        {value}
-      </span>
-    </div>
-  )
-}
 
 function SignalCard({ x, y, article }: { x: number; y: number; article: Article | null }) {
   if (!article) return null

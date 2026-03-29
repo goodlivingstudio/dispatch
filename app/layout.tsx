@@ -7,7 +7,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dispatch.goodliving.studio"),

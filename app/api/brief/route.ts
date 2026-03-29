@@ -103,7 +103,7 @@ export async function POST(req: Request) {
         ],
         error: message,
       },
-      { status: 200 }
+      { status: 500 }
     )
   }
 }

@@ -202,6 +202,8 @@ export function Ticker({
               key={s}
               onClick={() => onSkinChange(s)}
               title={SKIN_LABEL[s]}
+              aria-label={`${SKIN_LABEL[s]} skin${skin === s ? " (active)" : ""}`}
+              aria-pressed={skin === s}
               style={{
                 width: 20,
                 height: 20,
@@ -239,6 +241,8 @@ export function Ticker({
         <button
           onClick={onToggle}
           title={isDay ? "Switch to night mode" : "Switch to day mode"}
+          aria-label={isDay ? "Switch to night mode" : "Switch to day mode"}
+          aria-pressed={isDay}
           style={{
             flexShrink: 0,
             width: 42,

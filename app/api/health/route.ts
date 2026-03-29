@@ -3,16 +3,12 @@
 
 export async function GET() {
   const anthropicKey = process.env.ANTHROPIC_API_KEY
-  const newsApiKey   = process.env.NEWSAPI_KEY
 
   const status = {
     env: {
       ANTHROPIC_API_KEY: anthropicKey
-        ? `set (${anthropicKey.length} chars, starts ${anthropicKey.slice(0, 7)}...)`
+        ? `set (${anthropicKey.length} chars)`
         : "MISSING",
-      NEWSAPI_KEY: newsApiKey
-        ? `set (${newsApiKey.length} chars)`
-        : "not set (optional)",
     },
     anthropic: "not tested",
     timestamp: new Date().toISOString(),

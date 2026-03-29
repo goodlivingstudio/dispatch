@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Dispatch — Palette Options</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1A1A1A;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 11px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  /* ── App shell ── */
+  .app {
+    width: 1344px;
+    height: 780px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+
+  /* ── Ticker ── */
+  .ticker {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    flex-shrink: 0;
+    justify-content: space-between;
+  }
+  .ticker-content {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    overflow: hidden;
+  }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .ticker-badge {
+    font-size: 7.5px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border-radius: 2px;
+  }
+  .ticker-text {
+    font-size: 11px;
+    letter-spacing: -0.01em;
+  }
+  .ticker-toggle {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    border-left: 1px solid;
+  }
+
+  /* ── Body layout ── */
+  .body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Left rail ── */
+  .left-rail {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rail-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid;
+  }
+  .wordmark {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .date-line {
+    font-size: 9px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 0.02em;
+    margin-top: 6px;
+  }
+  .live-dot-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .live-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .live-label { font-size: 8px; font-family: 'SF Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav-items { padding: 10px 0; flex: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 20px;
+    font-size: 12px;
+    letter-spacing: -0.01em;
+  }
+  .nav-item.active { }
+  .nav-count { font-size: 10px; font-family: 'SF Mono', monospace; }
+
+  /* ── Center ── */
+  .center { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .brief-band {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    flex-shrink: 0;
+  }
+  .brief-cell {
+    padding: 14px 18px;
+    border-right: 1px solid;
+    min-height: 76px;
+  }
+  .brief-cell:last-child { border-right: none; }
+  .brief-label {
+    font-size: 8px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .brief-body { font-size: 11px; line-height: 1.55; letter-spacing: -0.01em; }
+
+  .feed { flex: 1; overflow: hidden; }
+  .feed-card {
+    padding: 13px 20px 13px 18px;
+    border-bottom: 1px solid;
+    border-left: 2px solid;
+  }
+  .feed-card.high { }
+  .feed-meta { font-size: 9.5px; font-family: 'SF Mono', monospace; letter-spacing: 0.02em; margin-bottom: 5px; }
+  .feed-title { font-size: 13px; font-weight: 560; line-height: 1.38; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .feed-relevance { font-size: 11px; line-height: 1.5; letter-spacing: -0.005em; }
+
+  /* ── Right rail / Cerebro ── */
+  .right-rail { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; border-left: 1px solid; }
+  .cerebro-header {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid;
+    flex-shrink: 0;
+  }
+  .cerebro-label { font-size: 8.5px; font-family: 'SF Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+  .cerebro-body { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .cerebro-msg { font-size: 10.5px; font-family: 'SF Mono', monospace; line-height: 1.7; }
+  .cerebro-user { font-size: 10px; font-family: 'SF Mono', monospace; }
+  .cerebro-input {
+    flex-shrink: 0;
+    border-top: 1px solid;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cerebro-prompt { font-size: 12px; font-family: 'SF Mono', monospace; }
+  .cerebro-placeholder { font-size: 11px; font-family: 'SF Mono', monospace; opacity: 0.35; }
+
+  /* ── Dividers ── */
+  .divider { width: 1px; flex-shrink: 0; }
+
+  /* ── Pair layout ── */
+  .pair {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .pair-label {
+    font-size: 10px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ─── DIRECTION A — WARM MINERAL ───────────────────────────── */
+
+  /* Dark */
+  .a-dark { background: #0E0D0B; }
+  .a-dark .ticker { background: #151412; border-bottom: 1px solid #272420; }
+  .a-dark .ticker-badge.ai   { background: rgba(74,122,40,0.15); color: #8A7A5A; }
+  .a-dark .ticker-badge.design { background: rgba(90,110,140,0.15); color: #8A9EBE; }
+  .a-dark .ticker-badge.pharma { background: rgba(140,80,160,0.12); color: #B07AC8; }
+  .a-dark .ticker-text { color: #9E9189; }
+  .a-dark .ticker-toggle { color: #635D58; border-color: #272420; }
+  .a-dark .left-rail { background: #151412; }
+  .a-dark .rail-header { border-color: #272420; }
+  .a-dark .wordmark { color: #EDE8DF; }
+  .a-dark .date-line { color: #635D58; }
+  .a-dark .live-dot { background: #B8956A; }
+  .a-dark .live-label { color: #8A6E50; }
+  .a-dark .nav-item { color: #635D58; }
+  .a-dark .nav-item.active { background: #1D1B18; color: #EDE8DF; }
+  .a-dark .nav-count { color: #635D58; }
+  .a-dark .center { background: #0E0D0B; }
+  .a-dark .brief-band { background: #1D1B18; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .a-dark .brief-cell { border-color: rgba(255,255,255,0.05); }
+  .a-dark .brief-label { color: #8A6E50; }
+  .a-dark .brief-body { color: rgba(237,232,223,0.85); }
+  .a-dark .feed-card { border-color: #272420; border-left-color: transparent; }
+  .a-dark .feed-card.high { border-left-color: #B8956A; }
+  .a-dark .feed-meta { color: #635D58; }
+  .a-dark .feed-title { color: rgba(237,232,223,0.88); }
+  .a-dark .feed-relevance { color: #8A6E50; }
+  .a-dark .right-rail { background: #151412; border-color: #272420; }
+  .a-dark .cerebro-header { border-color: #272420; }
+  .a-dark .cerebro-label { color: #8A6E50; }
+  .a-dark .cerebro-msg { color: #9E9189; }
+  .a-dark .cerebro-user { color: #635D58; }
+  .a-dark .cerebro-user span { color: #B8956A; }
+  .a-dark .cerebro-input { border-color: #272420; }
+  .a-dark .cerebro-prompt { color: #B8956A; }
+  .a-dark .cerebro-placeholder { color: #9E9189; }
+
+  /* Light */
+  .a-light { background: #F7F4EF; }
+  .a-light .ticker { background: #F0EBE3; border-bottom: 1px solid #D6D0C6; }
+  .a-light .ticker-badge.ai   { background: rgba(74,122,40,0.1); color: #5A7A28; }
+  .a-light .ticker-badge.design { background: rgba(60,100,160,0.08); color: #2A5A90; }
+  .a-light .ticker-badge.pharma { background: rgba(120,60,160,0.08); color: #6A3A90; }
+  .a-light .ticker-text { color: #4E4840; }
+  .a-light .ticker-toggle { color: #7A7268; border-color: #D6D0C6; }
+  .a-light .left-rail { background: #F0EBE3; }
+  .a-light .rail-header { border-color: #D6D0C6; }
+  .a-light .wordmark { color: #1C1914; }
+  .a-light .date-line { color: #8A837A; }
+  .a-light .live-dot { background: #8A6030; }
+  .a-light .live-label { color: #8A6030; }
+  .a-light .nav-item { color: #8A837A; }
+  .a-light .nav-item.active { background: #E6E0D6; color: #1C1914; }
+  .a-light .nav-count { color: #8A837A; }
+  .a-light .center { background: #F7F4EF; }
+  .a-light .brief-band { background: #EDE8DF; border-bottom: 1px solid #D6D0C6; }
+  .a-light .brief-cell { border-color: #D6D0C6; }
+  .a-light .brief-label { color: #6B4A22; }
+  .a-light .brief-body { color: #1C1914; }
+  .a-light .feed-card { border-color: #D6D0C6; border-left-color: transparent; }
+  .a-light .feed-card.high { border-left-color: #8A6030; }
+  .a-light .feed-meta { color: #8A837A; }
+  .a-light .feed-title { color: #1C1914; }
+  .a-light .feed-relevance { color: #6B4A22; }
+  .a-light .right-rail { background: #F0EBE3; border-color: #D6D0C6; }
+  .a-light .cerebro-header { border-color: #D6D0C6; }
+  .a-light .cerebro-label { color: #6B4A22; }
+  .a-light .cerebro-msg { color: #4E4840; }
+  .a-light .cerebro-user { color: #8A837A; }
+  .a-light .cerebro-user span { color: #8A6030; }
+  .a-light .cerebro-input { border-color: #D6D0C6; }
+  .a-light .cerebro-prompt { color: #8A6030; }
+  .a-light .cerebro-placeholder { color: #4E4840; }
+
+  /* ─── DIRECTION B — BLUE SLATE ─────────────────────────────── */
+
+  /* Dark */
+  .b-dark { background: #0C0D10; }
+  .b-dark .ticker { background: #13151B; border-bottom: 1px solid #21252E; }
+  .b-dark .ticker-badge.ai   { background: rgba(74,122,160,0.15); color: #7A9EC0; }
+  .b-dark .ticker-badge.design { background: rgba(80,140,200,0.12); color: #70A8D8; }
+  .b-dark .ticker-badge.pharma { background: rgba(140,80,200,0.12); color: #A878D0; }
+  .b-dark .ticker-text { color: #8B92A2; }
+  .b-dark .ticker-toggle { color: #575E6E; border-color: #21252E; }
+  .b-dark .left-rail { background: #13151B; }
+  .b-dark .rail-header { border-color: #21252E; }
+  .b-dark .wordmark { color: #E8ECF2; }
+  .b-dark .date-line { color: #575E6E; }
+  .b-dark .live-dot { background: #4A7A9B; }
+  .b-dark .live-label { color: #6A9AB8; }
+  .b-dark .nav-item { color: #575E6E; }
+  .b-dark .nav-item.active { background: #1A1D26; color: #E8ECF2; }
+  .b-dark .nav-count { color: #575E6E; }
+  .b-dark .center { background: #0C0D10; }
+  .b-dark .brief-band { background: #0D1520; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .b-dark .brief-cell { border-color: rgba(255,255,255,0.05); }
+  .b-dark .brief-label { color: #6A9AB8; }
+  .b-dark .brief-body { color: rgba(232,236,242,0.88); }
+  .b-dark .feed-card { border-color: #21252E; border-left-color: transparent; }
+  .b-dark .feed-card.high { border-left-color: #4A7A9B; }
+  .b-dark .feed-meta { color: #575E6E; }
+  .b-dark .feed-title { color: rgba(232,236,242,0.88); }
+  .b-dark .feed-relevance { color: #6A9AB8; }
+  .b-dark .right-rail { background: #13151B; border-color: #21252E; }
+  .b-dark .cerebro-header { border-color: #21252E; }
+  .b-dark .cerebro-label { color: #6A9AB8; }
+  .b-dark .cerebro-msg { color: #8B92A2; }
+  .b-dark .cerebro-user { color: #575E6E; }
+  .b-dark .cerebro-user span { color: #4A7A9B; }
+  .b-dark .cerebro-input { border-color: #21252E; }
+  .b-dark .cerebro-prompt { color: #4A7A9B; }
+  .b-dark .cerebro-placeholder { color: #8B92A2; }
+
+  /* Light */
+  .b-light { background: #F2F4F8; }
+  .b-light .ticker { background: #E9ECF3; border-bottom: 1px solid #C8CDD9; }
+  .b-light .ticker-badge.ai   { background: rgba(60,100,160,0.1); color: #1A5A80; }
+  .b-light .ticker-badge.design { background: rgba(40,100,180,0.08); color: #1A4A90; }
+  .b-light .ticker-badge.pharma { background: rgba(100,40,160,0.08); color: #5A2A90; }
+  .b-light .ticker-text { color: #44495A; }
+  .b-light .ticker-toggle { color: #6B7182; border-color: #C8CDD9; }
+  .b-light .left-rail { background: #E9ECF3; }
+  .b-light .rail-header { border-color: #C8CDD9; }
+  .b-light .wordmark { color: #14161C; }
+  .b-light .date-line { color: #6B7182; }
+  .b-light .live-dot { background: #2B5C7A; }
+  .b-light .live-label { color: #2B5C7A; }
+  .b-light .nav-item { color: #6B7182; }
+  .b-light .nav-item.active { background: #DEE2EC; color: #14161C; }
+  .b-light .nav-count { color: #6B7182; }
+  .b-light .center { background: #F2F4F8; }
+  .b-light .brief-band { background: #E0E8F0; border-bottom: 1px solid #C8CDD9; }
+  .b-light .brief-cell { border-color: #C8CDD9; }
+  .b-light .brief-label { color: #2B5C7A; }
+  .b-light .brief-body { color: #14161C; }
+  .b-light .feed-card { border-color: #C8CDD9; border-left-color: transparent; }
+  .b-light .feed-card.high { border-left-color: #2B5C7A; }
+  .b-light .feed-meta { color: #6B7182; }
+  .b-light .feed-title { color: #14161C; }
+  .b-light .feed-relevance { color: #2B5C7A; }
+  .b-light .right-rail { background: #E9ECF3; border-color: #C8CDD9; }
+  .b-light .cerebro-header { border-color: #C8CDD9; }
+  .b-light .cerebro-label { color: #2B5C7A; }
+  .b-light .cerebro-msg { color: #44495A; }
+  .b-light .cerebro-user { color: #6B7182; }
+  .b-light .cerebro-user span { color: #2B5C7A; }
+  .b-light .cerebro-input { border-color: #C8CDD9; }
+  .b-light .cerebro-prompt { color: #2B5C7A; }
+  .b-light .cerebro-placeholder { color: #44495A; }
+
+  /* ─── DIRECTION C — SAGE & STONE ───────────────────────────── */
+
+  /* Dark */
+  .c-dark { background: #0F0E0C; }
+  .c-dark .ticker { background: #161411; border-bottom: 1px solid #2A2722; }
+  .c-dark .ticker-badge.ai   { background: rgba(92,138,110,0.15); color: #8AB09A; }
+  .c-dark .ticker-badge.design { background: rgba(80,120,180,0.12); color: #7AABCE; }
+  .c-dark .ticker-badge.pharma { background: rgba(150,100,200,0.1); color: #A882C0; }
+  .c-dark .ticker-text { color: #A09890; }
+  .c-dark .ticker-toggle { color: #6E665E; border-color: #2A2722; }
+  .c-dark .left-rail { background: #161411; }
+  .c-dark .rail-header { border-color: #2A2722; }
+  .c-dark .wordmark { color: #EDE7DC; }
+  .c-dark .date-line { color: #6E665E; }
+  .c-dark .live-dot { background: #7AAB8C; }
+  .c-dark .live-label { color: #8AB09A; }
+  .c-dark .nav-item { color: #6E665E; }
+  .c-dark .nav-item.active { background: #1E1B17; color: #EDE7DC; }
+  .c-dark .nav-count { color: #6E665E; }
+  .c-dark .center { background: #0F0E0C; }
+  .c-dark .brief-band { background: #182214; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .c-dark .brief-cell { border-color: rgba(255,255,255,0.05); }
+  .c-dark .brief-label { color: #8AB09A; }
+  .c-dark .brief-body { color: rgba(237,231,220,0.88); }
+  .c-dark .feed-card { border-color: #2A2722; border-left-color: transparent; }
+  .c-dark .feed-card.high { border-left-color: #7AAB8C; }
+  .c-dark .feed-meta { color: #6E665E; }
+  .c-dark .feed-title { color: rgba(237,231,220,0.88); }
+  .c-dark .feed-relevance { color: #8AB09A; }
+  .c-dark .right-rail { background: #161411; border-color: #2A2722; }
+  .c-dark .cerebro-header { border-color: #2A2722; }
+  .c-dark .cerebro-label { color: #8AB09A; }
+  .c-dark .cerebro-msg { color: #A09890; }
+  .c-dark .cerebro-user { color: #6E665E; }
+  .c-dark .cerebro-user span { color: #7AAB8C; }
+  .c-dark .cerebro-input { border-color: #2A2722; }
+  .c-dark .cerebro-prompt { color: #7AAB8C; }
+  .c-dark .cerebro-placeholder { color: #A09890; }
+
+  /* Light */
+  .c-light { background: #F6F3EE; }
+  .c-light .ticker { background: #EEEAE3; border-bottom: 1px solid #D5CFCA; }
+  .c-light .ticker-badge.ai   { background: rgba(58,107,80,0.1); color: #3A6B50; }
+  .c-light .ticker-badge.design { background: rgba(40,90,150,0.08); color: #1A5A80; }
+  .c-light .ticker-badge.pharma { background: rgba(100,50,150,0.08); color: #6A2A90; }
+  .c-light .ticker-text { color: #4D4740; }
+  .c-light .ticker-toggle { color: #7A736A; border-color: #D5CFCA; }
+  .c-light .left-rail { background: #EEEAE3; }
+  .c-light .rail-header { border-color: #D5CFCA; }
+  .c-light .wordmark { color: #1C1A16; }
+  .c-light .date-line { color: #7A736A; }
+  .c-light .live-dot { background: #3A6B50; }
+  .c-light .live-label { color: #3A6B50; }
+  .c-light .nav-item { color: #7A736A; }
+  .c-light .nav-item.active { background: #E4DDD4; color: #1C1A16; }
+  .c-light .nav-count { color: #7A736A; }
+  .c-light .center { background: #F6F3EE; }
+  .c-light .brief-band { background: #E4EDE8; border-bottom: 1px solid #D5CFCA; }
+  .c-light .brief-cell { border-color: #D5CFCA; }
+  .c-light .brief-label { color: #3A6B50; }
+  .c-light .brief-body { color: #1C1A16; }
+  .c-light .feed-card { border-color: #D5CFCA; border-left-color: transparent; }
+  .c-light .feed-card.high { border-left-color: #3A6B50; }
+  .c-light .feed-meta { color: #7A736A; }
+  .c-light .feed-title { color: #1C1A16; }
+  .c-light .feed-relevance { color: #3A6B50; }
+  .c-light .right-rail { background: #EEEAE3; border-color: #D5CFCA; }
+  .c-light .cerebro-header { border-color: #D5CFCA; }
+  .c-light .cerebro-label { color: #3A6B50; }
+  .c-light .cerebro-msg { color: #4D4740; }
+  .c-light .cerebro-user { color: #7A736A; }
+  .c-light .cerebro-user span { color: #3A6B50; }
+  .c-light .cerebro-input { border-color: #D5CFCA; }
+  .c-light .cerebro-prompt { color: #3A6B50; }
+  .c-light .cerebro-placeholder { color: #4D4740; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────────────────────────────────────────────
+     DIRECTION A — WARM MINERAL
+     Amber accent · Earth tones · No green
+────────────────────────────────────────────────────────────────── -->
+<div>
+  <div class="section-label" style="color:#B8956A">Direction A — Warm Mineral &nbsp;·&nbsp; Amber accent · Earth tones · Replaces green entirely</div>
+  <div class="pair">
+    <div>
+      <div class="pair-label" style="color:#635D58">Dark</div>
+      <div class="app a-dark">
+        <!-- Ticker -->
+        <div class="ticker a-dark">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge design">DESIGN</span>
+              <span class="ticker-text">CDO roles at Fortune 500 up 34% YoY — healthcare leads all sectors</span>
+            </div>
+          </div>
+          <div class="ticker-toggle a-dark">☀</div>
+        </div>
+        <!-- Body -->
+        <div class="body">
+          <div class="left-rail a-dark">
+            <div class="rail-header a-dark">
+              <div class="wordmark a-dark">Dispatch</div>
+              <div class="date-line a-dark">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot a-dark"></div>
+                <span class="live-label a-dark">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active a-dark"><span>All</span><span class="nav-count a-dark">24</span></div>
+              <div class="nav-item a-dark"><span>AI</span><span class="nav-count a-dark">6</span></div>
+              <div class="nav-item a-dark"><span>Healthcare</span><span class="nav-count a-dark">5</span></div>
+              <div class="nav-item a-dark"><span>Design Industry</span><span class="nav-count a-dark">4</span></div>
+              <div class="nav-item a-dark"><span>Leadership</span><span class="nav-count a-dark">3</span></div>
+              <div class="nav-item a-dark"><span>Policy</span><span class="nav-count a-dark">3</span></div>
+              <div class="nav-item a-dark"><span>Market</span><span class="nav-count a-dark">2</span></div>
+              <div class="nav-item a-dark"><span>Culture</span><span class="nav-count a-dark">1</span></div>
+            </div>
+          </div>
+          <div class="divider a-dark" style="background:#272420"></div>
+          <div class="center a-dark">
+            <div class="brief-band a-dark">
+              <div class="brief-cell a-dark">
+                <div class="brief-label a-dark">Signal</div>
+                <div class="brief-body a-dark">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell a-dark">
+                <div class="brief-label a-dark">Positioning</div>
+                <div class="brief-body a-dark">Agency-to-in-house migration is accelerating — judgment and systems thinking matter more than craft.</div>
+              </div>
+              <div class="brief-cell a-dark">
+                <div class="brief-label a-dark">Watch</div>
+                <div class="brief-body a-dark">v0 generation is production-ready. Brief quality is now the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high a-dark">
+                <div class="feed-meta a-dark">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title a-dark">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance a-dark">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card a-dark">
+                <div class="feed-meta a-dark">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title a-dark">CDO roles proliferating in regulated industries — specs emphasize systems thinking over craft</div>
+              </div>
+              <div class="feed-card a-dark">
+                <div class="feed-meta a-dark">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title a-dark">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+              <div class="feed-card a-dark">
+                <div class="feed-meta a-dark">Nielsen Norman Group · AI · 8h</div>
+                <div class="feed-title a-dark">AI cannot replace design judgment — it amplifies it. The briefing gap is the bottleneck.</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider a-dark" style="background:#272420"></div>
+          <div class="right-rail a-dark">
+            <div class="cerebro-header a-dark">
+              <span class="cerebro-label a-dark">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg a-dark" style="color:#635D58">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user a-dark"><span style="color:#B8956A">> </span>What's the most important signal in today's feed?</div>
+              <div class="cerebro-msg a-dark">The donanemab story is the one. Approval is the easy part — Lilly has solved the science. What they haven't solved is the experience of receiving a monthly infusion with biomarker monitoring when the neurology infrastructure in most of the US is 50+ miles away from patients who need it.</div>
+            </div>
+            <div class="cerebro-input a-dark">
+              <span class="cerebro-prompt a-dark">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pair-label" style="color:#8A837A">Light</div>
+      <div class="app a-light">
+        <div class="ticker a-light">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge design">DESIGN</span>
+              <span class="ticker-text">CDO roles at Fortune 500 up 34% YoY</span>
+            </div>
+          </div>
+          <div class="ticker-toggle a-light">☾</div>
+        </div>
+        <div class="body">
+          <div class="left-rail a-light">
+            <div class="rail-header a-light">
+              <div class="wordmark a-light">Dispatch</div>
+              <div class="date-line a-light">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot a-light"></div>
+                <span class="live-label a-light">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active a-light"><span>All</span><span class="nav-count a-light">24</span></div>
+              <div class="nav-item a-light"><span>AI</span><span class="nav-count a-light">6</span></div>
+              <div class="nav-item a-light"><span>Healthcare</span><span class="nav-count a-light">5</span></div>
+              <div class="nav-item a-light"><span>Design Industry</span><span class="nav-count a-light">4</span></div>
+              <div class="nav-item a-light"><span>Leadership</span><span class="nav-count a-light">3</span></div>
+              <div class="nav-item a-light"><span>Policy</span><span class="nav-count a-light">3</span></div>
+            </div>
+          </div>
+          <div class="divider a-light" style="background:#D6D0C6"></div>
+          <div class="center a-light">
+            <div class="brief-band a-light">
+              <div class="brief-cell a-light">
+                <div class="brief-label a-light">Signal</div>
+                <div class="brief-body a-light">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell a-light">
+                <div class="brief-label a-light">Positioning</div>
+                <div class="brief-body a-light">Agency-to-in-house migration is accelerating — judgment matters more than craft credentials.</div>
+              </div>
+              <div class="brief-cell a-light">
+                <div class="brief-label a-light">Watch</div>
+                <div class="brief-body a-light">v0 generation is production-ready. Brief quality is the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high a-light">
+                <div class="feed-meta a-light">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title a-light">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance a-light">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card a-light">
+                <div class="feed-meta a-light">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title a-light">CDO roles proliferating in regulated industries — specs emphasize systems thinking over craft</div>
+              </div>
+              <div class="feed-card a-light">
+                <div class="feed-meta a-light">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title a-light">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider a-light" style="background:#D6D0C6"></div>
+          <div class="right-rail a-light">
+            <div class="cerebro-header a-light">
+              <span class="cerebro-label a-light">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg a-light" style="color:#8A837A">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user a-light"><span style="color:#8A6030">> </span>What's the most important signal today?</div>
+              <div class="cerebro-msg a-light">The donanemab story is the one. Lilly has solved the science. What they haven't solved is the experience of receiving care when the neurology infrastructure doesn't reach most patients.</div>
+            </div>
+            <div class="cerebro-input a-light">
+              <span class="cerebro-prompt a-light">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────
+     DIRECTION B — BLUE SLATE EDITORIAL
+     Steel blue accent · Cool neutral · Clinical precision
+────────────────────────────────────────────────────────────────── -->
+<div>
+  <div class="section-label" style="color:#4A7A9B">Direction B — Blue Slate Editorial &nbsp;·&nbsp; Steel blue accent · Cool neutrals · Clinical precision</div>
+  <div class="pair">
+    <div>
+      <div class="pair-label" style="color:#575E6E">Dark</div>
+      <div class="app b-dark">
+        <div class="ticker b-dark">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge design">DESIGN</span>
+              <span class="ticker-text">CDO roles at Fortune 500 up 34% YoY</span>
+            </div>
+          </div>
+          <div class="ticker-toggle b-dark">☀</div>
+        </div>
+        <div class="body">
+          <div class="left-rail b-dark">
+            <div class="rail-header b-dark">
+              <div class="wordmark b-dark">Dispatch</div>
+              <div class="date-line b-dark">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot b-dark"></div>
+                <span class="live-label b-dark">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active b-dark"><span>All</span><span class="nav-count b-dark">24</span></div>
+              <div class="nav-item b-dark"><span>AI</span><span class="nav-count b-dark">6</span></div>
+              <div class="nav-item b-dark"><span>Healthcare</span><span class="nav-count b-dark">5</span></div>
+              <div class="nav-item b-dark"><span>Design Industry</span><span class="nav-count b-dark">4</span></div>
+              <div class="nav-item b-dark"><span>Leadership</span><span class="nav-count b-dark">3</span></div>
+              <div class="nav-item b-dark"><span>Policy</span><span class="nav-count b-dark">3</span></div>
+            </div>
+          </div>
+          <div class="divider b-dark" style="background:#21252E"></div>
+          <div class="center b-dark">
+            <div class="brief-band b-dark">
+              <div class="brief-cell b-dark">
+                <div class="brief-label b-dark">Signal</div>
+                <div class="brief-body b-dark">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell b-dark">
+                <div class="brief-label b-dark">Positioning</div>
+                <div class="brief-body b-dark">Agency-to-in-house migration is accelerating — judgment and systems thinking matter most.</div>
+              </div>
+              <div class="brief-cell b-dark">
+                <div class="brief-label b-dark">Watch</div>
+                <div class="brief-body b-dark">v0 generation is production-ready. Brief quality is the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high b-dark">
+                <div class="feed-meta b-dark">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title b-dark">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance b-dark">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card b-dark">
+                <div class="feed-meta b-dark">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title b-dark">CDO roles proliferating in regulated industries — specs emphasize systems thinking over craft</div>
+              </div>
+              <div class="feed-card b-dark">
+                <div class="feed-meta b-dark">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title b-dark">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+              <div class="feed-card b-dark">
+                <div class="feed-meta b-dark">Nielsen Norman Group · AI · 8h</div>
+                <div class="feed-title b-dark">AI cannot replace design judgment — it amplifies it. The briefing gap is the bottleneck.</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider b-dark" style="background:#21252E"></div>
+          <div class="right-rail b-dark">
+            <div class="cerebro-header b-dark">
+              <span class="cerebro-label b-dark">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg b-dark" style="color:#575E6E">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user b-dark"><span style="color:#4A7A9B">> </span>What's the most important signal today?</div>
+              <div class="cerebro-msg b-dark">The donanemab story is the one. Lilly has solved the science. What they haven't solved is the experience of receiving care when the neurology infrastructure doesn't reach most patients.</div>
+            </div>
+            <div class="cerebro-input b-dark">
+              <span class="cerebro-prompt b-dark">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pair-label" style="color:#6B7182">Light</div>
+      <div class="app b-light">
+        <div class="ticker b-light">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+          </div>
+          <div class="ticker-toggle b-light">☾</div>
+        </div>
+        <div class="body">
+          <div class="left-rail b-light">
+            <div class="rail-header b-light">
+              <div class="wordmark b-light">Dispatch</div>
+              <div class="date-line b-light">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot b-light"></div>
+                <span class="live-label b-light">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active b-light"><span>All</span><span class="nav-count b-light">24</span></div>
+              <div class="nav-item b-light"><span>AI</span><span class="nav-count b-light">6</span></div>
+              <div class="nav-item b-light"><span>Healthcare</span><span class="nav-count b-light">5</span></div>
+              <div class="nav-item b-light"><span>Design Industry</span><span class="nav-count b-light">4</span></div>
+              <div class="nav-item b-light"><span>Leadership</span><span class="nav-count b-light">3</span></div>
+            </div>
+          </div>
+          <div class="divider b-light" style="background:#C8CDD9"></div>
+          <div class="center b-light">
+            <div class="brief-band b-light">
+              <div class="brief-cell b-light">
+                <div class="brief-label b-light">Signal</div>
+                <div class="brief-body b-light">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell b-light">
+                <div class="brief-label b-light">Positioning</div>
+                <div class="brief-body b-light">Agency-to-in-house migration accelerating — judgment matters more than craft credentials.</div>
+              </div>
+              <div class="brief-cell b-light">
+                <div class="brief-label b-light">Watch</div>
+                <div class="brief-body b-light">v0 generation is production-ready. Brief quality is the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high b-light">
+                <div class="feed-meta b-light">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title b-light">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance b-light">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card b-light">
+                <div class="feed-meta b-light">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title b-light">CDO roles proliferating in regulated industries — systems thinking over craft</div>
+              </div>
+              <div class="feed-card b-light">
+                <div class="feed-meta b-light">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title b-light">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider b-light" style="background:#C8CDD9"></div>
+          <div class="right-rail b-light">
+            <div class="cerebro-header b-light">
+              <span class="cerebro-label b-light">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg b-light" style="color:#6B7182">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user b-light"><span style="color:#2B5C7A">> </span>What's the most important signal today?</div>
+              <div class="cerebro-msg b-light">The donanemab story is the one. Lilly has solved the science. The experience of receiving care hasn't been solved.</div>
+            </div>
+            <div class="cerebro-input b-light">
+              <span class="cerebro-prompt b-light">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────
+     DIRECTION C — SAGE & STONE (RECOMMENDED)
+     Muted sage · Warm neutrals · Most restful for vision
+────────────────────────────────────────────────────────────────── -->
+<div>
+  <div class="section-label" style="color:#7AAB8C">Direction C — Sage & Stone &nbsp;·&nbsp; Recommended &nbsp;·&nbsp; Muted sage · Warm neutrals · Most restful for sustained reading</div>
+  <div class="pair">
+    <div>
+      <div class="pair-label" style="color:#6E665E">Dark</div>
+      <div class="app c-dark">
+        <div class="ticker c-dark">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge design">DESIGN</span>
+              <span class="ticker-text">CDO roles at Fortune 500 up 34% YoY — healthcare leads all sectors</span>
+            </div>
+          </div>
+          <div class="ticker-toggle c-dark">☀</div>
+        </div>
+        <div class="body">
+          <div class="left-rail c-dark">
+            <div class="rail-header c-dark">
+              <div class="wordmark c-dark">Dispatch</div>
+              <div class="date-line c-dark">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot c-dark"></div>
+                <span class="live-label c-dark">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active c-dark"><span>All</span><span class="nav-count c-dark">24</span></div>
+              <div class="nav-item c-dark"><span>AI</span><span class="nav-count c-dark">6</span></div>
+              <div class="nav-item c-dark"><span>Healthcare</span><span class="nav-count c-dark">5</span></div>
+              <div class="nav-item c-dark"><span>Design Industry</span><span class="nav-count c-dark">4</span></div>
+              <div class="nav-item c-dark"><span>Leadership</span><span class="nav-count c-dark">3</span></div>
+              <div class="nav-item c-dark"><span>Policy</span><span class="nav-count c-dark">3</span></div>
+              <div class="nav-item c-dark"><span>Market</span><span class="nav-count c-dark">2</span></div>
+              <div class="nav-item c-dark"><span>Culture</span><span class="nav-count c-dark">1</span></div>
+            </div>
+          </div>
+          <div class="divider c-dark" style="background:#2A2722"></div>
+          <div class="center c-dark">
+            <div class="brief-band c-dark">
+              <div class="brief-cell c-dark">
+                <div class="brief-label c-dark">Signal</div>
+                <div class="brief-body c-dark">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell c-dark">
+                <div class="brief-label c-dark">Positioning</div>
+                <div class="brief-body c-dark">Agency-to-in-house migration is accelerating — judgment and systems thinking matter most.</div>
+              </div>
+              <div class="brief-cell c-dark">
+                <div class="brief-label c-dark">Watch</div>
+                <div class="brief-body c-dark">v0 generation is production-ready. Brief quality is the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high c-dark">
+                <div class="feed-meta c-dark">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title c-dark">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance c-dark">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card c-dark">
+                <div class="feed-meta c-dark">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title c-dark">CDO roles proliferating in regulated industries — specs emphasize systems thinking over craft</div>
+              </div>
+              <div class="feed-card c-dark">
+                <div class="feed-meta c-dark">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title c-dark">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+              <div class="feed-card c-dark">
+                <div class="feed-meta c-dark">Nielsen Norman Group · AI · 8h</div>
+                <div class="feed-title c-dark">AI cannot replace design judgment — it amplifies it. The briefing gap is the bottleneck.</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider c-dark" style="background:#2A2722"></div>
+          <div class="right-rail c-dark">
+            <div class="cerebro-header c-dark">
+              <span class="cerebro-label c-dark">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg c-dark" style="color:#6E665E">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user c-dark"><span style="color:#7AAB8C">> </span>What's the most important signal today?</div>
+              <div class="cerebro-msg c-dark">The donanemab story is the one. Lilly has solved the science. What they haven't solved is the experience of receiving care when the neurology infrastructure doesn't reach most patients.</div>
+            </div>
+            <div class="cerebro-input c-dark">
+              <span class="cerebro-prompt c-dark">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pair-label" style="color:#7A736A">Light</div>
+      <div class="app c-light">
+        <div class="ticker c-light">
+          <div class="ticker-content">
+            <div class="ticker-item">
+              <span class="ticker-badge pharma">PHARMA</span>
+              <span class="ticker-text">Diogo Rau: 'The whole space of interacting with consumers is completely untouched'</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge ai">AI</span>
+              <span class="ticker-text">Design leaders who brief AI outperform those who merely use it — HBR</span>
+            </div>
+            <div class="ticker-item">
+              <span class="ticker-badge design">DESIGN</span>
+              <span class="ticker-text">CDO roles at Fortune 500 up 34% YoY</span>
+            </div>
+          </div>
+          <div class="ticker-toggle c-light">☾</div>
+        </div>
+        <div class="body">
+          <div class="left-rail c-light">
+            <div class="rail-header c-light">
+              <div class="wordmark c-light">Dispatch</div>
+              <div class="date-line c-light">Saturday, March 28, 2026</div>
+              <div class="live-dot-row">
+                <div class="live-dot c-light"></div>
+                <span class="live-label c-light">Live</span>
+              </div>
+            </div>
+            <div class="nav-items">
+              <div class="nav-item active c-light"><span>All</span><span class="nav-count c-light">24</span></div>
+              <div class="nav-item c-light"><span>AI</span><span class="nav-count c-light">6</span></div>
+              <div class="nav-item c-light"><span>Healthcare</span><span class="nav-count c-light">5</span></div>
+              <div class="nav-item c-light"><span>Design Industry</span><span class="nav-count c-light">4</span></div>
+              <div class="nav-item c-light"><span>Leadership</span><span class="nav-count c-light">3</span></div>
+              <div class="nav-item c-light"><span>Policy</span><span class="nav-count c-light">3</span></div>
+            </div>
+          </div>
+          <div class="divider c-light" style="background:#D5CFCA"></div>
+          <div class="center c-light">
+            <div class="brief-band c-light">
+              <div class="brief-cell c-light">
+                <div class="brief-label c-light">Signal</div>
+                <div class="brief-body c-light">Lilly's donanemab approval creates a care coordination gap no pharma company has solved at scale.</div>
+              </div>
+              <div class="brief-cell c-light">
+                <div class="brief-label c-light">Positioning</div>
+                <div class="brief-body c-light">Agency-to-in-house migration accelerating — judgment matters more than craft credentials.</div>
+              </div>
+              <div class="brief-cell c-light">
+                <div class="brief-label c-light">Watch</div>
+                <div class="brief-body c-light">v0 generation is production-ready. Brief quality is the only constraint on design output.</div>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="feed-card high c-light">
+                <div class="feed-meta c-light">BioPharma Dive · Healthcare · 2h</div>
+                <div class="feed-title c-light">Donanemab real-world adoption requires care coordination infrastructure that doesn't exist yet</div>
+                <div class="feed-relevance c-light">Direct signal for the Lilly opportunity — the design gap Rau has named publicly.</div>
+              </div>
+              <div class="feed-card c-light">
+                <div class="feed-meta c-light">AIGA Eye on Design · Design Industry · 4h</div>
+                <div class="feed-title c-light">CDO roles proliferating in regulated industries — systems thinking over craft</div>
+              </div>
+              <div class="feed-card c-light">
+                <div class="feed-meta c-light">McKinsey Quarterly · Leadership · 6h</div>
+                <div class="feed-title c-light">Companies with design at C-suite level outperform peers by 32 basis points over five years</div>
+              </div>
+              <div class="feed-card c-light">
+                <div class="feed-meta c-light">Nielsen Norman Group · AI · 8h</div>
+                <div class="feed-title c-light">AI cannot replace design judgment — it amplifies it. The briefing gap is the bottleneck.</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider c-light" style="background:#D5CFCA"></div>
+          <div class="right-rail c-light">
+            <div class="cerebro-header c-light">
+              <span class="cerebro-label c-light">Cerebro</span>
+            </div>
+            <div class="cerebro-body">
+              <div class="cerebro-msg c-light" style="color:#7A736A">// ready<br>// Ask about the feed, the Lilly<br>// opportunity, or the five-year path.</div>
+              <div class="cerebro-user c-light"><span style="color:#3A6B50">> </span>What's the most important signal today?</div>
+              <div class="cerebro-msg c-light">The donanemab story is the one. Lilly has solved the science. The experience of receiving care hasn't been solved at the infrastructure level.</div>
+            </div>
+            <div class="cerebro-input c-light">
+              <span class="cerebro-prompt c-light">></span>
+              <span class="cerebro-placeholder">ask anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
