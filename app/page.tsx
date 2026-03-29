@@ -528,7 +528,6 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
   const top         = Math.max(8, y - 44)
   const lens        = article.signalLens || ""
   const type        = article.signalType || ""
-  const hook        = article.relevance || article.summary || ""
   const scores      = article.signalScores
   const accentColor = LENS_COLOR[lens] || "var(--border)"
   const urgency     = URGENCY_TIER(scores?.urgency)
@@ -583,17 +582,50 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         </div>
       )}
 
-      {/* Hook — why this matters */}
-      <div style={{ padding: "10px 12px 11px" }}>
-        <div style={{
-          fontSize: 12,
-          lineHeight: 1.55,
-          color: hook === article.summary ? "var(--text-secondary)" : "var(--text-primary)",
-          letterSpacing: "-0.01em",
-        }}>
-          {hook}
+      {/* Brief — what this is (news API summary) */}
+      {article.summary && (
+        <div style={{ padding: "9px 12px 8px", borderBottom: article.relevance ? "1px solid var(--border)" : "none" }}>
+          <div style={{
+            fontSize: 8,
+            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            letterSpacing: "0.09em",
+            textTransform: "uppercase",
+            color: "var(--text-tertiary)",
+            marginBottom: 5,
+          }}>Brief</div>
+          <div style={{
+            fontSize: 11.5,
+            lineHeight: 1.55,
+            color: "var(--text-secondary)",
+            letterSpacing: "-0.01em",
+          }}>
+            {article.summary}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Signal — why this matters (Haiku relevancy hook) */}
+      {article.relevance && (
+        <div style={{ padding: "9px 12px 10px" }}>
+          <div style={{
+            fontSize: 8,
+            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            letterSpacing: "0.09em",
+            textTransform: "uppercase",
+            color: "var(--text-tertiary)",
+            marginBottom: 5,
+          }}>Signal</div>
+          <div style={{
+            fontSize: 12,
+            lineHeight: 1.55,
+            color: "var(--text-primary)",
+            letterSpacing: "-0.01em",
+            fontWeight: 500,
+          }}>
+            {article.relevance}
+          </div>
+        </div>
+      )}
 
       {/* Footer: urgency tier (only when annotated) + source */}
       <div style={{
