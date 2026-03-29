@@ -1490,25 +1490,22 @@ function Cerebro({ articles, pendingPrompt }: {
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "4px 10px 8px",
             }}>
-              {/* Provocation — click to activate */}
-              {!input.trim() && (
+              {/* Discuss — sends the current provocation to Cerebro */}
+              {!input.trim() ? (
                 <button
                   onClick={() => send(PROVOCATIONS[placeholderIdx])}
-                  aria-label="Ask this question"
+                  aria-label="Discuss this prompt"
                   style={{
                     background: "none", border: "none", cursor: "pointer",
                     fontSize: 11, color: "var(--accent-muted)", padding: "2px 4px",
                     borderRadius: 4, transition: "color 0.15s",
-                    maxWidth: "70%", textAlign: "left", lineHeight: 1.3,
-                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}
                   onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
                   onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
                 >
-                  ↗ {PROVOCATIONS[placeholderIdx]}
+                  Discuss →
                 </button>
-              )}
-              {input.trim() && <div />}
+              ) : <div />}
               <div style={{ display: "flex", gap: 2 }}>
               <button
                 onClick={() => fileRef.current?.click()}
