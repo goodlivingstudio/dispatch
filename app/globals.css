@@ -1,19 +1,54 @@
 @import "tailwindcss";
 
+/* ─── Light mode (default) ─────────────────────────────────────── */
 :root {
-  --bg:    #0C0C0A;
-  --surf:  #141412;
-  --surf2: #1C1C1A;
-  --bdr:   #222220;
-  --bdr2:  #2C2C2A;
-  --t1:    #EDEAE3;
-  --t2:    #8A8882;
-  --t3:    #524F4A;
-  --t4:    #333028;
-  --acc:   #6CB842;
-  --acc-l: #0E1E08;
+  --bg:      #EEECEA;   /* warm gray page, like macOS desktop */
+  --surf:    #FFFFFF;   /* tile backgrounds */
+  --surf2:   #F5F3EF;   /* secondary surfaces */
+  --bdr:     #E0DDD6;
+  --bdr2:    #CCC9C0;
+  --t1:      #1A1816;
+  --t2:      #4A4640;
+  --t3:      #8A8680;
+  --t4:      #BCB9B0;
+  --acc:     #3D7A1E;
+  --acc-l:   #ECF5E5;
 
-  /* 11 category accent colors */
+  --radius:  14px;
+  --shadow:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 6px 20px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+
+  /* Category colors — dark enough to read on white tiles */
+  --cat-policy:            #2E6090;
+  --cat-ai:                #1570A6;
+  --cat-design-industry:   #5E4A8A;
+  --cat-creative-practice: #8A5C1A;
+  --cat-market:            #8A4E1A;
+  --cat-health:            #2E6E3A;
+  --cat-company:           #7A3E1A;
+  --cat-design-leadership: #7A2E52;
+  --cat-creative-tech:     #1A6A6A;
+  --cat-culture:           #7A2E2E;
+  --cat-data:              #1A6A4A;
+}
+
+/* ─── Dark mode ────────────────────────────────────────────────── */
+:root.dark {
+  --bg:      #141412;
+  --surf:    #1E1E1B;
+  --surf2:   #252522;
+  --bdr:     #2A2A26;
+  --bdr2:    #363630;
+  --t1:      #EDEBE5;
+  --t2:      #8A8882;
+  --t3:      #524F4A;
+  --t4:      #333028;
+  --acc:     #6CB842;
+  --acc-l:   #0E1E08;
+
+  --shadow:  0 1px 4px rgba(0,0,0,0.3);
+  --shadow-hover: 0 6px 24px rgba(0,0,0,0.4);
+
   --cat-policy:            #7B9EC8;
   --cat-ai:                #5BB5E8;
   --cat-design-industry:   #A892D4;
@@ -27,6 +62,7 @@
   --cat-data:              #7AC4A8;
 }
 
+/* ─── Base ─────────────────────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -35,27 +71,13 @@ html, body {
   color: var(--t1);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-::selection { background: var(--acc-l); color: var(--acc); }
+::selection { background: var(--acc-l); color: var(--t1); }
 
-::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 1px; }
-
-/* Category dot colors */
-.dot-policy            { background: var(--cat-policy); }
-.dot-ai                { background: var(--cat-ai); }
-.dot-design-industry   { background: var(--cat-design-industry); }
-.dot-creative-practice { background: var(--cat-creative-practice); }
-.dot-market            { background: var(--cat-market); }
-.dot-health            { background: var(--cat-health); }
-.dot-company           { background: var(--cat-company); }
-.dot-design-leadership { background: var(--cat-design-leadership); }
-.dot-creative-tech     { background: var(--cat-creative-tech); }
-.dot-culture           { background: var(--cat-culture); }
-.dot-data              { background: var(--cat-data); }
+::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 2px; }
 
 /* Category text colors */
 .cat-policy            { color: var(--cat-policy); }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────
 
 interface Article {
   id: string
@@ -13,6 +13,7 @@ interface Article {
   summary: string
   category: string
   tag: string
+  imageUrl?: string
 }
 
 interface Message {
@@ -20,113 +21,154 @@ interface Message {
   content: string
 }
 
-// ─── Config ──────────────────────────────────────────────────────────────────
+// ─── Config ──────────────────────────────────────────────────────
 
 const CATEGORY_CONFIG = [
-  { id: "policy",            label: "Policy",               tag: "policy",            color: "var(--cat-policy)" },
-  { id: "ai",                label: "AI & Design",          tag: "ai",                color: "var(--cat-ai)" },
-  { id: "design-industry",   label: "Design Industry",      tag: "design-industry",   color: "var(--cat-design-industry)" },
-  { id: "creative-practice", label: "Creative Practice",    tag: "creative-practice", color: "var(--cat-creative-practice)" },
-  { id: "market",            label: "Market Trends",        tag: "market",            color: "var(--cat-market)" },
-  { id: "health",            label: "Healthcare & Pharma",  tag: "health",            color: "var(--cat-health)" },
-  { id: "company",           label: "Company Intel",        tag: "company",           color: "var(--cat-company)" },
-  { id: "design-leadership", label: "Design Leadership",    tag: "design-leadership", color: "var(--cat-design-leadership)" },
-  { id: "creative-tech",     label: "Creative Technology",  tag: "creative-tech",     color: "var(--cat-creative-tech)" },
-  { id: "culture",           label: "Cultural Signal",      tag: "culture",           color: "var(--cat-culture)" },
-  { id: "data",              label: "Data & Modeling",      tag: "data",              color: "var(--cat-data)" },
+  { id: "policy",            label: "Policy",               tag: "policy"            },
+  { id: "ai",                label: "AI & Design",          tag: "ai"                },
+  { id: "design-industry",   label: "Design Industry",      tag: "design-industry"   },
+  { id: "creative-practice", label: "Creative Practice",    tag: "creative-practice" },
+  { id: "market",            label: "Market Trends",        tag: "market"            },
+  { id: "health",            label: "Healthcare & Pharma",  tag: "health"            },
+  { id: "company",           label: "Company Intel",        tag: "company"           },
+  { id: "design-leadership", label: "Design Leadership",    tag: "design-leadership" },
+  { id: "creative-tech",     label: "Creative Technology",  tag: "creative-tech"     },
+  { id: "culture",           label: "Cultural Signal",      tag: "culture"           },
+  { id: "data",              label: "Data & Modeling",      tag: "data"              },
 ]
 
 const TARGET_COMPANIES = ["Shopify", "Anthropic", "Rivian", "Patagonia", "Lilly"]
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Dark mode hook ───────────────────────────────────────────────
+
+function useDarkMode() {
+  const [dark, setDark] = useState(false)
+
+  useEffect(() => {
+    const stored = localStorage.getItem("dispatch-theme")
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    const isDark = stored ? stored === "dark" : false // light default
+    setDark(isDark)
+    document.documentElement.classList.toggle("dark", isDark)
+  }, [])
+
+  const toggle = useCallback(() => {
+    setDark(prev => {
+      const next = !prev
+      document.documentElement.classList.toggle("dark", next)
+      localStorage.setItem("dispatch-theme", next ? "dark" : "light")
+      return next
+    })
+  }, [])
+
+  return { dark, toggle }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
   const h = Math.floor(diff / 36e5)
   if (h < 1) return "< 1h"
   if (h < 24) return `${h}h`
-  const d = Math.floor(h / 24)
-  return d === 1 ? "1d" : `${d}d`
+  return `${Math.floor(h / 24)}d`
 }
 
-// ─── ArticleCard ─────────────────────────────────────────────────────────────
+// ─── Article Tile ─────────────────────────────────────────────────
 
-function ArticleCard({ article }: { article: Article }) {
-  const [expanded, setExpanded] = useState(false)
-  const cat = CATEGORY_CONFIG.find(c => c.tag === article.tag)
+function ArticleTile({ article }: { article: Article }) {
+  const isExternal = article.url !== "#"
 
-  return (
-    <article
-      className="group cursor-pointer"
-      style={{ borderBottom: "0.5px solid var(--bdr)" }}
-      onClick={() => setExpanded(e => !e)}
+  const tile = (
+    <div
+      className="group flex flex-col overflow-hidden transition-all duration-250 cursor-pointer h-full"
+      style={{
+        background: "var(--surf)",
+        borderRadius: "var(--radius)",
+        boxShadow: "var(--shadow)",
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-hover)"
+        ;(e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow)"
+        ;(e.currentTarget as HTMLElement).style.transform = "translateY(0)"
+      }}
     >
+      {/* Image */}
       <div
-        className="px-9 py-5 transition-colors duration-100"
-        style={{ background: expanded ? "var(--surf)" : "transparent" }}
+        className="relative overflow-hidden shrink-0"
+        style={{
+          aspectRatio: "3 / 2",
+          background: "var(--surf2)",
+          borderRadius: "var(--radius) var(--radius) 0 0",
+        }}
       >
-        {/* Headline — dominant */}
-        <p
-          className="leading-[1.42] mb-2.5 group-hover:opacity-55 transition-opacity duration-150"
+        {article.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={article.imageUrl}
+            alt=""
+            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+            onError={e => {
+              (e.target as HTMLImageElement).style.display = "none"
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span
+              className={`cat-${article.tag} text-[9px] font-mono uppercase tracking-[0.14em]`}
+              style={{ opacity: 0.5 }}
+            >
+              {article.category}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-4 pb-4">
+        <span
+          className={`cat-${article.tag} text-[9.5px] font-mono uppercase tracking-[0.1em] mb-2 block`}
+        >
+          {article.category}
+        </span>
+        <h3
+          className="flex-1 leading-[1.32] group-hover:opacity-65 transition-opacity duration-150"
           style={{
             color: "var(--t1)",
-            fontSize: "15.5px",
-            fontWeight: 500,
+            fontSize: "14.5px",
+            fontWeight: 600,
             letterSpacing: "-0.02em",
           }}
         >
           {article.title}
-        </p>
-
-        {/* Meta — recessed below headline */}
-        <div className="flex items-center gap-2">
-          {cat && (
-            <span
-              className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ background: cat.color, opacity: 0.7 }}
-            />
-          )}
-          <span
-            className="text-[10.5px] font-mono uppercase tracking-[0.07em]"
-            style={{ color: "var(--t3)" }}
-          >
+        </h3>
+        <div className="flex items-center gap-1.5 mt-3">
+          <span className="text-[10.5px]" style={{ color: "var(--t3)" }}>
             {article.source}
           </span>
-          <span style={{ color: "var(--bdr2)" }}>·</span>
-          <span className="text-[10.5px] font-mono" style={{ color: "var(--t4)" }}>
+          <span style={{ color: "var(--bdr2)", fontSize: 10 }}>·</span>
+          <span className="text-[10.5px]" style={{ color: "var(--t4)" }}>
             {timeAgo(article.publishedAt)}
           </span>
         </div>
-
-        {/* Expanded */}
-        {expanded && (
-          <div className="mt-4 pt-4" style={{ borderTop: "0.5px solid var(--bdr)" }}>
-            <p
-              className="text-[13px] leading-[1.85] mb-3"
-              style={{ color: "var(--t2)" }}
-            >
-              {article.summary}
-            </p>
-            {article.url !== "#" && (
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                className="text-[11px] hover:underline"
-                style={{ color: "var(--acc)" }}
-              >
-                Read full article →
-              </a>
-            )}
-          </div>
-        )}
       </div>
-    </article>
+    </div>
   )
+
+  if (isExternal) {
+    return (
+      <a href={article.url} target="_blank" rel="noopener noreferrer" className="block h-full">
+        {tile}
+      </a>
+    )
+  }
+  return <div className="h-full">{tile}</div>
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
+// ─── Sidebar ──────────────────────────────────────────────────────
 
 function Sidebar({
   articles,
@@ -134,34 +176,39 @@ function Sidebar({
   onSelect,
   isLive,
   loading,
+  dark,
+  onToggleDark,
 }: {
   articles: Article[]
   active: string
   onSelect: (tag: string) => void
   isLive: boolean
   loading: boolean
+  dark: boolean
+  onToggleDark: () => void
 }) {
   const now = new Date()
-  const date = now.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  const date = now.toLocaleDateString("en-US", { month: "long", day: "numeric" })
   const day = now.toLocaleDateString("en-US", { weekday: "long" })
 
   const countFor = (tag: string) => articles.filter(a => a.tag === tag).length
 
   return (
     <aside
-      className="flex flex-col shrink-0"
+      className="flex flex-col shrink-0 overflow-hidden"
       style={{
-        width: 224,
-        borderRight: "0.5px solid var(--bdr)",
+        width: 212,
         background: "var(--surf)",
+        borderRight: "0.5px solid var(--bdr)",
+        boxShadow: "1px 0 0 var(--bdr)",
       }}
     >
-      {/* Masthead */}
-      <div className="px-7 pt-7 pb-6" style={{ borderBottom: "0.5px solid var(--bdr)" }}>
+      {/* Wordmark */}
+      <div className="px-6 pt-7 pb-6" style={{ borderBottom: "0.5px solid var(--bdr)" }}>
         <div
           style={{
-            fontSize: 19,
-            fontWeight: 650,
+            fontSize: 20,
+            fontWeight: 700,
             letterSpacing: "-0.05em",
             color: "var(--t1)",
             lineHeight: 1,
@@ -169,23 +216,31 @@ function Sidebar({
         >
           Dispatch
         </div>
-        <div
-          className="mt-2"
-          style={{ fontSize: "11px", color: "var(--t3)", letterSpacing: "-0.01em" }}
-        >
+        <div className="mt-1.5" style={{ fontSize: "11px", color: "var(--t3)", letterSpacing: "-0.01em" }}>
           {day}, {date}
         </div>
-        <div className="flex items-center gap-2 mt-3.5">
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ background: loading ? "var(--t4)" : isLive ? "var(--acc)" : "var(--t4)" }}
-          />
-          <span
-            className="text-[9.5px] font-mono uppercase tracking-[0.1em]"
-            style={{ color: loading ? "var(--t4)" : isLive ? "var(--acc)" : "var(--t4)" }}
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: loading ? "var(--t4)" : isLive ? "var(--acc)" : "var(--t4)" }}
+            />
+            <span
+              className="text-[9.5px] font-mono uppercase tracking-[0.1em]"
+              style={{ color: loading ? "var(--t4)" : isLive ? "var(--acc)" : "var(--t4)" }}
+            >
+              {loading ? "Loading" : isLive ? "Live" : "Demo"}
+            </span>
+          </div>
+          {/* Dark mode toggle */}
+          <button
+            onClick={onToggleDark}
+            className="transition-opacity duration-150 hover:opacity-60"
+            style={{ fontSize: 14, color: "var(--t3)", lineHeight: 1 }}
+            title={dark ? "Switch to light" : "Switch to dark"}
           >
-            {loading ? "Loading" : isLive ? "Live" : "Demo"}
-          </span>
+            {dark ? "☀" : "☽"}
+          </button>
         </div>
       </div>
 
@@ -194,13 +249,16 @@ function Sidebar({
         {/* All */}
         <button
           onClick={() => onSelect("all")}
-          className="w-full flex items-center justify-between px-7 py-2.5 transition-colors duration-100"
+          className="w-full flex items-center justify-between px-6 py-2.5 transition-colors duration-100"
           style={{
             color: active === "all" ? "var(--t1)" : "var(--t3)",
             background: active === "all" ? "var(--surf2)" : "transparent",
           }}
         >
-          <span className="text-[12px] tracking-[-0.01em]" style={{ fontWeight: active === "all" ? 500 : 400 }}>
+          <span
+            className="text-[12px] tracking-[-0.01em]"
+            style={{ fontWeight: active === "all" ? 600 : 400 }}
+          >
             All
           </span>
           <span className="text-[10px] font-mono" style={{ color: "var(--t4)" }}>
@@ -208,7 +266,7 @@ function Sidebar({
           </span>
         </button>
 
-        <div className="mx-7 my-2.5" style={{ borderTop: "0.5px solid var(--bdr)" }} />
+        <div className="mx-6 my-2" style={{ borderTop: "0.5px solid var(--bdr)" }} />
 
         {CATEGORY_CONFIG.map(cat => {
           const n = countFor(cat.tag)
@@ -218,19 +276,22 @@ function Sidebar({
             <button
               key={cat.id}
               onClick={() => onSelect(cat.tag)}
-              className="w-full flex items-center gap-3 px-7 py-2 transition-colors duration-100"
+              className="w-full flex items-center gap-2.5 px-6 py-2 transition-colors duration-100"
               style={{
                 color: isActive ? "var(--t1)" : "var(--t3)",
                 background: isActive ? "var(--surf2)" : "transparent",
               }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full shrink-0 transition-opacity duration-100"
-                style={{ background: cat.color, opacity: isActive ? 1 : 0.55 }}
+                className={`w-1.5 h-1.5 rounded-full shrink-0 cat-${cat.tag}`}
+                style={{
+                  background: `var(--cat-${cat.tag})`,
+                  opacity: isActive ? 1 : 0.5,
+                }}
               />
               <span
-                className="flex-1 text-left text-[12px] tracking-[-0.01em]"
-                style={{ fontWeight: isActive ? 500 : 400 }}
+                className="flex-1 text-left text-[11.5px] tracking-[-0.01em]"
+                style={{ fontWeight: isActive ? 600 : 400 }}
               >
                 {cat.label}
               </span>
@@ -243,11 +304,11 @@ function Sidebar({
           )
         })}
 
-        {/* Watching */}
-        <div className="mx-7 my-3" style={{ borderTop: "0.5px solid var(--bdr)" }} />
-        <div className="px-7 mb-2">
+        <div className="mx-6 my-3" style={{ borderTop: "0.5px solid var(--bdr)" }} />
+
+        <div className="px-6 mb-1.5">
           <span
-            className="text-[9px] font-mono uppercase tracking-[0.12em]"
+            className="text-[9px] font-mono uppercase tracking-[0.14em]"
             style={{ color: "var(--t4)" }}
           >
             Watching
@@ -257,16 +318,16 @@ function Sidebar({
           <button
             key={co}
             onClick={() => onSelect("company")}
-            className="w-full flex items-center gap-3 px-7 py-1.5 hover:opacity-70 transition-opacity duration-100"
+            className="w-full flex items-center gap-2.5 px-6 py-1.5 hover:opacity-60 transition-opacity duration-100"
           >
             <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--t4)" }} />
-            <span className="text-[11.5px]" style={{ color: "var(--t3)" }}>{co}</span>
+            <span className="text-[11px]" style={{ color: "var(--t3)" }}>{co}</span>
           </button>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="px-7 py-4" style={{ borderTop: "0.5px solid var(--bdr)" }}>
+      <div className="px-6 py-4" style={{ borderTop: "0.5px solid var(--bdr)" }}>
         <span className="text-[10px] font-mono" style={{ color: "var(--t4)" }}>
           Jeremy Grant
         </span>
@@ -275,9 +336,9 @@ function Sidebar({
   )
 }
 
-// ─── SynthesisPanel ──────────────────────────────────────────────────────────
+// ─── Brief Widget ─────────────────────────────────────────────────
 
-function SynthesisPanel({ articles }: { articles: Article[] }) {
+function BriefWidget({ articles }: { articles: Article[] }) {
   const [synthesis, setSynthesis] = useState("")
   const [running, setRunning] = useState(false)
   const [lastRun, setLastRun] = useState<string | null>(null)
@@ -296,7 +357,7 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
         body: JSON.stringify({
           messages: [{
             role: "user",
-            content: "Synthesize today's feed. What are the 2–3 most important patterns or signals for someone in my position? Be direct and specific. No bullets.",
+            content: "Synthesize today's feed. What are the 2–3 most important patterns or signals? Be direct. No bullets.",
           }],
           feedContext: { count: articles.length, articles: context },
         }),
@@ -305,17 +366,24 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
       setSynthesis(data.text || "")
       setLastRun(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))
     } catch {
-      setSynthesis("Failed to reach Cerebro.")
+      setSynthesis("Could not reach Cerebro.")
     }
     setRunning(false)
   }
 
   return (
-    <div style={{ borderBottom: "0.5px solid var(--bdr)" }}>
-      {/* Header */}
+    <div
+      className="flex flex-col shrink-0"
+      style={{
+        background: "var(--surf)",
+        borderRadius: "var(--radius)",
+        boxShadow: "var(--shadow)",
+        overflow: "hidden",
+      }}
+    >
       <div
-        className="flex items-center justify-between px-6 shrink-0"
-        style={{ borderBottom: "0.5px solid var(--bdr)", height: 48 }}
+        className="flex items-center justify-between px-5 shrink-0"
+        style={{ height: 44, borderBottom: "0.5px solid var(--bdr)" }}
       >
         <span
           className="text-[10px] font-mono uppercase tracking-[0.12em]"
@@ -323,7 +391,7 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
         >
           Today's Brief
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {lastRun && (
             <span className="text-[9px] font-mono" style={{ color: "var(--t4)" }}>
               {lastRun}
@@ -332,11 +400,12 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
           <button
             onClick={run}
             disabled={running || !articles.length}
-            className="text-[10px] px-3 py-1.5 rounded-sm transition-all duration-150"
+            className="text-[10px] px-2.5 py-1 transition-all duration-150"
             style={{
               background: "transparent",
               color: running ? "var(--t4)" : "var(--acc)",
               border: "0.5px solid var(--bdr2)",
+              borderRadius: 6,
               cursor: running || !articles.length ? "not-allowed" : "pointer",
               letterSpacing: "0.02em",
             }}
@@ -345,15 +414,13 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
           </button>
         </div>
       </div>
-
-      {/* Body */}
-      <div className="px-6 py-5 overflow-y-auto" style={{ maxHeight: 200 }}>
+      <div className="px-5 py-4 overflow-y-auto" style={{ maxHeight: 180 }}>
         {synthesis ? (
           <p className="text-[13px] leading-[1.85]" style={{ color: "var(--t2)" }}>
             {synthesis}
           </p>
         ) : (
-          <p className="text-[12px] leading-[1.75]" style={{ color: "var(--t4)" }}>
+          <p className="text-[12px] leading-[1.7]" style={{ color: "var(--t4)" }}>
             Surface patterns and signals across today's feed.
           </p>
         )}
@@ -362,9 +429,9 @@ function SynthesisPanel({ articles }: { articles: Article[] }) {
   )
 }
 
-// ─── CerebroPanel ────────────────────────────────────────────────────────────
+// ─── Cerebro Widget ───────────────────────────────────────────────
 
-function CerebroPanel({ articles }: { articles: Article[] }) {
+function CerebroWidget({ articles }: { articles: Article[] }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -393,10 +460,7 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
 
     const feedContext = articles.length ? {
       count: articles.length,
-      articles: articles
-        .slice(0, 15)
-        .map(a => `[${a.category}] ${a.title}: ${a.summary}`)
-        .join("\n"),
+      articles: articles.slice(0, 15).map(a => `[${a.category}] ${a.title}: ${a.summary}`).join("\n"),
     } : null
 
     try {
@@ -409,17 +473,25 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
       setMessages(prev => [...prev, { role: "assistant", content: data.text || "No response." }])
       setTotalTokens(t => t + (data.inputTokens || 0) + (data.outputTokens || 0))
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Failed to reach Cerebro." }])
+      setMessages(prev => [...prev, { role: "assistant", content: "Could not reach Cerebro." }])
     }
     setLoading(false)
   }, [messages, loading, articles])
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div
+      className="flex flex-col flex-1 min-h-0"
+      style={{
+        background: "var(--surf)",
+        borderRadius: "var(--radius)",
+        boxShadow: "var(--shadow)",
+        overflow: "hidden",
+      }}
+    >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-6 shrink-0"
-        style={{ borderBottom: "0.5px solid var(--bdr)", height: 48 }}
+        className="flex items-center justify-between px-5 shrink-0"
+        style={{ height: 44, borderBottom: "0.5px solid var(--bdr)" }}
       >
         <span
           className="text-[10px] font-mono uppercase tracking-[0.12em]"
@@ -435,9 +507,9 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
         {messages.length === 0 && (
-          <p className="text-[12px] leading-[1.75]" style={{ color: "var(--t4)" }}>
+          <p className="text-[12px] leading-[1.7]" style={{ color: "var(--t4)" }}>
             Ask about the feed, research a company, or explore a signal.
           </p>
         )}
@@ -445,21 +517,19 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
           <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
             {m.role === "user" ? (
               <span
-                className="inline-block text-[12.5px] leading-[1.5] px-3.5 py-2 rounded-sm"
+                className="inline-block text-[12.5px] leading-[1.5] px-3 py-1.5"
                 style={{
                   background: "var(--acc-l)",
                   color: "var(--acc)",
-                  maxWidth: "85%",
+                  maxWidth: "84%",
                   border: "0.5px solid var(--bdr2)",
+                  borderRadius: 8,
                 }}
               >
                 {m.content}
               </span>
             ) : (
-              <p
-                className="text-[13px] leading-[1.85]"
-                style={{ color: "var(--t2)" }}
-              >
+              <p className="text-[13px] leading-[1.85]" style={{ color: "var(--t2)" }}>
                 {m.content}
               </p>
             )}
@@ -474,8 +544,8 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 shrink-0" style={{ borderTop: "0.5px solid var(--bdr)" }}>
-        <div className="flex items-end gap-3">
+      <div className="px-5 py-3.5 shrink-0" style={{ borderTop: "0.5px solid var(--bdr)" }}>
+        <div className="flex items-end gap-2.5">
           <textarea
             ref={textareaRef}
             value={input}
@@ -494,13 +564,13 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
           <button
             onClick={() => send(input)}
             disabled={!input.trim() || loading}
-            className="shrink-0 text-[10.5px] px-3 py-1.5 rounded-sm transition-all duration-150"
+            className="shrink-0 text-[10.5px] px-3 py-1.5 transition-all duration-150"
             style={{
               background: input.trim() && !loading ? "var(--acc)" : "transparent",
-              color: input.trim() && !loading ? "#0A0A08" : "var(--t4)",
+              color: input.trim() && !loading ? "#fff" : "var(--t4)",
               border: "0.5px solid var(--bdr2)",
+              borderRadius: 6,
               cursor: input.trim() && !loading ? "pointer" : "not-allowed",
-              letterSpacing: "0.02em",
             }}
           >
             Send
@@ -511,13 +581,14 @@ function CerebroPanel({ articles }: { articles: Article[] }) {
   )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────
 
 export default function Page() {
   const [articles, setArticles] = useState<Article[]>([])
   const [isLive, setIsLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState("all")
+  const { dark, toggle } = useDarkMode()
 
   useEffect(() => {
     fetch("/api/news")
@@ -534,44 +605,55 @@ export default function Page() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg)" }}>
-      {/* Left: category nav */}
+
+      {/* Sidebar */}
       <Sidebar
         articles={articles}
         active={active}
         onSelect={setActive}
         isLive={isLive}
         loading={loading}
+        dark={dark}
+        onToggleDark={toggle}
       />
 
-      {/* Center: article feed */}
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{ borderRight: "0.5px solid var(--bdr)" }}
-      >
+      {/* Center — bento grid */}
+      <main className="flex-1 overflow-y-auto" style={{ background: "var(--bg)" }}>
         {loading ? (
-          <div className="flex items-center justify-center h-32">
-            <span className="text-[11px] font-mono" style={{ color: "var(--t4)" }}>
-              Loading…
-            </span>
+          <div className="flex items-center justify-center h-40">
+            <span className="text-[11px] font-mono" style={{ color: "var(--t4)" }}>Loading…</span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex items-center justify-center h-32">
-            <span className="text-[11px] font-mono" style={{ color: "var(--t4)" }}>
-              No articles
-            </span>
+          <div className="flex items-center justify-center h-40">
+            <span className="text-[11px] font-mono" style={{ color: "var(--t4)" }}>No articles</span>
           </div>
         ) : (
-          filtered.map(a => <ArticleCard key={a.id} article={a} />)
+          <div
+            className="p-5"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(256px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            {filtered.map(a => (
+              <ArticleTile key={a.id} article={a} />
+            ))}
+          </div>
         )}
       </main>
 
-      {/* Right: brief + cerebro */}
+      {/* Right panel — widget stack */}
       <aside
-        className="flex flex-col shrink-0"
-        style={{ width: 340, background: "var(--surf)" }}
+        className="flex flex-col shrink-0 gap-4 p-4 overflow-hidden"
+        style={{
+          width: 340,
+          background: "var(--bg)",
+          borderLeft: "0.5px solid var(--bdr)",
+        }}
       >
-        <SynthesisPanel articles={filtered} />
-        <CerebroPanel articles={articles} />
+        <BriefWidget articles={filtered} />
+        <CerebroWidget articles={articles} />
       </aside>
     </div>
   )
