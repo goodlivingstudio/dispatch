@@ -1512,12 +1512,12 @@ function Cerebro({ articles, pendingPrompt }: {
                   onClick={() => send(PROVOCATIONS[placeholderIdx])}
                   aria-label="Discuss this prompt"
                   style={{
-                    background: "none", border: "none", cursor: "pointer",
-                    fontSize: 11, color: "var(--accent-muted)", padding: "2px 4px",
-                    borderRadius: 4, transition: "color 0.15s",
+                    background: "transparent", border: "none", cursor: "pointer",
+                    fontSize: 11, color: "var(--accent-muted)", padding: "6px 10px",
+                    borderRadius: 6, transition: "all 0.15s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                  onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
+                  onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)"; e.currentTarget.style.background = "transparent" }}
                 >
                   BUMP ↗
                 </button>

@@ -215,7 +215,11 @@ export function Ticker({
                 cursor: "pointer",
                 padding: 0,
                 flexShrink: 0,
+                borderRadius: 6,
+                transition: "background 0.15s",
               }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
             >
               <span
                 style={{
@@ -256,10 +260,10 @@ export function Ticker({
             cursor: "pointer",
             fontSize: 17,
             color: "var(--text-tertiary)",
-            transition: "color 0.15s",
+            transition: "all 0.15s",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          onMouseEnter={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "var(--bg-elevated)" }}
+          onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.background = "transparent" }}
         >
           {isDay ? "☾" : "☀"}
         </button>
