@@ -582,21 +582,13 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         </div>
       )}
 
-      {/* Brief — what this is (news API summary) */}
+      {/* Summary — what it is, factual, muted */}
       {article.summary && (
-        <div style={{ padding: "9px 12px 8px", borderBottom: article.relevance ? "1px solid var(--border)" : "none" }}>
-          <div style={{
-            fontSize: 8,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.09em",
-            textTransform: "uppercase",
-            color: "var(--text-tertiary)",
-            marginBottom: 5,
-          }}>Brief</div>
+        <div style={{ padding: article.relevance ? "10px 12px 9px" : "10px 12px" }}>
           <div style={{
             fontSize: 11.5,
             lineHeight: 1.55,
-            color: "var(--text-secondary)",
+            color: "var(--text-tertiary)",
             letterSpacing: "-0.01em",
           }}>
             {article.summary}
@@ -604,38 +596,29 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
         </div>
       )}
 
-      {/* Signal — why this matters (Haiku relevancy hook) */}
+      {/* Relevance — why it matters, interpretive, pulls you in */}
       {article.relevance && (
-        <div style={{ padding: "9px 12px 10px" }}>
-          <div style={{
-            fontSize: 8,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.09em",
-            textTransform: "uppercase",
-            color: "var(--text-tertiary)",
-            marginBottom: 5,
-          }}>Signal</div>
+        <div style={{
+          padding: "9px 12px 11px",
+          borderTop: "1px solid var(--border)",
+        }}>
           <div style={{
             fontSize: 12,
             lineHeight: 1.55,
             color: "var(--text-primary)",
-            letterSpacing: "-0.01em",
-            fontWeight: 500,
+            letterSpacing: "-0.015em",
           }}>
             {article.relevance}
           </div>
         </div>
       )}
 
-      {/* Footer: urgency tier (only when annotated) + source */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "5px 10px 6px",
-        borderTop: "1px solid var(--border)",
-      }}>
-        {scores ? (
+      {/* Footer: urgency tier — only when scores present */}
+      {scores && (
+        <div style={{
+          padding: "5px 10px 6px",
+          borderTop: "1px solid var(--border)",
+        }}>
           <span style={{
             fontSize: 9,
             fontFamily: "'SF Mono', 'Fira Code', monospace",
@@ -645,17 +628,8 @@ function SignalCard({ x, y, article }: { x: number; y: number; article: Article 
           }}>
             {urgency.label}
           </span>
-        ) : <span />}
-        <span style={{
-          fontSize: 9,
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-          letterSpacing: "0.04em",
-          color: "var(--text-tertiary)",
-          opacity: 0.7,
-        }}>
-          {article.source}
-        </span>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
