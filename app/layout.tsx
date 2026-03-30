@@ -11,8 +11,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dispatch.goodliving.studio"),
-  title: "Dispatch",
-  description: "Personal field intelligence — Jeremy Grant",
+  title: "D.i.s.p.a.t.c.h.",
+  description: "Directed Intelligence for Strategic Positioning Across Technology, Culture & Healthcare",
   robots: { index: false, follow: false },
   icons: {
     icon: [

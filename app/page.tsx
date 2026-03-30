@@ -393,13 +393,13 @@ function LeftRail({
             style={{
               fontSize: 20,
               fontWeight: 700,
-              letterSpacing: "-0.04em",
+              letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               lineHeight: 1,
               margin: 0,
             }}
           >
-            Dispatch
+            D.i.s.p.a.t.c.h.
           </h1>
           <LiveClock />
         </div>
