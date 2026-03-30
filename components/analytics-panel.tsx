@@ -389,12 +389,12 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       ]
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
             Average AI-scored signal strength across {analytics.annotatedCount} annotated articles — scored 0–10 per dimension
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data} layout="vertical" margin={{ left: 0, right: 32, top: 0, bottom: 0 }}>
-              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "'Inter', system-ui, sans-serif" }} axisLine={false} tickLine={false} />
+              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={150} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="value" radius={4} maxBarSize={22}>
@@ -410,7 +410,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
             ].map(stat => (
               <div key={stat.label}>
                 <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>{stat.value}</div>
-                <div style={{ fontSize: 11, fontFamily: "'Inter', system-ui, sans-serif", color: "var(--text-tertiary)", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4 }}>{stat.label}</div>
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4 }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -440,7 +440,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
               <div key={item.name}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.color }} />
-                  <span style={{ fontSize: 11, fontFamily: "'Inter', system-ui, sans-serif", color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase" }}>{item.name}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase" }}>{item.name}</span>
                 </div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", paddingLeft: 16 }}>
                   {item.value}
@@ -459,12 +459,12 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       const data = analytics.categoryData.map(c => ({ name: c.label, count: c.count }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
             Article volume by category across {analytics.total} signals — darker fill = higher concentration
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
-              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "'Inter', system-ui, sans-serif" }} axisLine={false} tickLine={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={100} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="count" fill={CARD_ACCENT.category} fillOpacity={0.75} radius={4} maxBarSize={22} />
@@ -481,12 +481,12 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
             Highest urgency signals today — AI-scored 0–10 (10 = act now, 0 = evergreen)
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
-              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "'Inter', system-ui, sans-serif" }} axisLine={false} tickLine={false} />
+              <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--text-tertiary)" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={220} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="urgency" fill={CARD_ACCENT.urgency} fillOpacity={0.8} radius={4} maxBarSize={20} />
@@ -500,12 +500,12 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       const data = analytics.topSources.map(s => ({ name: s.source, count: s.count }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
             Publication volume across {analytics.topSources.length} sources — signals per outlet today
           </div>
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={data} layout="vertical" margin={{ left: 0, right: 40, top: 0, bottom: 0 }}>
-              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)", fontFamily: "'Inter', system-ui, sans-serif" }} axisLine={false} tickLine={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-tertiary)" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} width={150} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="count" fill={CARD_ACCENT.sources} fillOpacity={0.8} radius={4} maxBarSize={20} />
@@ -608,7 +608,7 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
           background: "var(--bg-elevated)",
         }}>
           <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-            Send this signal to <span style={{ color: "var(--accent-muted)" }}>Cerebro</span> for deeper analysis and strategic framing.
+            Escalate this signal to <span style={{ color: "var(--accent-muted)" }}>Cerebro</span> for strategic framing.
           </div>
           <button
             onClick={() => { onDeliberate(buildPrompt(card.id, analytics)); onClose() }}
@@ -627,7 +627,7 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
               marginLeft: 24,
             }}
           >
-            Deliberate →
+            BUMP ↗
           </button>
         </div>
       </div>
@@ -708,7 +708,7 @@ export function AnalyticsPanel({ articles, onDeliberate }: {
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "24px 28px", background: "var(--bg-primary)" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
         {CARDS.map((card, i) => (
           <div key={card.id} style={{ gridColumn: i === 4 ? "1 / -1" : "auto" }}>
             <AnalyticsCard card={card} analytics={analytics} onClick={() => setActive(card)} />
