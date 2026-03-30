@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Newspaper, Radio, Layers } from "lucide-react"
+import { Radio, AudioLines, Blend } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 
@@ -322,9 +322,9 @@ export function LeftRail({
               }}
             />
             {([
-              { id: "signal" as const,    label: "Signal",    Icon: Newspaper },
-              { id: "audio" as const,     label: "Audio",     Icon: Radio     },
-              { id: "synthesis" as const, label: "Synthesis",  Icon: Layers    },
+              { id: "signal" as const,    label: "Signal",    Icon: Radio      },
+              { id: "audio" as const,     label: "Audio",     Icon: AudioLines },
+              { id: "synthesis" as const, label: "Synthesis",  Icon: Blend     },
             ]).map(tab => {
               const isActive = viewMode === tab.id
               const iconColor = isActive

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Sun, Moon } from "lucide-react"
+import { SunMedium, MoonStar } from "lucide-react"
 import type { Skin } from "@/app/page"
 
 // ─── Skin dot colours (fixed identifiers, not theme-relative) ──────────────
@@ -267,7 +267,7 @@ export function Ticker({
           onMouseEnter={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "var(--bg-elevated)" }}
           onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.background = "transparent" }}
         >
-          {isDay ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
+          {isDay ? <MoonStar size={17} strokeWidth={1.5} /> : <SunMedium size={17} strokeWidth={1.5} />}
         </button>
       )}
 

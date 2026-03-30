@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Paperclip, Mic, MicOff, ExternalLink, Radio } from "lucide-react"
+import { Paperclip, Mic, MicOff, ExternalLink, Radio, AudioLines, Blend, Brain, Zap } from "lucide-react"
 import { Ticker } from "@/components/ticker"
 import { AnalyticsPanel } from "@/components/analytics-panel"
 import { LeftRail } from "@/components/left-rail"
@@ -721,7 +721,7 @@ function Cerebro({ articles, pendingPrompt }: {
                   onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
                   onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)"; e.currentTarget.style.background = "transparent" }}
                 >
-                  BUMP ↗
+                  BUMP <Zap size={11} strokeWidth={2} style={{ display: "inline", verticalAlign: "middle", marginLeft: 2 }} />
                 </button>
               ) : <div />}
               <div style={{ display: "flex", gap: 2 }}>
@@ -1025,10 +1025,10 @@ export default function Page() {
           }}
         >
           {([
-            { id: "signal",    icon: "≡",  label: "Signal"    },
-            { id: "audio",     icon: "◉",  label: "Audio"     },
-            { id: "synthesis", icon: "◎",  label: "Synthesis" },
-            { id: "cerebro",   icon: "◈",  label: "Cerebro"   },
+            { id: "signal",    Icon: Radio,      label: "Signal"    },
+            { id: "audio",     Icon: AudioLines, label: "Audio"     },
+            { id: "synthesis", Icon: Blend,      label: "Synthesis" },
+            { id: "cerebro",   Icon: Brain,      label: "Cerebro"   },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -1061,7 +1061,7 @@ export default function Page() {
                   background: "var(--accent-secondary)",
                 }} />
               )}
-              <span style={{ fontSize: 15 }}>{tab.icon}</span>
+              <tab.Icon size={18} strokeWidth={1.5} />
               <span
                 style={{
                   fontSize: 10,
