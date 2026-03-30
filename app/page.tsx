@@ -721,7 +721,7 @@ function Cerebro({ articles, pendingPrompt }: {
                   onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
                   onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)"; e.currentTarget.style.background = "transparent" }}
                 >
-                  BUMP <ArrowUpRight size={12} strokeWidth={2} style={{ display: "inline", verticalAlign: "middle", marginLeft: 2 }} />
+                  BUMP <ArrowUpRight size={11} strokeWidth={2.2} style={{ display: "inline", position: "relative", top: 1, marginLeft: 2 }} />
                 </button>
               ) : <div />}
               <div style={{ display: "flex", gap: 2 }}>
