@@ -289,13 +289,15 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
         onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
         style={{
           ...sectionLabelStyle,
-          background: "none", border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", gap: 6, padding: 0,
-          marginBottom: open ? 12 : 0, transition: "margin 0.2s",
+          background: "transparent", border: "none", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 4,
+          padding: "4px 8px", borderRadius: 6,
+          marginBottom: open ? 12 : 0, transition: "all 0.15s",
         }}
+        onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
       >
         Contributing Signals ({articles.length})
-        <span style={{ fontSize: 8, opacity: 0.6, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
       </button>
       {open && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -580,14 +582,14 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 <div style={{ ...bodyStyle, fontSize: 14, lineHeight: 1.7 }}>{pattern.description}</div>
               </div>
 
-              <ContributingSignalsDrawer articles={pattern.articles} />
-
               <div>
                 <div style={sectionLabelStyle}>Strategic Implication</div>
                 <div style={{ ...bodyStyle, marginTop: 8, fontStyle: "italic" }}>
                   This convergence pattern suggests a developing theme that crosses traditional boundaries. When AI synthesis is active, this section will contain a strategic interpretation of how these signals relate to your mandate and what action they might warrant.
                 </div>
               </div>
+
+              <ContributingSignalsDrawer articles={pattern.articles} />
 
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 18 }}>
                 <BumpButton onClick={() => { onDeliberate(`Pattern: ${pattern.title} \u2014 ${pattern.description}`); setActiveModal(null) }} />
