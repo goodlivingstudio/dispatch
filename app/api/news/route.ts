@@ -32,8 +32,9 @@ interface FeedDef {
 // discipline, landscape, or culture. Articles are scored across all five
 // layers by the annotation engine regardless of their primary assignment.
 //
-// Sources without RSS (HBR, Figma, Anthropic, Cursor, Reuters) are omitted
-// pending web scraper implementation.
+// Sources without native RSS use Google News RSS proxy:
+// https://news.google.com/rss/search?q=site:domain.com
+// This indexes their published content as standard RSS.
 
 const FEEDS: FeedDef[] = [
 
@@ -64,8 +65,8 @@ const FEEDS: FeedDef[] = [
   { url: "https://rss.politico.com/politics-news.xml",           source: "Politico",          category: "Policy & Regulation",  tag: "landscape",    layer: "landscape" },
   { url: "https://www.axios.com/feeds/feed.rss",                 source: "Axios",             category: "Policy & Tech",        tag: "landscape",    layer: "landscape" },
   { url: "https://feeds.bloomberg.com/markets/news.rss",         source: "Bloomberg",         category: "Markets & Finance",    tag: "landscape",    layer: "landscape" },
+  // Economist direct section feeds (may be restricted — Google News proxy below as backup)
   { url: "https://www.economist.com/business/rss.xml",           source: "The Economist",     category: "Global Business",      tag: "landscape",    layer: "landscape" },
-  { url: "https://www.economist.com/finance-and-economics/rss.xml", source: "The Economist",  category: "Finance & Economics",  tag: "landscape",    layer: "landscape" },
   { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "New York Times", category: "Technology",        tag: "landscape",    layer: "landscape" },
   { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",  source: "New York Times", category: "Business",          tag: "landscape",    layer: "landscape" },
 
@@ -78,6 +79,24 @@ const FEEDS: FeedDef[] = [
   { url: "https://pitchfork.com/feed/feed-news/rss",             source: "Pitchfork",         category: "Music & Criticism",    tag: "culture",      layer: "culture" },
   { url: "https://www.nplusonemag.com/feed/",                    source: "n+1",               category: "Literary & Ideas",     tag: "culture",      layer: "culture" },
   { url: "https://www.fastcompany.com/latest/rss",               source: "Fast Company",      category: "Innovation & Culture", tag: "culture",      layer: "culture" },
+  { url: "https://news.google.com/rss/search?q=site:criterion.com&hl=en-US&gl=US", source: "Criterion", category: "Film & Cinema", tag: "culture", layer: "culture" },
+
+  // ── GOOGLE NEWS PROXY — Sources without native RSS ────────────────────────
+  // These use Google's index to generate RSS from publications that killed
+  // their feeds or never had them. Same pipeline, different plumbing.
+
+  // Position
+  { url: "https://news.google.com/rss/search?q=site:hbr.org&hl=en-US&gl=US", source: "Harvard Business Review", category: "Business & Leadership", tag: "position", layer: "position" },
+
+  // Discipline
+  { url: "https://news.google.com/rss/search?q=site:figma.com/blog&hl=en-US&gl=US", source: "Figma Blog", category: "Design Tooling", tag: "discipline", layer: "discipline" },
+  { url: "https://news.google.com/rss/search?q=site:anthropic.com&hl=en-US&gl=US", source: "Anthropic", category: "AI Platform", tag: "discipline", layer: "discipline" },
+  { url: "https://news.google.com/rss/search?q=site:cursor.com/blog+OR+site:cursor.sh/blog&hl=en-US&gl=US", source: "Cursor", category: "Design Engineering", tag: "discipline", layer: "discipline" },
+  { url: "https://news.google.com/rss/search?q=site:linear.app/blog&hl=en-US&gl=US", source: "Linear", category: "Product Engineering", tag: "discipline", layer: "discipline" },
+
+  // Landscape
+  { url: "https://news.google.com/rss/search?q=site:reuters.com&hl=en-US&gl=US", source: "Reuters", category: "Global Wire", tag: "landscape", layer: "landscape" },
+  { url: "https://news.google.com/rss/search?q=site:economist.com&hl=en-US&gl=US", source: "The Economist", category: "Global Analysis", tag: "landscape", layer: "landscape" },
 ]
 
 // ─── RSS Parser ───────────────────────────────────────────────────────────────
