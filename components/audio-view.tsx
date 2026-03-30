@@ -199,17 +199,17 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
                     onClose()
                   }}
                   style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    padding: "10px 16px", borderRadius: 8,
-                    background: "transparent", border: "1px solid var(--border)",
-                    color: "var(--accent-secondary)", fontSize: 12, fontWeight: 600,
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "10px 20px", borderRadius: 8,
+                    background: "var(--bg-elevated)", border: "none",
+                    color: "var(--accent-secondary)", fontSize: 13, fontWeight: 600,
                     cursor: "pointer", transition: "all 0.15s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.borderColor = "var(--accent-secondary)" }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "var(--border)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
                 >
-                  <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em" }}>BUMP</span>
-                  <ArrowUpRight size={12} strokeWidth={2} />
+                  BUMP
+                  <ArrowUpRight size={13} strokeWidth={2} />
                 </button>
               )}
             </div>
