@@ -22,60 +22,62 @@ interface FeedDef {
   url: string
   source: string
   category: string
-  tag: string
+  tag: string    // maps to IntelLayer for filtering
+  layer: string  // primary intelligence layer
 }
 
-// ─── RSS Feed Map ─────────────────────────────────────────────────────────────
-// Curated sources only — no press release aggregators, no content farms
+// ─── RSS Feed Map — Five-Layer Mandate ───────────────────────────────────────
+// Source: docs/mandate.md
+// Every feed maps to a primary intelligence layer: opportunity, position,
+// discipline, landscape, or culture. Articles are scored across all five
+// layers by the annotation engine regardless of their primary assignment.
+//
+// Sources without RSS (HBR, Figma, Anthropic, Cursor, Reuters) are omitted
+// pending web scraper implementation.
 
 const FEEDS: FeedDef[] = [
-  // Policy
-  { url: "https://feeds.reuters.com/reuters/politicsNews",      source: "Reuters",       category: "Policy",              tag: "policy" },
-  { url: "https://rss.politico.com/politics-news.xml",          source: "Politico",      category: "Policy",              tag: "policy" },
-  { url: "https://www.axios.com/feeds/feed.rss",                source: "Axios",         category: "Policy",              tag: "policy" },
 
-  // AI & Design
-  { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", source: "The Verge", category: "AI & Design", tag: "ai" },
-  { url: "https://www.wired.com/feed/category/artificial-intelligence/latest/rss", source: "Wired", category: "AI & Design", tag: "ai" },
-  { url: "https://www.technologyreview.com/feed/",              source: "MIT Tech Review", category: "AI & Design",       tag: "ai" },
-  { url: "https://techcrunch.com/category/artificial-intelligence/feed/", source: "TechCrunch", category: "AI & Design",  tag: "ai" },
+  // ── OPPORTUNITY — Healthcare, pharma, AI-health intersection ──────────────
+  { url: "https://www.statnews.com/feed/",                       source: "STAT News",         category: "Healthcare & Pharma",  tag: "opportunity",  layer: "opportunity" },
+  { url: "https://www.biopharmadive.com/feeds/news/",            source: "BioPharma Dive",    category: "Healthcare & Pharma",  tag: "opportunity",  layer: "opportunity" },
+  { url: "https://www.fiercehealthcare.com/rss.xml",             source: "Fierce Healthcare", category: "Healthcare & Pharma",  tag: "opportunity",  layer: "opportunity" },
+  { url: "https://endpts.com/feed/",                             source: "Endpoints News",    category: "Pharma Deals & FDA",   tag: "opportunity",  layer: "opportunity" },
+  { url: "https://investor.lilly.com/rss/news-releases.xml",     source: "Lilly Newsroom",    category: "Eli Lilly",            tag: "opportunity",  layer: "opportunity" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml", source: "New York Times",  category: "Health",              tag: "opportunity",  layer: "opportunity" },
 
-  // Design Industry
-  { url: "https://eyeondesign.aiga.org/feed/",                  source: "Eye on Design", category: "Design Industry",    tag: "design-industry" },
-  { url: "https://www.dezeen.com/design/feed/",                 source: "Dezeen",        category: "Design Industry",    tag: "design-industry" },
-  { url: "https://www.core77.com/rss",                          source: "Core77",        category: "Design Industry",    tag: "design-industry" },
+  // ── POSITION — Design leadership careers, hiring, compensation ────────────
+  { url: "https://eyeondesign.aiga.org/feed/",                   source: "Eye on Design",     category: "Design Leadership",    tag: "position",     layer: "position" },
+  { url: "https://www.fastcompany.com/co-design/rss",            source: "Fast Company",      category: "Design & Business",    tag: "position",     layer: "position" },
+  { url: "https://www.core77.com/feed",                          source: "Core77",            category: "Design Industry",      tag: "position",     layer: "position" },
 
-  // Creative Practice & Culture
-  { url: "https://www.dezeen.com/architecture/feed/",           source: "Dezeen",        category: "Creative Practice",  tag: "creative-practice" },
-  { url: "https://www.itsnicethat.com/rss",                     source: "It's Nice That", category: "Creative Practice", tag: "creative-practice" },
-  { url: "https://www.architectural-review.com/rss",            source: "Arch Review",   category: "Creative Practice",  tag: "creative-practice" },
+  // ── DISCIPLINE — How design leadership is evolving as a function ──────────
+  { url: "https://vercel.com/atom",                              source: "Vercel",            category: "Platform & Tooling",   tag: "discipline",   layer: "discipline" },
+  { url: "https://linear.app/changelog.xml",                     source: "Linear",            category: "Product Engineering",  tag: "discipline",   layer: "discipline" },
+  { url: "https://medium.com/feed/design-ibm",                   source: "IBM Design",        category: "Enterprise Design",    tag: "discipline",   layer: "discipline" },
+  { url: "https://www.dezeen.com/design/feed/",                  source: "Dezeen",            category: "Design Practice",      tag: "discipline",   layer: "discipline" },
 
-  // Market Trends
-  { url: "https://feeds.reuters.com/reuters/businessNews",      source: "Reuters",       category: "Market Trends",      tag: "market" },
-  { url: "https://techcrunch.com/category/venture/feed/",       source: "TechCrunch",    category: "Market Trends",      tag: "market" },
-  { url: "https://www.axios.com/feeds/feed.rss",                source: "Axios",         category: "Market Trends",      tag: "market" },
+  // ── LANDSCAPE — Technology, policy, economics, AI capability ──────────────
+  { url: "https://www.theverge.com/rss/index.xml",               source: "The Verge",         category: "Technology",           tag: "landscape",    layer: "landscape" },
+  { url: "https://www.wired.com/feed/rss",                       source: "Wired",             category: "Technology & Culture", tag: "landscape",    layer: "landscape" },
+  { url: "https://www.technologyreview.com/feed/",               source: "MIT Tech Review",   category: "Deep Technology",      tag: "landscape",    layer: "landscape" },
+  { url: "https://techcrunch.com/feed/",                         source: "TechCrunch",        category: "Startups & Venture",   tag: "landscape",    layer: "landscape" },
+  { url: "https://rss.politico.com/politics-news.xml",           source: "Politico",          category: "Policy & Regulation",  tag: "landscape",    layer: "landscape" },
+  { url: "https://www.axios.com/feeds/feed.rss",                 source: "Axios",             category: "Policy & Tech",        tag: "landscape",    layer: "landscape" },
+  { url: "https://feeds.bloomberg.com/markets/news.rss",         source: "Bloomberg",         category: "Markets & Finance",    tag: "landscape",    layer: "landscape" },
+  { url: "https://www.economist.com/business/rss.xml",           source: "The Economist",     category: "Global Business",      tag: "landscape",    layer: "landscape" },
+  { url: "https://www.economist.com/finance-and-economics/rss.xml", source: "The Economist",  category: "Finance & Economics",  tag: "landscape",    layer: "landscape" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "New York Times", category: "Technology",        tag: "landscape",    layer: "landscape" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",  source: "New York Times", category: "Business",          tag: "landscape",    layer: "landscape" },
 
-  // Healthcare & Pharma
-  { url: "https://www.statnews.com/feed/",                      source: "STAT News",     category: "Healthcare & Pharma", tag: "health" },
-  { url: "https://www.biopharmadive.com/feeds/news/",           source: "BioPharma Dive", category: "Healthcare & Pharma", tag: "health" },
-  { url: "https://www.fiercehealthcare.com/rss.xml",            source: "Fierce Healthcare", category: "Healthcare & Pharma", tag: "health" },
-
-  // Design Leadership
-  { url: "https://eyeondesign.aiga.org/feed/",                  source: "Eye on Design", category: "Design Leadership",  tag: "design-leadership" },
-  { url: "https://www.dezeen.com/tag/careers/feed/",            source: "Dezeen",        category: "Design Leadership",  tag: "design-leadership" },
-
-  // Creative Technology
-  { url: "https://www.theverge.com/rss/index.xml",              source: "The Verge",     category: "Creative Technology", tag: "creative-tech" },
-  { url: "https://techcrunch.com/feed/",                        source: "TechCrunch",    category: "Creative Technology", tag: "creative-tech" },
-
-  // Cultural Signal
-  { url: "https://pitchfork.com/rss/news/feed/2000/",           source: "Pitchfork",     category: "Cultural Signal",    tag: "culture" },
-  { url: "https://www.dezeen.com/feed/",                        source: "Dezeen",        category: "Cultural Signal",    tag: "culture" },
-  { url: "https://www.criterion.com/feed",                      source: "Criterion",     category: "Cultural Signal",    tag: "culture" },
-
-  // Data & Modeling
-  { url: "https://towardsdatascience.com/feed",                 source: "Towards Data Science", category: "Data & Modeling", tag: "data" },
-  { url: "https://thegradient.pub/rss/",                        source: "The Gradient",  category: "Data & Modeling",    tag: "data" },
+  // ── CULTURE — Taste, criticism, creative practice ─────────────────────────
+  { url: "https://www.theatlantic.com/feed/all/",                source: "The Atlantic",      category: "Ideas & Culture",      tag: "culture",      layer: "culture" },
+  { url: "https://slate.com/feeds/all.rss",                      source: "Slate",             category: "Culture & Commentary", tag: "culture",      layer: "culture" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml", source: "New York Times",   category: "Arts & Culture",       tag: "culture",      layer: "culture" },
+  { url: "https://www.dezeen.com/architecture/feed/",            source: "Dezeen",            category: "Architecture",         tag: "culture",      layer: "culture" },
+  { url: "https://www.architectural-review.com/rss",             source: "Arch Review",       category: "Architecture Criticism", tag: "culture",    layer: "culture" },
+  { url: "https://pitchfork.com/feed/feed-news/rss",             source: "Pitchfork",         category: "Music & Criticism",    tag: "culture",      layer: "culture" },
+  { url: "https://www.nplusonemag.com/feed/",                    source: "n+1",               category: "Literary & Ideas",     tag: "culture",      layer: "culture" },
+  { url: "https://www.fastcompany.com/latest/rss",               source: "Fast Company",      category: "Innovation & Culture", tag: "culture",      layer: "culture" },
 ]
 
 // ─── RSS Parser ───────────────────────────────────────────────────────────────
@@ -206,123 +208,34 @@ async function fetchFeed(feed: FeedDef): Promise<Article[]> {
   }
 }
 
-// ─── Exa Company Intelligence ─────────────────────────────────────────────────
-// Uses Exa search API for company intelligence — much better than news APIs
-// Add EXA_API_KEY to Vercel env vars to enable: https://exa.ai
-
-const TARGET_COMPANIES = ["Shopify", "Anthropic", "Rivian", "Patagonia", "Eli Lilly"]
-
-async function fetchCompanyIntelligence(): Promise<Article[]> {
-  const key = process.env.EXA_API_KEY
-  if (!key) return COMPANY_STUBS
-
-  const query = `${TARGET_COMPANIES.join(" OR ")} design team product announcement hiring`
-
-  try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-    const res = await fetch("https://api.exa.ai/search", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": key,
-      },
-      body: JSON.stringify({
-        query,
-        numResults: 8,
-        startPublishedDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-        contents: { text: { maxCharacters: 400 } },
-        category: "news",
-      }),
-    })
-    clearTimeout(timeout)
-
-    if (!res.ok) return COMPANY_STUBS
-    const data = await res.json()
-
-    return (data.results || [])
-      .filter((r: { title?: string; url?: string }) => r.title && r.url)
-      .slice(0, 8)
-      .map((r: { id: string; title: string; url: string; publishedDate?: string; text?: string; author?: string }, i: number) => ({
-        id: `company-${i}`,
-        title: r.title,
-        source: extractDomain(r.url),
-        url: r.url,
-        publishedAt: r.publishedDate || new Date().toISOString(),
-        summary: r.text ? r.text.slice(0, 280).replace(/\s+/g, " ").trim() : r.title,
-        category: "Company Intel",
-        tag: "company",
-      }))
-  } catch {
-    return COMPANY_STUBS
-  }
-}
-
-function extractDomain(url: string): string {
-  try {
-    const h = new URL(url).hostname.replace("www.", "")
-    return h.split(".")[0].charAt(0).toUpperCase() + h.split(".")[0].slice(1)
-  } catch {
-    return "Web"
-  }
-}
-
 // ─── Stub Content ─────────────────────────────────────────────────────────────
-// Quality reference content — used when live feeds are unavailable
+// Quality reference content — used when live feeds are unavailable for a layer
 
-const COMPANY_STUBS: Article[] = [
-  { id: "co-1", title: "Shopify's design team restructure signals a shift toward systems-first thinking", source: "The Verge", url: "#", publishedAt: new Date().toISOString(), summary: "Shopify has reorganized its design function around systems and infrastructure rather than product verticals. The move reflects a broader bet that design leverage comes from platform, not features.", category: "Company Intel", tag: "company" },
-  { id: "co-2", title: "Anthropic expands product design team as Claude reaches 100M users", source: "TechCrunch", url: "#", publishedAt: new Date().toISOString(), summary: "Anthropic is scaling its product design organization with a focus on enterprise UX and developer experience. Several senior hires from Google and Figma have joined in Q1.", category: "Company Intel", tag: "company" },
-  { id: "co-3", title: "Rivian's in-vehicle experience team is hiring senior UX leads in Palo Alto", source: "Rivian", url: "#", publishedAt: new Date().toISOString(), summary: "Rivian is building out its connected vehicle UX team ahead of the R2 launch. The roles prioritize systems thinking and cross-platform design at scale.", category: "Company Intel", tag: "company" },
-  { id: "co-4", title: "Patagonia's digital team is rebuilding its direct-to-consumer experience", source: "Fast Company", url: "#", publishedAt: new Date().toISOString(), summary: "Patagonia's design and digital team is re-platforming its e-commerce experience around their own fulfillment infrastructure, reducing dependence on third-party vendors.", category: "Company Intel", tag: "company" },
-  { id: "co-5", title: "LillyDirect's second year: what the access data is showing", source: "STAT News", url: "#", publishedAt: new Date().toISOString(), summary: "Eli Lilly's direct pharmacy platform is showing meaningful improvement in prescription fulfillment times for GLP-1 medications. The design team is now focused on refill experience and adherence flows.", category: "Company Intel", tag: "company" },
-]
+const ALL_LAYERS = ["opportunity", "position", "discipline", "landscape", "culture"]
 
 const STUBS: Record<string, Article[]> = {
-  policy: [
-    { id: "pol-1", title: "FTC moves to define AI accountability standards for consumer-facing products", source: "Politico", url: "#", publishedAt: new Date().toISOString(), summary: "The Federal Trade Commission has issued preliminary guidance on how companies must disclose AI-generated content to consumers. Design and product teams are scrambling to interpret implementation requirements.", category: "Policy", tag: "policy" },
-    { id: "pol-2", title: "CMS updates prior authorization rules — and the UX burden just shifted to payers", source: "Axios", url: "#", publishedAt: new Date().toISOString(), summary: "New CMS rules require payers to process prior authorizations through standardized APIs. The compliance burden has significant implications for patient-facing UX design.", category: "Policy", tag: "policy" },
+  opportunity: [
+    { id: "opp-1", title: "LillyDirect's second year: what the access data is showing", source: "STAT News", url: "#", publishedAt: new Date().toISOString(), summary: "Eli Lilly's direct pharmacy platform is showing meaningful improvement in prescription fulfillment times for GLP-1 medications. The design team is now focused on refill experience and adherence flows.", category: "Healthcare & Pharma", tag: "opportunity" },
+    { id: "opp-2", title: "Healthcare AI funding doubles in Q1 as pharma bets on diagnostic automation", source: "BioPharma Dive", url: "#", publishedAt: new Date().toISOString(), summary: "Venture capital investment in healthcare AI reached $4.2B in Q1, with diagnostic imaging and patient access tools drawing the most capital. Design experience at the human-AI interface is the scarce resource.", category: "Healthcare & Pharma", tag: "opportunity" },
+    { id: "opp-3", title: "Digital health UX is still failing patients — and the data shows it", source: "Fierce Healthcare", url: "#", publishedAt: new Date().toISOString(), summary: "A new analysis finds that most pharmaceutical digital touchpoints score below average on usability benchmarks. The gap between clinical excellence and patient-facing experience is widening.", category: "Healthcare & Pharma", tag: "opportunity" },
   ],
-  ai: [
-    { id: "ai-1", title: "Claude's extended thinking mode changes what's possible in design research", source: "The Verge", url: "#", publishedAt: new Date().toISOString(), summary: "Anthropic's extended thinking capability enables multi-step reasoning across complex briefs. Early adopters in design research are using it for synthesis tasks that previously required senior strategists.", category: "AI & Design", tag: "ai" },
-    { id: "ai-2", title: "Figma's AI features have shipped. The question is whether design teams are ready.", source: "Eye on Design", url: "#", publishedAt: new Date().toISOString(), summary: "Figma's AI-assisted design tools are now broadly available. The bottleneck isn't the tool — it's the briefing and evaluation judgment that separates useful output from noise.", category: "AI & Design", tag: "ai" },
-    { id: "ai-3", title: "The briefing gap: why AI-assisted design fails before it starts", source: "Nielsen Norman", url: "#", publishedAt: new Date().toISOString(), summary: "New research from NN/g confirms that output quality correlates strongly with input precision. Design teams investing in briefing discipline outperform those focused on tool adoption by 3x.", category: "AI & Design", tag: "ai" },
+  position: [
+    { id: "pos-1", title: "VP of Design compensation benchmarks: what the data shows", source: "Levels.fyi", url: "#", publishedAt: new Date().toISOString(), summary: "Median VP Design compensation at public tech companies reached $620K total. Healthcare tech and pharma are paying 20-30% above median to attract design leaders with domain fluency.", category: "Design Leadership", tag: "position" },
+    { id: "pos-2", title: "CDO roles are proliferating in regulated industries — and the specs are changing", source: "Core77", url: "#", publishedAt: new Date().toISOString(), summary: "Healthcare, finance, and pharma are creating Chief Design Officer roles at a faster rate than tech. The job descriptions emphasize systems thinking, regulatory fluency, and cross-functional alignment.", category: "Design Leadership", tag: "position" },
   ],
-  "design-industry": [
-    { id: "di-1", title: "Design leadership is being redefined around judgment, not craft", source: "Harvard Business Review", url: "#", publishedAt: new Date().toISOString(), summary: "The most valued design leaders today are not the best practitioners — they are the best decision-makers. The ability to brief, evaluate, and redirect AI output is becoming the core leadership competency.", category: "Design Industry", tag: "design-industry" },
-    { id: "di-2", title: "VP of Design compensation benchmarks for 2025: what the data shows", source: "Levels.fyi", url: "#", publishedAt: new Date().toISOString(), summary: "Median VP Design compensation at public tech companies reached $620K total in 2024. Healthcare tech and pharma are paying 20-30% above median to attract design leaders with domain fluency.", category: "Design Industry", tag: "design-industry" },
-    { id: "di-3", title: "Strategy teams are encroaching on design territory", source: "McKinsey Design", url: "#", publishedAt: new Date().toISOString(), summary: "As AI lowers the barrier to producing design artifacts, strategy teams are generating their own mockups and prototypes. Design leaders who can only offer execution are being sidelined.", category: "Design Industry", tag: "design-industry" },
+  discipline: [
+    { id: "dis-1", title: "Design leadership is being redefined around judgment, not craft", source: "Eye on Design", url: "#", publishedAt: new Date().toISOString(), summary: "The most valued design leaders today are not the best practitioners — they are the best decision-makers. The ability to brief, evaluate, and redirect AI output is becoming the core leadership competency.", category: "Design Practice", tag: "discipline" },
+    { id: "dis-2", title: "The rise of the design engineer: the most valuable hire in product", source: "Linear Blog", url: "#", publishedAt: new Date().toISOString(), summary: "Design engineers who translate visual vision into working code are becoming the highest-leverage hire in product-led companies. The role didn't exist as a category five years ago.", category: "Product Engineering", tag: "discipline" },
+    { id: "dis-3", title: "The briefing gap: why AI-assisted design fails before it starts", source: "IBM Design", url: "#", publishedAt: new Date().toISOString(), summary: "Output quality correlates strongly with input precision. Design teams investing in briefing discipline outperform those focused on tool adoption by 3x.", category: "Enterprise Design", tag: "discipline" },
   ],
-  "creative-practice": [
-    { id: "cp-1", title: "What Herzog & de Meuron's new building tells us about computational form", source: "Dezeen", url: "#", publishedAt: new Date().toISOString(), summary: "The practice's latest structure uses parametric geometry derived from structural analysis rather than aesthetic preference. The result is a building that looks designed by a system that understands load.", category: "Creative Practice", tag: "creative-practice" },
-    { id: "cp-2", title: "The Brutalist is not a film about architecture. It's about what outlasts you.", source: "The Atlantic", url: "#", publishedAt: new Date().toISOString(), summary: "Brady Corbet's film uses architecture as a frame for the question of authorship — who gets credit for vision and who absorbs the labor. It's the most relevant film about creative work in years.", category: "Creative Practice", tag: "creative-practice" },
-  ],
-  market: [
-    { id: "mkt-1", title: "Healthcare AI funding doubles in Q1 2025 as pharma bets on diagnostic automation", source: "Reuters", url: "#", publishedAt: new Date().toISOString(), summary: "Venture capital investment in healthcare AI reached $4.2B in Q1, with diagnostic imaging and patient access tools drawing the most capital. Design experience at the human-AI interface is the scarce resource.", category: "Market Trends", tag: "market" },
-    { id: "mkt-2", title: "The agency model is under structural pressure from in-house AI teams", source: "Digiday", url: "#", publishedAt: new Date().toISOString(), summary: "Large brands are building internal AI-assisted creative capabilities, reducing reliance on external agencies for production work. Agencies that survive will offer judgment and strategy, not execution.", category: "Market Trends", tag: "market" },
-  ],
-  health: [
-    { id: "hlt-1", title: "Donanemab approval reshapes the Alzheimer's care pathway — and the design challenge", source: "STAT News", url: "#", publishedAt: new Date().toISOString(), summary: "Lilly's donanemab approval has created a new category of care coordination challenge: patients need monthly infusions, biomarker monitoring, and specialist access that the current system wasn't built for.", category: "Healthcare & Pharma", tag: "health" },
-    { id: "hlt-2", title: "Digital health UX is still failing patients — and the data shows it", source: "NEJM Catalyst", url: "#", publishedAt: new Date().toISOString(), summary: "A new analysis finds that most pharmaceutical digital touchpoints score below average on usability benchmarks. The gap between clinical excellence and patient-facing experience is widening.", category: "Healthcare & Pharma", tag: "health" },
-    { id: "hlt-3", title: "Pharma's AI mandate: from pilot to infrastructure", source: "BioPharma Dive", url: "#", publishedAt: new Date().toISOString(), summary: "Major pharmaceutical companies are moving AI from experimental programs to core operational infrastructure. Lilly's mandate that every employee engage with AI daily is being studied as an implementation model.", category: "Healthcare & Pharma", tag: "health" },
-  ],
-  "design-leadership": [
-    { id: "dl-1", title: "Google's Head of Design exits after 9 years; successor being considered from product org", source: "Eye on Design", url: "#", publishedAt: new Date().toISOString(), summary: "The transition signals a broader trend: design leadership roles are increasingly being filled by product leaders with design sensibility rather than design practitioners with management experience.", category: "Design Leadership", tag: "design-leadership" },
-    { id: "dl-2", title: "CDO roles are proliferating in regulated industries — and the specs are changing", source: "Core77", url: "#", publishedAt: new Date().toISOString(), summary: "Healthcare, finance, and pharma are creating Chief Design Officer roles at a faster rate than tech. The job descriptions emphasize systems thinking, regulatory fluency, and cross-functional alignment.", category: "Design Leadership", tag: "design-leadership" },
-  ],
-  "creative-tech": [
-    { id: "ct-1", title: "Cursor's composer mode changes how designers prototype in code", source: "The Verge", url: "#", publishedAt: new Date().toISOString(), summary: "Cursor's multi-file composer allows designers who code to describe an entire component system in natural language and iterate on it in real time. The design-to-code cycle has compressed from days to hours.", category: "Creative Technology", tag: "creative-tech" },
-    { id: "ct-2", title: "v0's component generation is production-ready. The design process needs to catch up.", source: "TechCrunch", url: "#", publishedAt: new Date().toISOString(), summary: "Vercel's v0 now generates React components that pass production code review at most companies. The constraint isn't the tool — it's the design brief that goes in.", category: "Creative Technology", tag: "creative-tech" },
-    { id: "ct-3", title: "The rise of the design engineer: a new role is becoming the most valuable in product", source: "Linear Blog", url: "#", publishedAt: new Date().toISOString(), summary: "Design engineers — who can translate visual vision into working code — are becoming the highest-leverage hire in product-led companies. The role didn't exist as a category five years ago.", category: "Creative Technology", tag: "creative-tech" },
+  landscape: [
+    { id: "lan-1", title: "FTC moves to define AI accountability standards for consumer-facing products", source: "Politico", url: "#", publishedAt: new Date().toISOString(), summary: "The Federal Trade Commission has issued preliminary guidance on how companies must disclose AI-generated content to consumers. Design and product teams are scrambling to interpret implementation requirements.", category: "Policy & Regulation", tag: "landscape" },
+    { id: "lan-2", title: "The agency model is under structural pressure from in-house AI teams", source: "The Verge", url: "#", publishedAt: new Date().toISOString(), summary: "Large brands are building internal AI-assisted creative capabilities, reducing reliance on external agencies for production work. Agencies that survive will offer judgment and strategy, not execution.", category: "Technology", tag: "landscape" },
+    { id: "lan-3", title: "From prototypes to predictive: how design and ML are converging at scale", source: "MIT Tech Review", url: "#", publishedAt: new Date().toISOString(), summary: "The most sophisticated product teams are building design systems that generate data for model training, and models that generate inputs for design iteration. The loop is closing.", category: "Deep Technology", tag: "landscape" },
   ],
   culture: [
-    { id: "cul-1", title: "Brutalism in architecture is back. The moral questions it raised never left.", source: "Architectural Review", url: "#", publishedAt: new Date().toISOString(), summary: "A wave of neo-brutalist buildings is emerging from young studios in Berlin, Seoul, and Mexico City. Unlike the 1970s movement, this version is obsessed with material honesty rather than social ideology.", category: "Cultural Signal", tag: "culture" },
-    { id: "cul-2", title: "Jack White's new record is about attention. Or the death of it.", source: "Pitchfork", url: "#", publishedAt: new Date().toISOString(), summary: "White's seventh album uses tempo and structure to force engagement — tracks build slowly, punish distraction, and reward full listens. It's a deliberate argument against the streaming era's compression of experience.", category: "Cultural Signal", tag: "culture" },
-  ],
-  data: [
-    { id: "dat-1", title: "Why design teams are starting to care about embeddings", source: "Towards Data Science", url: "#", publishedAt: new Date().toISOString(), summary: "Vector embeddings are the infrastructure layer beneath most AI design tools. Design leaders who understand how similarity search works have a significant advantage in briefing AI systems accurately.", category: "Data & Modeling", tag: "data" },
-    { id: "dat-2", title: "From prototypes to predictive: how design and ML are converging at scale", source: "The Gradient", url: "#", publishedAt: new Date().toISOString(), summary: "The most sophisticated product teams are building design systems that generate data for model training, and models that generate inputs for design iteration. The loop is closing.", category: "Data & Modeling", tag: "data" },
+    { id: "cul-1", title: "Brutalism in architecture is back. The moral questions it raised never left.", source: "Architectural Review", url: "#", publishedAt: new Date().toISOString(), summary: "A wave of neo-brutalist buildings is emerging from young studios in Berlin, Seoul, and Mexico City. Unlike the 1970s movement, this version is obsessed with material honesty rather than social ideology.", category: "Architecture Criticism", tag: "culture" },
+    { id: "cul-2", title: "The Brutalist is not a film about architecture. It's about what outlasts you.", source: "The Atlantic", url: "#", publishedAt: new Date().toISOString(), summary: "Brady Corbet's film uses architecture as a frame for the question of authorship — who gets credit for vision and who absorbs the labor. It's the most relevant film about creative work in years.", category: "Ideas & Culture", tag: "culture" },
   ],
 }
 
@@ -355,37 +268,32 @@ async function addRelevanceAnnotations(articles: Article[]): Promise<Article[]> 
 
   const system = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
 
-Five intelligence layers:
-OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target. Pharma digital transformation, patient experience, direct-to-patient models, AI in drug discovery and care coordination.
-POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics, interview intelligence, agency-to-in-house transitions.
-DISCIPLINE — How design leadership is evolving as a function. CDO roles, design org structure, AI's impact on practice, design engineering convergence.
-LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation, market movements.
-CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory.
+DISPATCH processes signal through five intelligence layers:
+
+1. OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target but not the only one. Pharma digital transformation, patient experience, direct-to-patient models, AI in drug discovery and care coordination.
+2. POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics, interview intelligence, agency-to-in-house transitions.
+3. DISCIPLINE — How design leadership is evolving as a function. CDO roles, design org structure, AI's impact on practice, design engineering convergence, tools on the vanguard (Figma, Claude, Cursor, Vercel).
+4. LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation, market movements.
+5. CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory. The intellectual currents that make a design leader worth following.
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
-  "hook": "one sharp sentence — what Jeremy specifically stands to gain or understand from this article",
+  "synopsis": "one plain sentence — what this article actually covers, framed for someone tracking design leadership and strategic positioning across technology, culture, and healthcare",
+  "hook": "one sharp sentence — why this signal matters to the DISPATCH mandate. What it reveals, what it implies, what connection it makes. Never say 'not relevant' — find the signal, even if indirect.",
   "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
-  "lens": the PRIMARY layer — one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "lens": the PRIMARY layer this maps to — one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
   "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
 }
 
-type definitions:
-DATA — statistics, benchmarks, or quantitative findings
-CASE — a company, project, or person as a working example
-OPINION — perspective, argument, or editorial stance
-TREND — directional signal about where an industry or practice is heading
-RESEARCH — study, report, or formal analysis
-NEWS — breaking development or announcement
-CULTURAL — creative, cultural, or broader civilizational reference
+Score definitions (0 = no relevance to this layer, 10 = essential):
+opportunity — strengthens healthcare/pharma positioning
+position — directly advances the career trajectory
+discipline — reveals how design leadership is evolving
+landscape — illuminates the broader operating environment
+culture — enriches creative authority and taste
+urgency — time-sensitivity (0 = evergreen, 10 = act now)
 
-score definitions:
-opportunity — strengthens healthcare/pharma positioning (0=none, 10=essential)
-position — directly advances the career trajectory (0=none, 10=essential)
-discipline — reveals how design leadership is evolving (0=none, 10=essential)
-landscape — illuminates the broader operating environment (0=none, 10=essential)
-culture — enriches creative authority and taste (0=none, 10=essential)
-urgency — time-sensitivity (0=evergreen, 10=act now)
+Multi-layer signals (scoring high on 2+ layers) are the most valuable. Flag them.
 
 Return only valid JSON array. No prose.`
 
@@ -424,7 +332,7 @@ Return only valid JSON array. No prose.`
     const match = text.match(/\[[\s\S]*\]/)
     if (!match) return articles
 
-    const annotations: { hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] = JSON.parse(match[0])
+    const annotations: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] = JSON.parse(match[0])
 
     return articles.map((a, i) => ({
       ...a,
@@ -441,10 +349,9 @@ Return only valid JSON array. No prose.`
 // ─── GET Handler ──────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const results = await Promise.allSettled([
-    ...FEEDS.map(feed => fetchFeed(feed)),
-    fetchCompanyIntelligence(),
-  ])
+  const results = await Promise.allSettled(
+    FEEDS.map(feed => fetchFeed(feed))
+  )
 
   const allArticles: Article[] = []
   let liveCount = 0
@@ -468,15 +375,14 @@ export async function GET() {
     }
   }
 
-  // Categories with no live source — on stub fallback
-  const ALL_TAGS = ["policy", "ai", "design-industry", "creative-practice", "market", "health", "company", "design-leadership", "creative-tech", "culture", "data"]
-  const stubCategories = ALL_TAGS.filter(tag => !coveredTags.has(tag))
+  // Layers with no live source — on stub fallback
+  const stubCategories = ALL_LAYERS.filter(layer => !coveredTags.has(layer))
 
-  const CATEGORY_ORDER = ALL_TAGS
+  const LAYER_ORDER = ALL_LAYERS
 
   const sorted = interleave(
     allArticles.sort((a, b) =>
-      CATEGORY_ORDER.indexOf(a.tag) - CATEGORY_ORDER.indexOf(b.tag)
+      LAYER_ORDER.indexOf(a.tag) - LAYER_ORDER.indexOf(b.tag)
     )
   )
 
