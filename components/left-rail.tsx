@@ -92,19 +92,13 @@ function SourceFilter({ articles, excludedSources, onToggleSource }: {
           padding: "6px 0",
           boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
         }}>
-          {/* Select all / none */}
-          <div style={{ display: "flex", gap: 8, padding: "4px 12px 8px", borderBottom: "1px solid var(--border)" }}>
+          {/* Reset */}
+          <div style={{ display: "flex", padding: "4px 12px 8px", borderBottom: "1px solid var(--border)" }}>
             <button
               onClick={() => sources.forEach(s => { if (excludedSources.has(s.name)) onToggleSource(s.name) })}
               style={{ background: "none", border: "none", fontSize: 10, color: "var(--accent-secondary)", cursor: "pointer", padding: 0 }}
             >
-              All
-            </button>
-            <button
-              onClick={() => sources.forEach(s => { if (!excludedSources.has(s.name)) onToggleSource(s.name) })}
-              style={{ background: "none", border: "none", fontSize: 10, color: "var(--text-tertiary)", cursor: "pointer", padding: 0 }}
-            >
-              None
+              Reset
             </button>
           </div>
           {sources.map(s => {
