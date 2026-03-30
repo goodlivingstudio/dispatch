@@ -266,14 +266,87 @@ function LayerDot({ layer, size = 7 }: { layer: LayerKey; size?: number }) {
 
 function LayerPill({ layer }: { layer: LayerKey }) {
   return (
-    <span style={{ ...pillStyle, color: "var(--text-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
-      <span style={{ width: 5, height: 5, borderRadius: "50%", background: LAYER_COLORS[layer], flexShrink: 0 }} />
+    <span style={{ ...pillStyle, color: "var(--text-secondary)" }}>
       {LAYER_LABELS[layer]}
     </span>
   )
 }
 
-// ─── Layer Scatter — Venn-inspired overlap visualization ─────────────────────
+// ─── Contributing Signals Drawer ─────────────────────────────────────────────
+
+function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
+  const [open, setOpen] = useState(false)
+
+  if (articles.length === 0) {
+    return (
+      <div style={bodyStyle}>No specific articles mapped yet.</div>
+    )
+  }
+
+  return (
+    <div>
+      <button
+        onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
+        style={{
+          ...sectionLabelStyle,
+          background: "none", border: "none", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 6, padding: 0,
+          marginBottom: open ? 12 : 0, transition: "margin 0.2s",
+        }}
+      >
+        Contributing Signals ({articles.length})
+        <span style={{ fontSize: 8, opacity: 0.6, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {articles.map(a => {
+            const isExternal = a.url && a.url !== "#"
+            const inner = (
+              <div
+                key={a.id}
+                style={{
+                  padding: "10px 14px", background: "var(--bg-elevated)", borderRadius: 8,
+                  cursor: isExternal ? "pointer" : "default",
+                  transition: "background 0.12s",
+                }}
+                onMouseEnter={e => { if (isExternal) e.currentTarget.style.background = "var(--bg-surface)" }}
+                onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+              >
+                {/* Eyebrow */}
+                <div style={{
+                  fontSize: 11, fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  color: "var(--text-tertiary)", letterSpacing: "-0.01em", marginBottom: 4,
+                }}>
+                  {a.source} · {a.category} · {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </div>
+                {/* Headline */}
+                <div style={{
+                  fontSize: 13, fontWeight: 550, color: "var(--text-primary)",
+                  lineHeight: 1.4, letterSpacing: "-0.01em",
+                }}>
+                  {a.title}
+                </div>
+              </div>
+            )
+            if (isExternal) {
+              return (
+                <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }} onClick={e => e.stopPropagation()}>
+                  {inner}
+                </a>
+              )
+            }
+            return inner
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Unused — kept for future dataviz work ───────────────────────────────────
+// LayerScatter and LayerLegend removed from render but retained in code
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 function LayerScatter({ layerCounts, size = 80 }: { layerCounts: Record<LayerKey, number>; size?: number }) {
   const total = Math.max(Object.values(layerCounts).reduce((a, b) => a + b, 0), 1)
@@ -369,7 +442,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
 
         {/* ── Module 1: Current Briefing ────────────────────────────────── */}
         <div
-          style={{ ...cardBase, borderLeft: "3px solid var(--accent-secondary)", ...cardHoverStyle("briefing") }}
+          style={{ ...cardBase,  ...cardHoverStyle("briefing") }}
           onMouseEnter={() => setHoveredCard("briefing")}
           onMouseLeave={() => setHoveredCard(null)}
           onClick={() => setActiveModal("briefing")}
@@ -393,9 +466,8 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 onClick={() => setActiveModal(`pattern-${i}`)}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
-                  {pattern.layers.map(l => <LayerDot key={l} layer={l} />)}
-                  <span style={{ fontSize: 10, color: "var(--text-tertiary)", fontFamily: "'SF Mono', 'Fira Code', monospace", marginLeft: 4 }}>
-                    {pattern.layers.length} layers &middot; {pattern.signalCount} signals
+                  <span style={{ fontSize: 10, color: "var(--text-tertiary)", fontFamily: "'SF Mono', 'Fira Code', monospace" }}>
+                    {pattern.layers.map(l => LAYER_LABELS[l]).join(" · ")} · {pattern.signalCount} signals
                   </span>
                 </div>
                 <div style={{ ...headingStyle, marginBottom: 6 }}>{pattern.title}</div>
@@ -423,12 +495,9 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 <div style={bodyStyle}>All layers have healthy coverage.</div>
               ) : (
                 blindSpots.map(s => (
-                  <div key={s.layer} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <LayerDot layer={s.layer} size={7} />
-                    <div style={{ ...bodyStyle, marginTop: -2 }}>
-                      <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{LAYER_LABELS[s.layer]}</strong>
-                      {" "}&mdash; {s.note}
-                    </div>
+                  <div key={s.layer} style={{ ...bodyStyle }}>
+                    <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{LAYER_LABELS[s.layer]}</strong>
+                    {" "}&mdash; {s.note}
                   </div>
                 ))
               )}
@@ -437,7 +506,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
 
           {/* Cerebro */}
           <div
-            style={{ ...cardBase, borderLeft: "3px solid var(--accent-secondary)", display: "flex", flexDirection: "column", ...cardHoverStyle("cerebro") }}
+            style={{ ...cardBase,  display: "flex", flexDirection: "column", ...cardHoverStyle("cerebro") }}
             onMouseEnter={() => setHoveredCard("cerebro")}
             onMouseLeave={() => setHoveredCard(null)}
             onClick={() => setActiveModal("cerebro")}
@@ -482,11 +551,8 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               <div style={sectionLabelStyle}>What to Watch</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                 {blindSpots.length > 0 ? blindSpots.map(s => (
-                  <div key={s.layer} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: LAYER_COLORS[s.layer], flexShrink: 0 }} />
-                    <span style={{ ...bodyStyle }}>
-                      <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{LAYER_LABELS[s.layer]}</strong> — {s.note}
-                    </span>
+                  <div key={s.layer} style={{ ...bodyStyle }}>
+                    <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{LAYER_LABELS[s.layer]}</strong> — {s.note}
                   </div>
                 )) : (
                   <div style={bodyStyle}>All layers show healthy coverage. Focus on convergence patterns for actionable insight.</div>
@@ -514,42 +580,12 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 <div style={{ ...bodyStyle, fontSize: 14, lineHeight: 1.7 }}>{pattern.description}</div>
               </div>
 
-              <div>
-                <div style={sectionLabelStyle}>Contributing Signals</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-                  {pattern.articles.length === 0 ? (
-                    <div style={bodyStyle}>No specific articles mapped yet.</div>
-                  ) : (
-                    pattern.articles.map(a => (
-                      <div key={a.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px", background: "var(--bg-elevated)", borderRadius: 8 }}>
-                        <LayerDot layer={(a.tag?.toLowerCase() || "landscape") as LayerKey} size={6} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {a.title}
-                          </div>
-                          <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontFamily: "'SF Mono', 'Fira Code', monospace", marginTop: 2 }}>
-                            {a.source} &middot; {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
+              <ContributingSignalsDrawer articles={pattern.articles} />
 
               <div>
                 <div style={sectionLabelStyle}>Strategic Implication</div>
                 <div style={{ ...bodyStyle, marginTop: 8, fontStyle: "italic" }}>
                   This convergence pattern suggests a developing theme that crosses traditional boundaries. When AI synthesis is active, this section will contain a strategic interpretation of how these signals relate to your mandate and what action they might warrant.
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={sectionLabelStyle}>Signal Frequency</div>
-                <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 16 }}>
-                  {pattern.layers.map(l => (
-                    <div key={l} style={{ width: 16, height: Math.max(3, (layerCounts[l] / Math.max(...Object.values(layerCounts), 1)) * 16), borderRadius: 2, background: LAYER_COLORS[l], opacity: 0.7 }} />
-                  ))}
                 </div>
               </div>
 
@@ -574,7 +610,6 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 {blindSpots.map(s => (
                   <div key={s.layer} style={{ padding: "14px 16px", background: "var(--bg-elevated)", borderRadius: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <LayerDot layer={s.layer} size={8} />
                       <span style={{ ...headingStyle, fontSize: 14 }}>{LAYER_LABELS[s.layer]}</span>
                       <span style={{ ...pillStyle, color: "var(--text-tertiary)" }}>{s.count} signals</span>
                     </div>
