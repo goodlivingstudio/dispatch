@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { ExternalLink } from "lucide-react"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -30,110 +31,253 @@ function timeAgo(iso: string): string {
   return `${Math.floor(d / 7)}w`
 }
 
-// ─── Episode Card ────────────────────────────────────────────────────────────
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+}
 
-function EpisodeCard({ episode }: { episode: Episode }) {
-  const [hovered, setHovered] = useState(false)
+const LAYER_LABELS: Record<string, string> = {
+  opportunity: "Opportunity",
+  position: "Position",
+  discipline: "Discipline",
+  landscape: "Landscape",
+  culture: "Culture",
+}
 
+// ─── Episode Modal ──────────────────────────────────────────────────────────
+
+function EpisodeModal({ episode, onClose }: { episode: Episode; onClose: () => void }) {
   return (
-    <a
-      href={episode.url || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ textDecoration: "none", display: "block" }}
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 2000,
+        background: "rgba(0,0,0,0.6)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
         style={{
-          display: "flex",
-          gap: 14,
-          padding: 16,
           background: "var(--bg-surface)",
-          borderRadius: 12,
-          cursor: "pointer",
-          transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-          transform: hovered ? "scale(1.015)" : "scale(1)",
+          borderRadius: 16,
+          width: "80vw",
+          maxWidth: 720,
+          maxHeight: "85vh",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Artwork */}
-        {episode.artworkUrl ? (
-          <img
-            src={episode.artworkUrl}
-            alt={episode.showName}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 8,
-              objectFit: "cover",
-              flexShrink: 0,
-              background: "var(--bg-elevated)",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 8,
-              background: "var(--bg-elevated)",
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 20,
-              color: "var(--text-tertiary)",
-            }}
-          >
-            ◉
+        {/* Header with artwork */}
+        <div style={{
+          display: "flex", gap: 20, padding: "28px 32px 24px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+        }}>
+          {episode.artworkUrl ? (
+            <img
+              src={episode.artworkUrl}
+              alt={episode.showName}
+              style={{ width: 96, height: 96, borderRadius: 12, objectFit: "cover", flexShrink: 0, background: "var(--bg-elevated)" }}
+            />
+          ) : (
+            <div style={{
+              width: 96, height: 96, borderRadius: 12, background: "var(--bg-elevated)",
+              flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 28, color: "var(--text-tertiary)",
+            }}>
+              ◉
+            </div>
+          )}
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 6 }}>
+              {episode.showName}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 650, color: "var(--text-primary)", lineHeight: 1.35, letterSpacing: "-0.02em" }}>
+              {episode.title}
+            </div>
           </div>
-        )}
-
-        {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Eyebrow: show name · duration · time */}
-          <div
+          <button
+            onClick={onClose}
             style={{
-              fontSize: 11,
-              color: "var(--text-tertiary)",
-              letterSpacing: "0.01em",
-              marginBottom: 5,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              background: "none", border: "none", color: "var(--text-tertiary)",
+              cursor: "pointer", fontSize: 20, lineHeight: 1, padding: "4px 8px",
+              borderRadius: 4, alignSelf: "flex-start", flexShrink: 0,
             }}
           >
-            {episode.showName}
-            {episode.duration && (
-              <>
-                <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
-                {episode.duration}
-              </>
-            )}
-            <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
-            {timeAgo(episode.publishedAt)}
-          </div>
+            ×
+          </button>
+        </div>
 
-          {/* Episode title */}
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 550,
-              color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
-              lineHeight: 1.4,
-              letterSpacing: "-0.02em",
-              transition: "color 0.15s",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical" as const,
-              overflow: "hidden",
-            }}
-          >
-            {episode.title}
+        {/* Scrollable content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+
+            {/* THE WHAT — Synopsis */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 10,
+              }}>
+                Synopsis
+              </div>
+              <div style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                {episode.summary || "Episode synopsis will be available when the annotation engine is active. This section provides an AI-generated summary of what this episode covers, distilled for relevance to your mandate."}
+              </div>
+            </div>
+
+            {/* THE META — Particulars */}
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 28 }}>
+              <div style={{
+                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 14,
+              }}>
+                Details
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Show</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.showName}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Duration</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.duration || "—"}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Published</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{formatDate(episode.publishedAt)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Category</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.category}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Layer</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{LAYER_LABELS[episode.layer] || episode.layer}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* THE WHY — Mandate relevance */}
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 28 }}>
+              <div style={{
+                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 10,
+              }}>
+                Why It Matters
+              </div>
+              <div style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                Mandate relevance analysis will appear here when the annotation engine is active. This section explains how this episode connects to your five intelligence layers and what you should listen for relative to your strategic positioning.
+              </div>
+            </div>
+
+            {/* Listen button */}
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}>
+              {episode.url && episode.url !== "#" ? (
+                <a
+                  href={episode.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "10px 20px", borderRadius: 8,
+                    background: "var(--accent-secondary)", color: "var(--bg-primary)",
+                    textDecoration: "none", fontSize: 13, fontWeight: 600,
+                    transition: "opacity 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = "0.85" }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1" }}
+                >
+                  Listen
+                  <ExternalLink size={13} strokeWidth={2} />
+                </a>
+              ) : (
+                <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+                  No direct link available for this episode.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </a>
+    </div>
+  )
+}
+
+// ─── Episode Card ────────────────────────────────────────────────────────────
+
+function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        gap: 14,
+        padding: 16,
+        background: "var(--bg-surface)",
+        borderRadius: 12,
+        cursor: "pointer",
+        transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+        transform: hovered ? "scale(1.015)" : "scale(1)",
+      }}
+    >
+      {/* Artwork */}
+      {episode.artworkUrl ? (
+        <img
+          src={episode.artworkUrl}
+          alt={episode.showName}
+          style={{
+            width: 64, height: 64, borderRadius: 8,
+            objectFit: "cover", flexShrink: 0, background: "var(--bg-elevated)",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: 64, height: 64, borderRadius: 8, background: "var(--bg-elevated)",
+            flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 20, color: "var(--text-tertiary)",
+          }}
+        >
+          ◉
+        </div>
+      )}
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Eyebrow */}
+        <div
+          style={{
+            fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.01em",
+            marginBottom: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}
+        >
+          {episode.showName}
+          {episode.duration && (
+            <><span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>{episode.duration}</>
+          )}
+          <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
+          {timeAgo(episode.publishedAt)}
+        </div>
+
+        {/* Episode title */}
+        <div
+          style={{
+            fontSize: 14, fontWeight: 550,
+            color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
+            lineHeight: 1.4, letterSpacing: "-0.02em", transition: "color 0.15s",
+            display: "-webkit-box", WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical" as const, overflow: "hidden",
+          }}
+        >
+          {episode.title}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -143,6 +287,7 @@ export function AudioView() {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [loading, setLoading] = useState(true)
   const [showCount, setShowCount] = useState(0)
+  const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null)
 
   useEffect(() => {
     fetch("/api/podcasts")
@@ -159,15 +304,10 @@ export function AudioView() {
     <main style={{ flex: 1, overflowY: "auto", padding: "24px 28px", background: "var(--bg-primary)" }}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--text-tertiary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.04em",
-            fontWeight: 600,
-          }}
-        >
+        <div style={{
+          fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+          letterSpacing: "0.04em", fontWeight: 600,
+        }}>
           Audio Intelligence
         </div>
         {!loading && (
@@ -204,9 +344,14 @@ export function AudioView() {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {episodes.map(ep => (
-            <EpisodeCard key={ep.id} episode={ep} />
+            <EpisodeCard key={ep.id} episode={ep} onClick={() => setActiveEpisode(ep)} />
           ))}
         </div>
+      )}
+
+      {/* Episode modal */}
+      {activeEpisode && (
+        <EpisodeModal episode={activeEpisode} onClose={() => setActiveEpisode(null)} />
       )}
     </main>
   )
