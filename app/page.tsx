@@ -404,18 +404,14 @@ function LeftRail({
             </h1>
             <div
               style={{
-                fontSize: 8.5,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 10,
                 color: "var(--text-tertiary)",
-                letterSpacing: "0.04em",
-                marginTop: 5,
-                lineHeight: 1.3,
-                opacity: 0.7,
+                letterSpacing: "0.01em",
+                marginTop: 6,
+                lineHeight: 1.4,
               }}
             >
-              Directed intelligence for strategic positioning
-              <br />
-              across technology, culture &amp; healthcare
+              Directed intelligence for strategic positioning across technology, culture &amp; healthcare
             </div>
           </div>
           <LiveClock />
@@ -440,20 +436,20 @@ function LeftRail({
 
       {/* Navigation */}
       <nav style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
-        {/* Left brain / Right brain toggle */}
-        <div style={{ padding: "8px 12px 4px", marginBottom: 2 }}>
+        {/* Signal / Synthesis — left brain / right brain */}
+        <div style={{ padding: "8px 14px 4px", marginBottom: 2 }}>
           <div
             style={{
               display: "flex",
               background: "var(--bg-elevated)",
-              borderRadius: 4,
+              borderRadius: 6,
               padding: 2,
               gap: 2,
             }}
           >
             {[
-              { id: "feed",      icon: "≡", label: "Feed"     },
-              { id: "analytics", icon: "◎", label: "Analytics" },
+              { id: "feed",      icon: "⊡", label: "Signal"    },
+              { id: "analytics", icon: "◐", label: "Synthesis"  },
             ].map(tab => {
               const isTab = tab.id === "analytics" ? showAnalytics : !showAnalytics
               return (
@@ -465,16 +461,19 @@ function LeftRail({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 4,
-                    padding: "4px 0",
+                    gap: 5,
+                    padding: "8px 0",
+                    minHeight: 36,
                     background: isTab ? "var(--bg-surface)" : "transparent",
                     border: "none",
-                    borderRadius: 3,
+                    borderRadius: 5,
                     cursor: "pointer",
-                    transition: "background 0.15s",
+                    transition: "all 0.15s",
                   }}
+                  onMouseEnter={e => { if (!isTab) e.currentTarget.style.background = "rgba(255,255,255,0.03)" }}
+                  onMouseLeave={e => { if (!isTab) e.currentTarget.style.background = "transparent" }}
                 >
-                  <span style={{ fontSize: 12, color: isTab ? "var(--text-primary)" : "var(--text-tertiary)" }}>
+                  <span style={{ fontSize: 13, color: isTab ? "var(--text-primary)" : "var(--text-tertiary)", transition: "color 0.15s" }}>
                     {tab.icon}
                   </span>
                   <span style={{
@@ -482,6 +481,7 @@ function LeftRail({
                     letterSpacing: "0.01em",
                     color: isTab ? "var(--text-primary)" : "var(--text-tertiary)",
                     fontWeight: isTab ? 600 : 400,
+                    transition: "color 0.15s",
                   }}>
                     {tab.label}
                   </span>
@@ -491,53 +491,60 @@ function LeftRail({
           </div>
         </div>
 
-        {/* Category nav — hidden in analytics view */}
-        {!showAnalytics && CATEGORY_CONFIG.map(cat => {
-          const n = countFor(cat.id)
-          if (cat.id !== "all" && n === 0 && !feedLoading) return null
-          const isActive = active === cat.id
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onSelect(cat.id)}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "8px 20px",
-                minHeight: 32,
-                background: isActive ? "var(--bg-elevated)" : "transparent",
-                border: "none",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: "background 0.1s",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
-                  fontWeight: isActive ? 500 : 400,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                {cat.label}
-              </span>
-              {n > 0 && (
-                <span
+        {/* Category pills — hidden in synthesis view */}
+        {!showAnalytics && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "8px 14px" }}>
+            {CATEGORY_CONFIG.map(cat => {
+              const n = countFor(cat.id)
+              if (cat.id !== "all" && n === 0 && !feedLoading) return null
+              const isActive = active === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => onSelect(cat.id)}
                   style={{
-                    fontSize: 11,
-                    fontVariantNumeric: "tabular-nums",
-                    color: isActive ? "var(--text-secondary)" : "var(--text-tertiary)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "5px 12px",
+                    borderRadius: 16,
+                    border: "none",
+                    background: isActive ? "var(--accent-primary)" : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
                   }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
                 >
-                  {n}
-                </span>
-              )}
-            </button>
-          )
-        })}
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                      fontWeight: isActive ? 600 : 400,
+                      letterSpacing: "-0.01em",
+                      transition: "color 0.15s",
+                    }}
+                  >
+                    {cat.label}
+                  </span>
+                  {n > 0 && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontVariantNumeric: "tabular-nums",
+                        color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
+                        opacity: 0.7,
+                        transition: "color 0.15s",
+                      }}
+                    >
+                      {n}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
       </nav>
     </aside>
