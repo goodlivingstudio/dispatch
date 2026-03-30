@@ -37,7 +37,7 @@ const sectionLabelStyle: React.CSSProperties = {
   fontSize: 11,
   color: "var(--text-tertiary)",
   textTransform: "uppercase",
-  letterSpacing: "0.06em",
+  letterSpacing: "0.04em",
   fontWeight: 600,
   marginBottom: 6,
 }
@@ -84,7 +84,7 @@ const bumpButtonStyle: React.CSSProperties = {
   color: "var(--text-secondary)",
   fontSize: 10,
   fontWeight: 600,
-  letterSpacing: "0.06em",
+  letterSpacing: "0.04em",
   textTransform: "uppercase",
   cursor: "pointer",
   transition: "all 0.15s",
@@ -315,7 +315,7 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
                 {/* Eyebrow */}
                 <div style={{
                   fontSize: 11,
-                  color: "var(--text-tertiary)", letterSpacing: "-0.01em", marginBottom: 4,
+                  color: "var(--text-tertiary)", letterSpacing: "0.01em", marginBottom: 4,
                 }}>
                   {a.source} · {a.category} · {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </div>

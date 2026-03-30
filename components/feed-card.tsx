@@ -142,7 +142,7 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
           style={{
             fontSize: 11,
             color: "var(--text-tertiary)",
-            letterSpacing: "-0.01em",
+            letterSpacing: "0.01em",
             marginBottom: 6,
             whiteSpace: "nowrap",
             overflow: "hidden",
