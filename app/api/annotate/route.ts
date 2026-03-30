@@ -14,28 +14,37 @@ interface Annotation {
   relevance: string
   signalType: string
   signalLens: string
-  signalScores?: { lilly: number; hod: number; urgency: number }
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
-const SYSTEM_PROMPT = `You annotate news articles for a design intelligence dispatch. The dispatch serves a Senior Design Director tracking two mandates:
+const SYSTEM_PROMPT = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
 
-LILLY — pharma design, patient experience, AI mandate, LillyDirect, Diogo Rau's strategy, Alzheimer's access gap, direct-to-patient models, healthcare innovation.
-HOD — design leadership evolution, AI × design, systems thinking, org influence, talent dynamics, creative practice at scale.
-BOTH — strengthens both simultaneously.
+DISPATCH processes signal through five intelligence layers:
+
+1. OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target but not the only one. Pharma digital transformation, patient experience, direct-to-patient models, AI in drug discovery and care coordination.
+2. POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics, interview intelligence, agency-to-in-house transitions.
+3. DISCIPLINE — How design leadership is evolving as a function. CDO roles, design org structure, AI's impact on practice, design engineering convergence, tools on the vanguard (Figma, Claude, Cursor, Vercel).
+4. LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation, market movements.
+5. CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory. The intellectual currents that make a design leader worth following.
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
-  "synopsis": "one plain sentence describing what this article is actually about, framed for someone tracking design and healthcare innovation — not a restatement of the headline, but what it covers",
-  "hook": "one sharp sentence explaining why this signal matters to the dispatch mandate — what it reveals about the landscape, what it implies for pharma design or design leadership. Never say 'not relevant' — explain the actual context or indirect signal instead.",
+  "synopsis": "one plain sentence — what this article actually covers, framed for someone tracking design leadership and strategic positioning across technology, culture, and healthcare",
+  "hook": "one sharp sentence — why this signal matters to the DISPATCH mandate. What it reveals, what it implies, what connection it makes. Never say 'not relevant' — find the signal, even if indirect.",
   "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
-  "lens": one of: LILLY | HOD | BOTH,
-  "scores": { "lilly": 0-10, "hod": 0-10, "urgency": 0-10 }
+  "lens": the PRIMARY layer this maps to — one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
 }
 
-score definitions:
-lilly — how directly this strengthens the Lilly opportunity (0=none, 10=essential reading)
-hod — how directly this builds toward the Head of Design path (0=none, 10=essential)
-urgency — how time-sensitive this signal is; will it matter less in 2 weeks? (0=evergreen, 10=act now)
+Score definitions (0 = no relevance to this layer, 10 = essential):
+opportunity — strengthens healthcare/pharma positioning
+position — directly advances the career trajectory
+discipline — reveals how design leadership is evolving
+landscape — illuminates the broader operating environment
+culture — enriches creative authority and taste
+urgency — time-sensitivity (0 = evergreen, 10 = act now)
+
+Multi-layer signals (scoring high on 2+ layers) are the most valuable. Flag them.
 
 Return only valid JSON array. No prose.`
 
@@ -90,7 +99,7 @@ export async function POST(req: Request) {
     const match = text.match(/\[[\s\S]*\]/)
     if (!match) return Response.json({ annotations: [] })
 
-    const raw: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { lilly: number; hod: number; urgency: number } }[] =
+    const raw: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] =
       JSON.parse(match[0])
 
     const annotations: Annotation[] = articles.map((a, i) => ({

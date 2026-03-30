@@ -70,7 +70,7 @@ interface AnnotationEntry {
   relevance: string
   signalType: string
   signalLens: string
-  signalScores?: { lilly: number; hod: number; urgency: number }
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 function loadAnnotationCache(): AnnotationEntry[] | null {

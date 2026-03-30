@@ -18,7 +18,7 @@ export interface AnalyticsArticle {
   publishedAt: string
   signalLens?: string
   signalType?: string
-  signalScores?: { lilly: number; hod: number; urgency: number }
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -31,10 +31,12 @@ const CARD_ACCENT: Record<string, string> = {
   sources:  "#A78BFA",
 }
 
-const LENS_COLOR: Record<string, string> = {
-  LILLY: "#C8955A",
-  HOD:   "#60A5FA",
-  BOTH:  "#4ade80",
+const LAYER_COLOR: Record<string, string> = {
+  OPPORTUNITY: "#C8955A",
+  POSITION:    "#60A5FA",
+  DISCIPLINE:  "#4ade80",
+  LANDSCAPE:   "#A78BFA",
+  CULTURE:     "#f87171",
 }
 
 const CARD_GRADIENT: Record<string, string> = {
@@ -80,22 +82,25 @@ function useAnalytics(articles: AnalyticsArticle[]) {
     const avg = (arr: number[]) =>
       arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0
 
-    // Lens distribution
-    const lens = { LILLY: 0, HOD: 0, BOTH: 0 }
+    // Layer distribution
+    const layers = { OPPORTUNITY: 0, POSITION: 0, DISCIPLINE: 0, LANDSCAPE: 0, CULTURE: 0 }
     annotated.forEach(a => {
-      if (a.signalLens && a.signalLens in lens)
-        lens[a.signalLens as keyof typeof lens]++
+      if (a.signalLens && a.signalLens in layers)
+        layers[a.signalLens as keyof typeof layers]++
     })
 
     // Category volumes + avg scores
     const catCount: Record<string, number> = {}
-    const catScores: Record<string, { lilly: number[]; hod: number[]; urgency: number[] }> = {}
+    const catScores: Record<string, { opportunity: number[]; position: number[]; discipline: number[]; landscape: number[]; culture: number[]; urgency: number[] }> = {}
     articles.forEach(a => { catCount[a.tag] = (catCount[a.tag] || 0) + 1 })
     annotated.forEach(a => {
-      if (!catScores[a.tag]) catScores[a.tag] = { lilly: [], hod: [], urgency: [] }
+      if (!catScores[a.tag]) catScores[a.tag] = { opportunity: [], position: [], discipline: [], landscape: [], culture: [], urgency: [] }
       if (a.signalScores) {
-        catScores[a.tag].lilly.push(a.signalScores.lilly)
-        catScores[a.tag].hod.push(a.signalScores.hod)
+        catScores[a.tag].opportunity.push(a.signalScores.opportunity)
+        catScores[a.tag].position.push(a.signalScores.position)
+        catScores[a.tag].discipline.push(a.signalScores.discipline)
+        catScores[a.tag].landscape.push(a.signalScores.landscape)
+        catScores[a.tag].culture.push(a.signalScores.culture)
         catScores[a.tag].urgency.push(a.signalScores.urgency)
       }
     })
@@ -105,9 +110,12 @@ function useAnalytics(articles: AnalyticsArticle[]) {
         tag,
         label: TAG_LABEL[tag] || tag,
         count,
-        avgLilly:   avg(catScores[tag]?.lilly   || []),
-        avgHod:     avg(catScores[tag]?.hod     || []),
-        avgUrgency: avg(catScores[tag]?.urgency || []),
+        avgOpportunity: avg(catScores[tag]?.opportunity || []),
+        avgPosition:    avg(catScores[tag]?.position    || []),
+        avgDiscipline:  avg(catScores[tag]?.discipline  || []),
+        avgLandscape:   avg(catScores[tag]?.landscape   || []),
+        avgCulture:     avg(catScores[tag]?.culture     || []),
+        avgUrgency:     avg(catScores[tag]?.urgency     || []),
       }))
       .sort((a, b) => b.count - a.count)
 
@@ -125,21 +133,27 @@ function useAnalytics(articles: AnalyticsArticle[]) {
       .slice(0, 8)
       .map(([source, count]) => ({ source, count }))
 
-    const allLilly   = annotated.map(a => a.signalScores!.lilly)
-    const allHod     = annotated.map(a => a.signalScores!.hod)
-    const allUrgency = annotated.map(a => a.signalScores!.urgency)
+    const allOpportunity = annotated.map(a => a.signalScores!.opportunity)
+    const allPosition    = annotated.map(a => a.signalScores!.position)
+    const allDiscipline  = annotated.map(a => a.signalScores!.discipline)
+    const allLandscape   = annotated.map(a => a.signalScores!.landscape)
+    const allCulture     = annotated.map(a => a.signalScores!.culture)
+    const allUrgency     = annotated.map(a => a.signalScores!.urgency)
 
     return {
       total:          articles.length,
       annotatedCount: annotated.length,
       stubCount:      articles.filter(a => a.url === "#").length,
-      lens,
+      layers,
       categoryData,
       urgencyTop,
       topSources,
-      avgLilly:   avg(allLilly),
-      avgHod:     avg(allHod),
-      avgUrgency: avg(allUrgency),
+      avgOpportunity: avg(allOpportunity),
+      avgPosition:    avg(allPosition),
+      avgDiscipline:  avg(allDiscipline),
+      avgLandscape:   avg(allLandscape),
+      avgCulture:     avg(allCulture),
+      avgUrgency:     avg(allUrgency),
     }
   }, [articles])
 }
@@ -217,16 +231,18 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             signals tracked today
           </div>
           <ProportionBar segments={[
-            { flex: analytics.lens.LILLY, color: LENS_COLOR.LILLY },
-            { flex: analytics.lens.HOD,   color: LENS_COLOR.HOD   },
-            { flex: analytics.lens.BOTH,  color: LENS_COLOR.BOTH  },
+            { flex: analytics.layers.OPPORTUNITY, color: LAYER_COLOR.OPPORTUNITY },
+            { flex: analytics.layers.POSITION,    color: LAYER_COLOR.POSITION    },
+            { flex: analytics.layers.DISCIPLINE,  color: LAYER_COLOR.DISCIPLINE  },
+            { flex: analytics.layers.LANDSCAPE,   color: LAYER_COLOR.LANDSCAPE   },
+            { flex: analytics.layers.CULTURE,     color: LAYER_COLOR.CULTURE     },
           ]} />
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-            {(["LILLY", "HOD", "BOTH"] as const).map(k => (
+          <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
+            {(["OPPORTUNITY", "POSITION", "DISCIPLINE", "LANDSCAPE", "CULTURE"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: LAYER_COLOR[k], flexShrink: 0 }} />
                 <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.04em", fontWeight: 600 }}>
-                  {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} {analytics.lens[k]}
+                  {k.charAt(0) + k.slice(1).toLowerCase()} {analytics.layers[k]}
                 </span>
               </div>
             ))}
@@ -236,29 +252,31 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
     }
 
     case "lens": {
-      const total    = analytics.lens.LILLY + analytics.lens.HOD + analytics.lens.BOTH
-      const dominant = (Object.entries(analytics.lens) as [string, number][])
-        .sort((a, b) => b[1] - a[1])[0]
+      const layerEntries = Object.entries(analytics.layers) as [string, number][]
+      const total    = layerEntries.reduce((s, [, v]) => s + v, 0)
+      const dominant = layerEntries.sort((a, b) => b[1] - a[1])[0]
       const pct = total > 0 ? Math.round((dominant[1] / total) * 100) : 0
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <DonutRing segments={[
-            { value: analytics.lens.LILLY, color: LENS_COLOR.LILLY },
-            { value: analytics.lens.HOD,   color: LENS_COLOR.HOD   },
-            { value: analytics.lens.BOTH,  color: LENS_COLOR.BOTH  },
+            { value: analytics.layers.OPPORTUNITY, color: LAYER_COLOR.OPPORTUNITY },
+            { value: analytics.layers.POSITION,    color: LAYER_COLOR.POSITION    },
+            { value: analytics.layers.DISCIPLINE,  color: LAYER_COLOR.DISCIPLINE  },
+            { value: analytics.layers.LANDSCAPE,   color: LAYER_COLOR.LANDSCAPE   },
+            { value: analytics.layers.CULTURE,     color: LAYER_COLOR.CULTURE     },
           ]} />
           <div>
             <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
               {pct}%
             </div>
-            <div style={{ fontSize: 11, color: LENS_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
-              {dominant[0] === "HOD" ? "HoD" : dominant[0] === "BOTH" ? "Both" : "Lilly"} dominant
+            <div style={{ fontSize: 11, color: LAYER_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
+              {dominant[0].charAt(0) + dominant[0].slice(1).toLowerCase()} dominant
             </div>
-            {(["LILLY","HOD","BOTH"] as const).map(k => (
+            {(["OPPORTUNITY","POSITION","DISCIPLINE","LANDSCAPE","CULTURE"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: LENS_COLOR[k], flexShrink: 0 }} />
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: LAYER_COLOR[k], flexShrink: 0 }} />
                 <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", fontWeight: 600 }}>
-                  {k === "HOD" ? "HoD" : k === "BOTH" ? "Both" : "Lilly"} — {analytics.lens[k]}
+                  {k.charAt(0) + k.slice(1).toLowerCase()} — {analytics.layers[k]}
                 </span>
               </div>
             ))}
@@ -383,9 +401,12 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
 
     case "snapshot": {
       const data = [
-        { name: "Lilly Relevance", value: parseFloat(analytics.avgLilly.toFixed(1)),   fill: LENS_COLOR.LILLY },
-        { name: "HoD Relevance",   value: parseFloat(analytics.avgHod.toFixed(1)),     fill: LENS_COLOR.HOD   },
-        { name: "Urgency",         value: parseFloat(analytics.avgUrgency.toFixed(1)), fill: CARD_ACCENT.urgency },
+        { name: "Opportunity",  value: parseFloat(analytics.avgOpportunity.toFixed(1)), fill: LAYER_COLOR.OPPORTUNITY },
+        { name: "Position",     value: parseFloat(analytics.avgPosition.toFixed(1)),    fill: LAYER_COLOR.POSITION    },
+        { name: "Discipline",   value: parseFloat(analytics.avgDiscipline.toFixed(1)),  fill: LAYER_COLOR.DISCIPLINE  },
+        { name: "Landscape",    value: parseFloat(analytics.avgLandscape.toFixed(1)),   fill: LAYER_COLOR.LANDSCAPE   },
+        { name: "Culture",      value: parseFloat(analytics.avgCulture.toFixed(1)),     fill: LAYER_COLOR.CULTURE     },
+        { name: "Urgency",      value: parseFloat(analytics.avgUrgency.toFixed(1)),     fill: CARD_ACCENT.urgency     },
       ]
       return (
         <div>
@@ -420,11 +441,13 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
 
     case "lens": {
       const pieData = [
-        { name: "Lilly",    value: analytics.lens.LILLY, color: LENS_COLOR.LILLY },
-        { name: "HoD Path", value: analytics.lens.HOD,   color: LENS_COLOR.HOD   },
-        { name: "Both",     value: analytics.lens.BOTH,  color: LENS_COLOR.BOTH  },
+        { name: "Opportunity", value: analytics.layers.OPPORTUNITY, color: LAYER_COLOR.OPPORTUNITY },
+        { name: "Position",    value: analytics.layers.POSITION,    color: LAYER_COLOR.POSITION    },
+        { name: "Discipline",  value: analytics.layers.DISCIPLINE,  color: LAYER_COLOR.DISCIPLINE  },
+        { name: "Landscape",   value: analytics.layers.LANDSCAPE,   color: LAYER_COLOR.LANDSCAPE   },
+        { name: "Culture",     value: analytics.layers.CULTURE,     color: LAYER_COLOR.CULTURE     },
       ].filter(d => d.value > 0)
-      const total = analytics.lens.LILLY + analytics.lens.HOD + analytics.lens.BOTH
+      const total = Object.values(analytics.layers).reduce((s, v) => s + v, 0)
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
           <ResponsiveContainer width={280} height={280}>
@@ -522,14 +545,14 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
 // ─── Deliberate prompt builder ────────────────────────────────────────────────
 
 function buildPrompt(id: string, analytics: Analytics): string {
-  const total = analytics.lens.LILLY + analytics.lens.HOD + analytics.lens.BOTH
+  const total = Object.values(analytics.layers).reduce((s, v) => s + v, 0)
   const pct = (n: number) => total > 0 ? Math.round((n / total) * 100) : 0
 
   switch (id) {
     case "snapshot":
-      return `Looking at today's signal snapshot: ${analytics.total} total articles in the feed, ${analytics.annotatedCount} annotated. Lens split is ${pct(analytics.lens.LILLY)}% Lilly-focused, ${pct(analytics.lens.HOD)}% HoD path, ${pct(analytics.lens.BOTH)}% serving both. Average scores — Lilly relevance: ${analytics.avgLilly.toFixed(1)}/10, HoD relevance: ${analytics.avgHod.toFixed(1)}/10, urgency: ${analytics.avgUrgency.toFixed(1)}/10. What does this distribution tell me about today's information environment?`
+      return `Looking at today's signal snapshot: ${analytics.total} total articles in the feed, ${analytics.annotatedCount} annotated. Layer split: Opportunity ${pct(analytics.layers.OPPORTUNITY)}%, Position ${pct(analytics.layers.POSITION)}%, Discipline ${pct(analytics.layers.DISCIPLINE)}%, Landscape ${pct(analytics.layers.LANDSCAPE)}%, Culture ${pct(analytics.layers.CULTURE)}%. Average scores — opportunity: ${analytics.avgOpportunity.toFixed(1)}/10, position: ${analytics.avgPosition.toFixed(1)}/10, discipline: ${analytics.avgDiscipline.toFixed(1)}/10, landscape: ${analytics.avgLandscape.toFixed(1)}/10, culture: ${analytics.avgCulture.toFixed(1)}/10, urgency: ${analytics.avgUrgency.toFixed(1)}/10. What does this distribution tell me about today's information environment?`
     case "lens":
-      return `My lens distribution today: ${analytics.lens.LILLY} Lilly-specific articles (${pct(analytics.lens.LILLY)}%), ${analytics.lens.HOD} HoD path (${pct(analytics.lens.HOD)}%), ${analytics.lens.BOTH} serving both mandates (${pct(analytics.lens.BOTH)}%). Is this a healthy balance? What does the skew — if any — tell me about where I should focus?`
+      return `My layer distribution today: ${analytics.layers.OPPORTUNITY} Opportunity (${pct(analytics.layers.OPPORTUNITY)}%), ${analytics.layers.POSITION} Position (${pct(analytics.layers.POSITION)}%), ${analytics.layers.DISCIPLINE} Discipline (${pct(analytics.layers.DISCIPLINE)}%), ${analytics.layers.LANDSCAPE} Landscape (${pct(analytics.layers.LANDSCAPE)}%), ${analytics.layers.CULTURE} Culture (${pct(analytics.layers.CULTURE)}%). Is this a healthy balance? What does the skew — if any — tell me about where I should focus?`
     case "category": {
       const top3 = analytics.categoryData.slice(0, 3).map(c => `${c.label} (${c.count})`).join(", ")
       return `Today's category distribution is led by: ${top3}. Total coverage across ${analytics.categoryData.length} categories. What does this concentration pattern reveal? Am I getting the right coverage for my mandate?`

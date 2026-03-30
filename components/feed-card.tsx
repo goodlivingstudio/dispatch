@@ -127,7 +127,7 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
         display: "flex",
         padding: "14px 20px 14px 18px",
         borderBottom: "1px solid var(--border)",
-        borderLeft: `2px solid ${article.signalLens === "LILLY" || article.signalLens === "BOTH" ? "var(--accent-secondary)" : "transparent"}`,
+        borderLeft: `2px solid ${article.signalLens === "OPPORTUNITY" ? "var(--accent-secondary)" : "transparent"}`,
         background: hovered ? "var(--bg-surface)" : "transparent",
         cursor: isExternal ? "pointer" : hasSignal ? "default" : "default",
         transition: "background 0.12s",

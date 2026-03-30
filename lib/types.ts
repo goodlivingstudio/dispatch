@@ -13,7 +13,7 @@ export interface Article {
   relevance?: string    // AI-generated: why it matters to the mandate
   signalType?: string
   signalLens?: string
-  signalScores?: { lilly: number; hod: number; urgency: number }
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 export interface Message {
@@ -37,22 +37,21 @@ export type Skin = "mineral" | "slate" | "forest"
 
 export type ViewMode = "signal" | "audio" | "synthesis"
 
-// ─── Config ──────────────────────────────────────────────────────────────────
+// ─── Intelligence layers (from mandate) ──────────────────────────────────────
 
-export const CATEGORY_CONFIG = [
-  { id: "all",              label: "All"             },
-  { id: "policy",           label: "Policy"          },
-  { id: "ai",               label: "AI"              },
-  { id: "design-industry",  label: "Design Industry" },
-  { id: "creative-practice",label: "Creative"        },
-  { id: "market",           label: "Market"          },
-  { id: "health",           label: "Healthcare"      },
-  { id: "company",          label: "Company"         },
-  { id: "design-leadership",label: "Leadership"      },
-  { id: "creative-tech",    label: "Creative Tech"   },
-  { id: "culture",          label: "Culture"         },
-  { id: "data",             label: "Data"            },
+export type IntelLayer = "opportunity" | "position" | "discipline" | "landscape" | "culture"
+
+export const LAYER_CONFIG: { id: IntelLayer | "all"; label: string }[] = [
+  { id: "all",          label: "All"          },
+  { id: "opportunity",  label: "Opportunity"  },
+  { id: "position",     label: "Position"     },
+  { id: "discipline",   label: "Discipline"   },
+  { id: "landscape",    label: "Landscape"    },
+  { id: "culture",      label: "Culture"      },
 ]
+
+// Legacy — will be removed once news API migrates to layers
+export const CATEGORY_CONFIG = LAYER_CONFIG
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -64,10 +63,15 @@ export function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
-// ─── Signal lens colors ──────────────────────────────────────────────────────
+// ─── Layer colors ────────────────────────────────────────────────────────────
 
-export const LENS_COLOR: Record<string, string> = {
-  LILLY: "var(--accent-secondary)",
-  HOD:   "var(--accent-muted)",
-  BOTH:  "var(--accent-secondary)",
+export const LAYER_COLOR: Record<string, string> = {
+  opportunity: "var(--accent-secondary)",
+  position:    "var(--accent-muted)",
+  discipline:  "var(--text-secondary)",
+  landscape:   "var(--text-tertiary)",
+  culture:     "var(--accent-muted)",
 }
+
+// Legacy alias
+export const LENS_COLOR = LAYER_COLOR

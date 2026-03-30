@@ -24,7 +24,7 @@ LINE 1: The label (2-4 words, uppercase — what kind of signal this is)
 LINE 2: One to two sentences of substance. Direct. No hedging. Lead with the implication, not the event.
 
 Example format:
-LILLY OPPORTUNITY
+OPPORTUNITY SIGNAL
 NVIDIA-Lilly $1B AI lab signals pharma is moving from pilot to infrastructure. This is the context your interview needs to acknowledge.
 |||
 MARKET PRESSURE

@@ -15,7 +15,7 @@ interface Article {
   relevance?: string
   signalType?: string
   signalLens?: string
-  signalScores?: { lilly: number; hod: number; urgency: number }
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 interface FeedDef {
@@ -353,19 +353,21 @@ async function addRelevanceAnnotations(articles: Article[]): Promise<Article[]> 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey || articles.length === 0) return articles
 
-  const system = `You annotate news articles for Jeremy Grant, Senior Design Director positioning for Head of Design at Eli Lilly's innovation team.
+  const system = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
 
-Two lenses:
-LILLY — directly relevant to the Lilly opportunity: pharma design, patient experience, AI mandate, LillyDirect, Diogo Rau's strategy, Alzheimer's access gap, direct-to-patient models.
-HOD — relevant to the five-year Head of Design path: design leadership evolution, AI × design, systems thinking, org influence, talent/compensation, creative practice.
-BOTH — strengthens both simultaneously.
+Five intelligence layers:
+OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target. Pharma digital transformation, patient experience, direct-to-patient models, AI in drug discovery and care coordination.
+POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics, interview intelligence, agency-to-in-house transitions.
+DISCIPLINE — How design leadership is evolving as a function. CDO roles, design org structure, AI's impact on practice, design engineering convergence.
+LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation, market movements.
+CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory.
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
   "hook": "one sharp sentence — what Jeremy specifically stands to gain or understand from this article",
   "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
-  "lens": one of: LILLY | HOD | BOTH,
-  "scores": { "lilly": 0-10, "hod": 0-10, "urgency": 0-10 }
+  "lens": the PRIMARY layer — one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
 }
 
 type definitions:
@@ -378,9 +380,12 @@ NEWS — breaking development or announcement
 CULTURAL — creative, cultural, or broader civilizational reference
 
 score definitions:
-lilly — how directly this strengthens Jeremy's positioning for the Lilly role (0=none, 10=essential reading)
-hod — how directly this builds toward the five-year Head of Design path (0=none, 10=essential)
-urgency — how time-sensitive this signal is; will it matter less in 2 weeks? (0=evergreen, 10=act now)
+opportunity — strengthens healthcare/pharma positioning (0=none, 10=essential)
+position — directly advances the career trajectory (0=none, 10=essential)
+discipline — reveals how design leadership is evolving (0=none, 10=essential)
+landscape — illuminates the broader operating environment (0=none, 10=essential)
+culture — enriches creative authority and taste (0=none, 10=essential)
+urgency — time-sensitivity (0=evergreen, 10=act now)
 
 Return only valid JSON array. No prose.`
 
@@ -419,7 +424,7 @@ Return only valid JSON array. No prose.`
     const match = text.match(/\[[\s\S]*\]/)
     if (!match) return articles
 
-    const annotations: { hook?: string; type?: string; lens?: string; scores?: { lilly: number; hod: number; urgency: number } }[] = JSON.parse(match[0])
+    const annotations: { hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] = JSON.parse(match[0])
 
     return articles.map((a, i) => ({
       ...a,
