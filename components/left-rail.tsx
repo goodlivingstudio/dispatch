@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Radio, AudioLines, Blend, Aperture } from "lucide-react"
+import { Radio, AudioLines, Blend, Maximize2 } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 
@@ -325,7 +325,7 @@ export function LeftRail({
               { id: "signal" as const,    Icon: Radio,      title: "Signal"    },
               { id: "audio" as const,     Icon: AudioLines, title: "Audio"     },
               { id: "synthesis" as const, Icon: Blend,      title: "Synthesis" },
-              { id: "zen" as const,       Icon: Aperture,   title: "Zen"       },
+              { id: "zen" as const,       Icon: Maximize2,  title: "Zen"       },
             ]).map(tab => {
               const isActive = viewMode === tab.id
               return (
@@ -417,6 +417,80 @@ export function LeftRail({
         )}
 
       </nav>
+
+      {/* Zen preview — ambient creative nourishment */}
+      <ZenPreview onExpand={() => onViewChange("zen")} />
     </aside>
+  )
+}
+
+// ─── Zen Preview — bottom of left rail ──────────────────────────────────────
+
+function ZenPreview({ onExpand }: { onExpand: () => void }) {
+  const [image, setImage] = useState<{ url: string; title: string } | null>(null)
+  const [hovered, setHovered] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/zen")
+      .then(r => r.json())
+      .then(data => {
+        const blocks = data.blocks || []
+        if (blocks.length > 0) {
+          setImage({ url: blocks[0].imageUrl, title: blocks[0].title || "" })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  if (!image) return null
+
+  return (
+    <div
+      style={{
+        flexShrink: 0,
+        padding: "12px 14px",
+        borderTop: "1px solid var(--border)",
+      }}
+    >
+      <div
+        onClick={onExpand}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          position: "relative",
+          borderRadius: 10,
+          overflow: "hidden",
+          cursor: "pointer",
+          aspectRatio: "16/10",
+        }}
+      >
+        <img
+          src={image.url}
+          alt={image.title}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            transform: hovered ? "scale(1.05)" : "scale(1)",
+          }}
+        />
+        {/* Overlay on hover */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 0.25s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Maximize2 size={20} strokeWidth={1.5} color="rgba(255,255,255,0.8)" />
+        </div>
+      </div>
+    </div>
   )
 }
