@@ -7,7 +7,7 @@ import { LeftRail } from "@/components/left-rail"
 import { useChiefOfStaff, ChiefOfStaffBand, AnalysisPanelMobile } from "@/components/chief-of-staff"
 import { FeedCard, SignalCard } from "@/components/feed-card"
 import { Divider } from "@/components/divider"
-import type { Article, Message, Signal, FeedHealth, Skin } from "@/lib/types"
+import type { Article, Message, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
 
 // ─── Skin + mode system ───────────────────────────────────────────────────────
 
@@ -793,6 +793,22 @@ function Cerebro({ articles, pendingPrompt }: {
   )
 }
 
+// ─── Audio Placeholder ───────────────────────────────────────────────────────
+
+function AudioPlaceholder() {
+  return (
+    <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)" }}>
+      <div style={{ textAlign: "center", maxWidth: 360 }}>
+        <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>◉</div>
+        <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>Audio Intelligence</div>
+        <div style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
+          Podcast signal processing. Import your Apple Podcasts subscriptions to populate this channel.
+        </div>
+      </div>
+    </main>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function clamp(val: number, min: number, max: number) {
@@ -817,9 +833,9 @@ export default function Page() {
   const [isLive,         setIsLive]         = useState(false)
   const [feedHealth,     setFeedHealth]     = useState<FeedHealth | null>(null)
   const [feedLoading,    setFeedLoading]    = useState(true)
-  const [showAnalytics,  setShowAnalytics]  = useState(false)
+  const [viewMode,       setViewMode]       = useState<ViewMode>("signal")
   const [active,         setActive]         = useState("all")
-  const [mobileTab,      setMobileTab]      = useState<"feed" | "analysis" | "cerebro">("feed")
+  const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "cerebro">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
 
   const handleToggleSource = useCallback((source: string) => {
@@ -838,11 +854,11 @@ export default function Page() {
       const savedCategory = localStorage.getItem("dispatch-category")
       if (savedCategory) setActive(savedCategory)
 
-      const savedView = localStorage.getItem("dispatch-view")
-      if (savedView === "synthesis") setShowAnalytics(true)
+      const savedView = localStorage.getItem("dispatch-view-mode")
+      if (savedView === "signal" || savedView === "audio" || savedView === "synthesis") setViewMode(savedView)
 
       const savedTab = localStorage.getItem("dispatch-mobile-tab")
-      if (savedTab === "feed" || savedTab === "analysis" || savedTab === "cerebro") setMobileTab(savedTab)
+      if (savedTab === "signal" || savedTab === "audio" || savedTab === "synthesis" || savedTab === "cerebro") setMobileTab(savedTab)
 
       const savedExcluded = localStorage.getItem("dispatch-excluded-sources")
       if (savedExcluded) setExcludedSources(new Set(JSON.parse(savedExcluded)))
@@ -856,8 +872,8 @@ export default function Page() {
 
   // Persist view mode
   useEffect(() => {
-    try { localStorage.setItem("dispatch-view", showAnalytics ? "synthesis" : "signal") } catch {}
-  }, [showAnalytics])
+    try { localStorage.setItem("dispatch-view-mode", viewMode) } catch {}
+  }, [viewMode])
 
   // Persist mobile tab
   useEffect(() => {
@@ -1000,9 +1016,10 @@ export default function Page() {
 
         {/* Mobile: show active tab panel */}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          {mobileTab === "feed"     && feedContent}
-          {mobileTab === "analysis" && <AnalysisPanelMobile signals={signals} briefLoading={briefLoading} />}
-          {mobileTab === "cerebro"  && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
+          {mobileTab === "signal"    && feedContent}
+          {mobileTab === "audio"     && <AudioPlaceholder />}
+          {mobileTab === "synthesis" && <AnalysisPanelMobile signals={signals} briefLoading={briefLoading} />}
+          {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
         </div>
 
         {/* Mobile bottom tab bar */}
@@ -1017,9 +1034,10 @@ export default function Page() {
           }}
         >
           {([
-            { id: "feed",     icon: "≡",  label: "Signal"    },
-            { id: "analysis", icon: "◎",  label: "Synthesis" },
-            { id: "cerebro",  icon: "◈",  label: "Cerebro"   },
+            { id: "signal",    icon: "≡",  label: "Signal"    },
+            { id: "audio",     icon: "◉",  label: "Audio"     },
+            { id: "synthesis", icon: "◎",  label: "Synthesis" },
+            { id: "cerebro",   icon: "◈",  label: "Cerebro"   },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -1093,14 +1111,16 @@ export default function Page() {
           isLive={isLive}
           feedLoading={feedLoading}
           width={leftWidth}
-          showAnalytics={showAnalytics}
-          onToggleAnalytics={() => setShowAnalytics(v => !v)}
+          viewMode={viewMode}
+          onViewChange={setViewMode}
           excludedSources={excludedSources}
           onToggleSource={handleToggleSource}
         />
         <Divider onMouseDown={e => startResize("left", e)} />
-        {showAnalytics
+        {viewMode === "synthesis"
           ? <AnalyticsPanel articles={articles} onDeliberate={handleAnalyticsDeliberate} />
+          : viewMode === "audio"
+          ? <AudioPlaceholder />
           : feedContent}
         <Divider onMouseDown={e => startResize("right", e)} />
         <div style={{ width: rightWidth, flexShrink: 0 }}>

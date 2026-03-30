@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispatch — Toggle Explorations</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0E0D0B; color: #F0EDE8; padding: 40px; }
+  h1 { font-size: 14px; font-weight: 600; color: #B8956A; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 40px; }
+  h2 { font-size: 11px; font-weight: 600; color: #8A8480; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 16px; }
+  .section { margin-bottom: 56px; }
+  .row { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 32px; }
+  .card { background: #1A1815; border: 1px solid #2C2820; border-radius: 12px; padding: 24px; min-width: 320px; }
+  .card-label { font-size: 10px; color: #8A8480; letter-spacing: 0.02em; margin-bottom: 12px; }
+  .note { font-size: 11px; color: #8A8480; line-height: 1.6; margin-top: 12px; max-width: 300px; }
+
+  /* Toggle base */
+  .toggle { display: flex; border-radius: 8px; padding: 3px; position: relative; }
+  .toggle-btn { border: none; cursor: pointer; font-size: 12px; padding: 8px 0; min-height: 36px; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; font-family: inherit; background: transparent; transition: color 0.3s; }
+  .toggle-btn.active { color: #F0EDE8; font-weight: 600; }
+  .toggle-btn.inactive { color: #8A8480; font-weight: 400; }
+
+  /* Indicator */
+  .indicator { position: absolute; top: 3px; height: calc(100% - 6px); border-radius: 6px; transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s; z-index: 0; }
+</style>
+</head>
+<body>
+
+<h1>Dispatch — Toggle Explorations: Signal · Audio · Synthesis</h1>
+
+<!-- OPTION 1: Grouped with separator -->
+<div class="section">
+  <h2>Option 1 — Grouped toggle with separator</h2>
+  <p class="note" style="margin-bottom: 20px;">Signal and Audio are siblings in one container. Synthesis sits apart. The gap communicates hierarchy: intake channels vs. intelligence layer.</p>
+  <div class="row">
+
+    <!-- 1A: Signal active -->
+    <div class="card">
+      <div class="card-label">1A · Signal active (left brain intake)</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 180px;">
+          <div class="indicator" style="left: 3px; width: calc(50% - 4.5px); background: #1A1815;"></div>
+          <button class="toggle-btn active" style="flex: 1;">Signal</button>
+          <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        </div>
+        <span style="color: #2C2820; font-size: 10px;">·</span>
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 100px;">
+          <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1B: Audio active -->
+    <div class="card">
+      <div class="card-label">1B · Audio active (left brain intake)</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 180px;">
+          <div class="indicator" style="left: calc(50% + 1.5px); width: calc(50% - 4.5px); background: #1A1815;"></div>
+          <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+          <button class="toggle-btn active" style="flex: 1;">Audio</button>
+        </div>
+        <span style="color: #2C2820; font-size: 10px;">·</span>
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 100px;">
+          <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1C: Synthesis active -->
+    <div class="card">
+      <div class="card-label">1C · Synthesis active (right brain overview)</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 180px;">
+          <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+          <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        </div>
+        <span style="color: #2C2820; font-size: 10px;">·</span>
+        <div class="toggle" style="background: #252220; flex: 0 0 auto; width: 100px;">
+          <div class="indicator" style="left: 3px; width: calc(100% - 6px); background: #2A1A0A;"></div>
+          <button class="toggle-btn active" style="flex: 1; color: #B8956A;">Synthesis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPTION 2: Same toggle, different visual weight -->
+<div class="section">
+  <h2>Option 2 — Unified toggle, Synthesis changes character</h2>
+  <p class="note" style="margin-bottom: 20px;">All three in one row. Signal ↔ Audio is a quiet slide. Synthesis activating shifts the indicator color to accent — the toggle itself signals "you've changed modes."</p>
+  <div class="row">
+
+    <!-- 2A: Signal active -->
+    <div class="card">
+      <div class="card-label">2A · Signal active — neutral indicator</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: 3px; width: calc(33.33% - 4px); background: #1A1815;"></div>
+        <button class="toggle-btn active" style="flex: 1;">Signal</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+      </div>
+    </div>
+
+    <!-- 2B: Audio active -->
+    <div class="card">
+      <div class="card-label">2B · Audio active — neutral indicator</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: calc(33.33% + 1px); width: calc(33.33% - 2px); background: #1A1815;"></div>
+        <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+        <button class="toggle-btn active" style="flex: 1;">Audio</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+      </div>
+    </div>
+
+    <!-- 2C: Synthesis active — accent indicator -->
+    <div class="card">
+      <div class="card-label">2C · Synthesis active — accent indicator (mode shift)</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: calc(66.66% + 1px); width: calc(33.33% - 4px); background: #2A1A0A;"></div>
+        <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        <button class="toggle-btn active" style="flex: 1; color: #B8956A;">Synthesis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2D-F: Variant with subtle divider between siblings and Synthesis -->
+  <div class="row">
+    <!-- 2D: Signal active with hairline -->
+    <div class="card">
+      <div class="card-label">2D · Signal active — hairline before Synthesis</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: 3px; width: calc(33.33% - 4px); background: #1A1815;"></div>
+        <button class="toggle-btn active" style="flex: 1;">Signal</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        <span style="width: 1px; background: #2C2820; margin: 6px 0; flex-shrink: 0;"></span>
+        <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+      </div>
+    </div>
+
+    <!-- 2E: Audio active with hairline -->
+    <div class="card">
+      <div class="card-label">2E · Audio active — hairline before Synthesis</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: calc(33.33% + 1px); width: calc(33.33% - 4px); background: #1A1815;"></div>
+        <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+        <button class="toggle-btn active" style="flex: 1;">Audio</button>
+        <span style="width: 1px; background: #2C2820; margin: 6px 0; flex-shrink: 0;"></span>
+        <button class="toggle-btn inactive" style="flex: 1;">Synthesis</button>
+      </div>
+    </div>
+
+    <!-- 2F: Synthesis active with hairline + accent -->
+    <div class="card">
+      <div class="card-label">2F · Synthesis active — hairline + accent shift</div>
+      <div class="toggle" style="background: #252220; width: 280px;">
+        <div class="indicator" style="left: calc(66.66% + 4px); width: calc(33.33% - 6px); background: #2A1A0A;"></div>
+        <button class="toggle-btn inactive" style="flex: 1;">Signal</button>
+        <button class="toggle-btn inactive" style="flex: 1;">Audio</button>
+        <span style="width: 1px; background: #2C2820; margin: 6px 0; flex-shrink: 0;"></span>
+        <button class="toggle-btn active" style="flex: 1; color: #B8956A;">Synthesis</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Conceptual mapping -->
+<div class="section">
+  <h2>Cerebro brain model</h2>
+  <div class="card" style="max-width: 500px;">
+    <div style="display: flex; gap: 32px; align-items: flex-start;">
+      <div>
+        <div style="font-size: 11px; color: #B8956A; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 8px;">Left hemisphere</div>
+        <div style="font-size: 13px; color: #A8A29B; line-height: 1.6;">
+          <strong style="color: #F0EDE8;">Signal</strong> — text intelligence<br>
+          <strong style="color: #F0EDE8;">Audio</strong> — podcast intelligence<br>
+          <span style="font-size: 11px; color: #8A8480;">Analytical intake. Fast processing. Data-forward.</span>
+        </div>
+      </div>
+      <div style="width: 1px; background: #2C2820; align-self: stretch;"></div>
+      <div>
+        <div style="font-size: 11px; color: #B8956A; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 8px;">Right hemisphere</div>
+        <div style="font-size: 13px; color: #A8A29B; line-height: 1.6;">
+          <strong style="color: #F0EDE8;">Synthesis</strong> — pattern recognition<br>
+          <span style="font-size: 11px; color: #8A8480;">Sees across both channels. Visual. Convergent.</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #2C2820;">
+      <div style="font-size: 11px; color: #B8956A; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 6px;">Cerebro</div>
+      <div style="font-size: 12px; color: #8A8480; line-height: 1.6;">
+        The conversational layer that bridges both hemispheres. Always present. Always listening. The strategic advisor that synthesizes signal, audio, and synthesis into actionable intelligence.
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

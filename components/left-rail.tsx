@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import type { Article, FeedHealth } from "@/lib/types"
+import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 
 // ─── Live Clock — 24hr with seconds ──────────────────────────────────────────
@@ -163,8 +163,8 @@ export function LeftRail({
   isLive,
   feedLoading,
   width,
-  showAnalytics,
-  onToggleAnalytics,
+  viewMode,
+  onViewChange,
   excludedSources,
   onToggleSource,
 }: {
@@ -175,8 +175,8 @@ export function LeftRail({
   feedHealth?: FeedHealth | null
   feedLoading: boolean
   width: number
-  showAnalytics: boolean
-  onToggleAnalytics: () => void
+  viewMode: ViewMode
+  onViewChange: (mode: ViewMode) => void
   excludedSources: Set<string>
   onToggleSource: (source: string) => void
 }) {
@@ -293,7 +293,7 @@ export function LeftRail({
 
       {/* Navigation */}
       <nav style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
-        {/* Signal / Synthesis — left brain / right brain */}
+        {/* Signal / Audio / Synthesis — three-state toggle */}
         <div style={{ padding: "8px 14px 4px", marginBottom: 2 }}>
           <div
             style={{
@@ -311,24 +311,25 @@ export function LeftRail({
               style={{
                 position: "absolute",
                 top: 3,
-                left: showAnalytics ? "calc(50% + 1.5px)" : "3px",
-                width: "calc(50% - 4.5px)",
+                left: viewMode === "signal" ? "3px" : viewMode === "audio" ? "calc(33.33% + 1px)" : "calc(66.66% + 1px)",
+                width: "calc(33.33% - 4px)",
                 height: "calc(100% - 6px)",
-                background: "var(--bg-surface)",
+                background: viewMode === "synthesis" ? "var(--synth-indicator)" : "var(--bg-surface)",
                 borderRadius: 6,
-                transition: "left 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+                transition: "left 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
                 zIndex: 0,
               }}
             />
-            {[
-              { id: "feed",      label: "Signal"    },
-              { id: "analytics", label: "Synthesis"  },
-            ].map(tab => {
-              const isTab = tab.id === "analytics" ? showAnalytics : !showAnalytics
+            {([
+              { id: "signal" as const,    label: "Signal"    },
+              { id: "audio" as const,     label: "Audio"     },
+              { id: "synthesis" as const, label: "Synthesis"  },
+            ]).map(tab => {
+              const isActive = viewMode === tab.id
               return (
                 <button
                   key={tab.id}
-                  onClick={() => { if (tab.id === "analytics" && !showAnalytics) onToggleAnalytics(); else if (tab.id === "feed" && showAnalytics) onToggleAnalytics() }}
+                  onClick={() => onViewChange(tab.id)}
                   style={{
                     flex: 1,
                     display: "flex",
@@ -347,8 +348,10 @@ export function LeftRail({
                   <span style={{
                     fontSize: 12,
                     letterSpacing: "0.01em",
-                    color: isTab ? "var(--text-primary)" : "var(--text-tertiary)",
-                    fontWeight: isTab ? 600 : 400,
+                    color: isActive
+                      ? (tab.id === "synthesis" ? "var(--accent-secondary)" : "var(--text-primary)")
+                      : "var(--text-tertiary)",
+                    fontWeight: isActive ? 600 : 400,
                     transition: "color 0.3s ease",
                   }}>
                     {tab.label}
@@ -359,8 +362,8 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* Category pills — hidden in synthesis view */}
-        {!showAnalytics && (
+        {/* Category pills — visible in Signal mode only */}
+        {viewMode === "signal" && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "8px 14px" }}>
             {CATEGORY_CONFIG.map(cat => {
               const n = countFor(cat.id)
