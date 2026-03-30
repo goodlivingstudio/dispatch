@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispatch — Synthesis View Sketch</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0E0D0B; color: #F0EDE8; min-height: 100vh; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 32px; }
+
+  /* ── Zone 0: Title ── */
+  .section-label {
+    font-size: 10px; font-family: 'SF Mono', monospace;
+    color: #8A8480; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ── Zone 1: Orienting Statement ── */
+  .orient {
+    font-size: 18px; font-weight: 400; color: #A8A29B;
+    line-height: 1.6; letter-spacing: -0.01em;
+    padding: 28px 0 32px; border-bottom: 1px solid #2C2820;
+    margin-bottom: 32px;
+  }
+  .orient strong { color: #F0EDE8; font-weight: 550; }
+
+  /* ── Zone 2: Layer Pulse ── */
+  .pulse { display: flex; flex-direction: column; gap: 6px; margin-bottom: 40px; }
+  .pulse-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 8px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pulse-row:hover { background: #1A1815; }
+  .pulse-label {
+    width: 90px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.03em;
+    color: #8A8480; flex-shrink: 0;
+  }
+  .pulse-bar-track {
+    flex: 1; height: 6px; background: #1A1815; border-radius: 3px;
+    overflow: hidden;
+  }
+  .pulse-bar {
+    height: 100%; border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pulse-count {
+    width: 30px; text-align: right; font-size: 12px;
+    font-variant-numeric: tabular-nums; color: #8A8480;
+  }
+  .pulse-row.hot .pulse-label { color: #B8956A; }
+  .pulse-row.hot .pulse-count { color: #B8956A; }
+
+  /* ── Zone 3: Convergence Cards ── */
+  .convergence-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .convergence-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 40px;
+  }
+  .conv-card {
+    background: #1A1815; border: 1px solid #2C2820;
+    border-radius: 12px; padding: 20px; cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;
+    position: relative;
+  }
+  .conv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  .conv-card.featured {
+    grid-column: 1 / -1;
+    border-left: 3px solid #B8956A;
+  }
+  .conv-badges { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 9px; font-family: 'SF Mono', monospace;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px;
+    background: #252220; color: #B8956A; font-weight: 600;
+  }
+  .badge.secondary { color: #8A8480; opacity: 0.7; }
+  .badge.urgent { background: rgba(239,68,68,0.12); color: #f87171; }
+  .conv-title {
+    font-size: 14px; font-weight: 550; color: #F0EDE8;
+    line-height: 1.4; letter-spacing: -0.02em; margin-bottom: 8px;
+  }
+  .conv-hook {
+    font-size: 12px; color: #A8A29B; line-height: 1.55;
+  }
+  .conv-source {
+    font-size: 10px; font-family: 'SF Mono', monospace;
+    color: #8A8480; margin-top: 12px; letter-spacing: -0.01em;
+  }
+  .conv-bump {
+    position: absolute; bottom: 16px; right: 16px;
+    font-size: 10px; color: #B8956A; opacity: 0;
+    transition: opacity 0.2s; cursor: pointer;
+    background: none; border: none; padding: 4px 8px;
+    border-radius: 4px; font-weight: 600;
+  }
+  .conv-card:hover .conv-bump { opacity: 1; }
+  .conv-bump:hover { background: rgba(184,149,106,0.1); }
+
+  /* ── Zone 4: Source Activity ── */
+  .source-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px; margin-bottom: 40px;
+  }
+  .source-cell {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: #1A1815; border-radius: 6px;
+    font-size: 12px; color: #A8A29B;
+    transition: background 0.15s;
+  }
+  .source-cell:hover { background: #252220; }
+  .source-count {
+    font-size: 11px; font-variant-numeric: tabular-nums;
+    color: #8A8480;
+  }
+  .source-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    margin-right: 8px; flex-shrink: 0;
+  }
+
+  /* ── Zone 5: Cerebro Provocation ── */
+  .provocation {
+    background: #1A1815; border-left: 2px solid #B8956A;
+    border-radius: 0 10px 10px 0; padding: 20px 24px;
+  }
+  .provocation-text {
+    font-size: 14px; color: #C8A87A; line-height: 1.6;
+    font-style: italic; margin-bottom: 12px;
+  }
+  .provocation-cta {
+    font-size: 11px; color: #B8956A; background: none;
+    border: 1px solid #2C2820; padding: 6px 14px;
+    border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    font-weight: 500;
+  }
+  .provocation-cta:hover { border-color: #B8956A; background: rgba(184,149,106,0.08); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Zone 1: Orienting Statement -->
+  <div class="section-label">Synthesis · March 30, 2026</div>
+  <div class="orient">
+    Today's feed is <strong>Landscape-heavy</strong> — AI policy and technology platform shifts dominate. <strong>Opportunity</strong> is active with the Insilico-Lilly deal creating a direct entry point for your interview argument. <strong>Culture</strong> is quiet. Watch for convergence between Discipline and Landscape — design engineering roles are being shaped by the same AI tooling shifts you're tracking.
+  </div>
+
+  <!-- Zone 2: Layer Pulse -->
+  <div class="section-label">Layer Pulse</div>
+  <div class="pulse">
+    <div class="pulse-row">
+      <span class="pulse-label">Opportunity</span>
+      <div class="pulse-bar-track"><div class="pulse-bar" style="width: 35%; background: #B8956A;"></div></div>
+      <span class="pulse-count">12</span>
+    </div>
+    <div class="pulse-row">
+      <span class="pulse-label">Position</span>
+      <div class="pulse-bar-track"><div class="pulse-bar" style="width: 15%; background: #60A5FA;"></div></div>
+      <span class="pulse-count">5</span>
+    </div>
+    <div class="pulse-row">
+      <span class="pulse-label">Discipline</span>
+      <div class="pulse-bar-track"><div class="pulse-bar" style="width: 25%; background: #4ade80;"></div></div>
+      <span class="pulse-count">9</span>
+    </div>
+    <div class="pulse-row hot">
+      <span class="pulse-label">Landscape</span>
+      <div class="pulse-bar-track"><div class="pulse-bar" style="width: 75%; background: #A78BFA;"></div></div>
+      <span class="pulse-count">28</span>
+    </div>
+    <div class="pulse-row">
+      <span class="pulse-label">Culture</span>
+      <div class="pulse-bar-track"><div class="pulse-bar" style="width: 10%; background: #f87171;"></div></div>
+      <span class="pulse-count">4</span>
+    </div>
+  </div>
+
+  <!-- Zone 3: Convergence -->
+  <div class="convergence-header">
+    <div class="section-label" style="margin-bottom: 0;">Convergence Signals</div>
+    <div style="font-size: 10px; color: #8A8480;">Scoring 5+ on 2+ layers</div>
+  </div>
+  <div class="convergence-grid">
+
+    <!-- Featured: highest convergence -->
+    <div class="conv-card featured">
+      <div class="conv-badges">
+        <span class="badge">Opportunity</span>
+        <span class="badge">Discipline</span>
+        <span class="badge">Landscape</span>
+        <span class="badge urgent">URG 9</span>
+      </div>
+      <div class="conv-title">AI drug developer Insilico Medicine and Lilly ink commercialization deal worth up to $2.75 billion</div>
+      <div class="conv-hook">The Insilico-Lilly deal adds a third AI layer to Lilly's stack — molecule, operations, and patient experience. Your interview must position design as the connective tissue between these three layers. This is the strongest signal for your immediate opportunity.</div>
+      <div class="conv-source">STAT News · 2h ago</div>
+      <button class="conv-bump">BUMP →</button>
+    </div>
+
+    <div class="conv-card">
+      <div class="conv-badges">
+        <span class="badge">Position</span>
+        <span class="badge">Discipline</span>
+      </div>
+      <div class="conv-title">Google's Head of Design exits after 9 years; successor being considered from product org</div>
+      <div class="conv-hook">Product leaders replacing design practitioners at the top signals what the market values — systems thinking over craft. Your positioning should lean into this.</div>
+      <div class="conv-source">Eye on Design · 1h ago</div>
+      <button class="conv-bump">BUMP →</button>
+    </div>
+
+    <div class="conv-card">
+      <div class="conv-badges">
+        <span class="badge">Discipline</span>
+        <span class="badge">Landscape</span>
+      </div>
+      <div class="conv-title">Shopify's design team restructure signals a shift toward systems-first thinking</div>
+      <div class="conv-hook">Design reorganizing around infrastructure, not product verticals. This is the organizational argument you need — design as platform capability, not campaign service.</div>
+      <div class="conv-source">The Verge · 1h ago</div>
+      <button class="conv-bump">BUMP →</button>
+    </div>
+
+    <div class="conv-card">
+      <div class="conv-badges">
+        <span class="badge">Opportunity</span>
+        <span class="badge">Landscape</span>
+      </div>
+      <div class="conv-title">CDO roles at Fortune 500 companies up 34% YoY — healthcare and pharma lead all sectors</div>
+      <div class="conv-hook">The role you're targeting is proliferating fastest in your target sector. The specs emphasize systems thinking and regulatory fluency — exactly your positioning.</div>
+      <div class="conv-source">Core77 · 3h ago</div>
+      <button class="conv-bump">BUMP →</button>
+    </div>
+
+  </div>
+
+  <!-- Zone 4: Source Activity -->
+  <div class="section-label">Source Activity</div>
+  <div class="source-grid">
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#B8956A;"></span>STAT News</span><span class="source-count">8</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#A78BFA;"></span>The Verge</span><span class="source-count">11</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#A78BFA;"></span>TechCrunch</span><span class="source-count">9</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#A78BFA;"></span>Politico</span><span class="source-count">7</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#f87171;"></span>The Atlantic</span><span class="source-count">4</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#B8956A;"></span>BioPharma Dive</span><span class="source-count">6</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#4ade80;"></span>Eye on Design</span><span class="source-count">3</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#f87171;"></span>Dezeen</span><span class="source-count">5</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#A78BFA;"></span>Wired</span><span class="source-count">4</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#4ade80;"></span>Vercel</span><span class="source-count">2</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#B8956A;"></span>Endpoints</span><span class="source-count">3</span></div>
+    <div class="source-cell"><span><span class="source-dot" style="display:inline-block; background:#60A5FA;"></span>Fast Company</span><span class="source-count">4</span></div>
+  </div>
+
+  <!-- Zone 5: Cerebro Provocation -->
+  <div class="section-label">Cerebro suggests</div>
+  <div class="provocation">
+    <div class="provocation-text">The Insilico deal adds a third AI layer to Lilly's stack — molecule, operations, and patient experience. Does your interview framing currently account for where design sits relative to all three, or is it still anchored mostly to the patient-facing layer?</div>
+    <button class="provocation-cta">Discuss in Cerebro →</button>
+  </div>
+
+</div>
+
+</body>
+</html>
