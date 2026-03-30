@@ -814,7 +814,7 @@ export default function Page() {
   const handleSignalLeave = useCallback(() => { setSignal(null) }, [])
 
   // Resizable column widths
-  const [leftWidth,  setLeftWidth]  = useState(220)
+  const [leftWidth,  setLeftWidth]  = useState(300)
   const [rightWidth, setRightWidth] = useState(320)
   const dragRef = useRef<{ side: "left"|"right"; startX: number; startW: number } | null>(null)
 
