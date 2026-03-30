@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Paperclip, Mic, MicOff, ExternalLink, Radio, AudioLines, Blend, Brain, ArrowUpRight } from "lucide-react"
 import { Ticker } from "@/components/ticker"
-import { AnalyticsPanel } from "@/components/analytics-panel"
+// AnalyticsPanel stays in codebase but no longer rendered — Synthesis is now a feed mode
+// import { AnalyticsPanel } from "@/components/analytics-panel"
 import { LeftRail } from "@/components/left-rail"
-import { useChiefOfStaff, ChiefOfStaffBand, AnalysisPanelMobile } from "@/components/chief-of-staff"
+import { useChiefOfStaff, ChiefOfStaffBand } from "@/components/chief-of-staff"
 import { FeedCard, SignalCard } from "@/components/feed-card"
 import { Divider } from "@/components/divider"
 import type { Article, Message, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
@@ -881,11 +882,6 @@ export default function Page() {
     setMobileTab("cerebro")
   }, [])
 
-  const handleAnalyticsDeliberate = useCallback((text: string) => {
-    setCerebroPrompt({ text, id: Date.now() })
-    setMobileTab("cerebro")
-  }, [])
-
   // Signal card hover state — desktop only
   const [signal, setSignal] = useState<{ article: Article; x: number; y: number } | null>(null)
   const handleSignalEnter = useCallback((article: Article, x: number, y: number) => { setSignal({ article, x, y }) }, [])
@@ -988,15 +984,29 @@ export default function Page() {
             No articles
           </div>
         ) : (
-          filtered.map(a => (
-            <FeedCard
-              key={a.id}
-              article={a}
-              onSignalEnter={handleSignalEnter}
-              onSignalMove={handleSignalMove}
-              onSignalLeave={handleSignalLeave}
-            />
-          ))
+          (() => {
+            const currentMode = isMobile ? (mobileTab === "synthesis" ? "synthesis" : "signal") : (viewMode === "synthesis" ? "synthesis" : "signal")
+            const sortedArticles = currentMode === "synthesis"
+              ? [...filtered].sort((a, b) => {
+                  const scoreSum = (art: Article) => {
+                    if (!art.signalScores) return 0
+                    const s = art.signalScores
+                    return s.opportunity + s.position + s.discipline + s.landscape + s.culture
+                  }
+                  return scoreSum(b) - scoreSum(a)
+                })
+              : filtered
+            return sortedArticles.map(a => (
+              <FeedCard
+                key={a.id}
+                article={a}
+                mode={currentMode}
+                onSignalEnter={handleSignalEnter}
+                onSignalMove={handleSignalMove}
+                onSignalLeave={handleSignalLeave}
+              />
+            ))
+          })()
         )}
       </div>
     </main>
@@ -1009,9 +1019,8 @@ export default function Page() {
 
         {/* Mobile: show active tab panel */}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          {mobileTab === "signal"    && feedContent}
+          {(mobileTab === "signal" || mobileTab === "synthesis") && feedContent}
           {mobileTab === "audio"     && <AudioPlaceholder />}
-          {mobileTab === "synthesis" && <AnalysisPanelMobile signals={signals} briefLoading={briefLoading} />}
           {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
         </div>
 
@@ -1110,9 +1119,7 @@ export default function Page() {
           onToggleSource={handleToggleSource}
         />
         <Divider onMouseDown={e => startResize("left", e)} />
-        {viewMode === "synthesis"
-          ? <AnalyticsPanel articles={articles} onDeliberate={handleAnalyticsDeliberate} />
-          : viewMode === "audio"
+        {viewMode === "audio"
           ? <AudioPlaceholder />
           : feedContent}
         <Divider onMouseDown={e => startResize("right", e)} />

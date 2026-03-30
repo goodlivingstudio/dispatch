@@ -73,12 +73,29 @@ export type SignalCallbacks = {
   onSignalLeave: () => void
 }
 
-export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { article: Article } & SignalCallbacks) {
+export function FeedCard({ article, mode = "signal", onSignalEnter, onSignalMove, onSignalLeave }: { article: Article; mode?: "signal" | "synthesis" } & SignalCallbacks) {
   const isExternal   = article.url !== "#"
   const hasSignal    = !!(article.synopsis || article.relevance)
   const [hovered, setHovered] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const signalActiveRef = useRef(false)
+
+  // Synthesis helpers
+  const scores = article.signalScores
+  const layers: { name: string; score: number }[] = scores
+    ? [
+        { name: "OPP", score: scores.opportunity },
+        { name: "POS", score: scores.position },
+        { name: "DIS", score: scores.discipline },
+        { name: "LND", score: scores.landscape },
+        { name: "CUL", score: scores.culture },
+      ]
+    : []
+  const primaryLayer = layers.length > 0 ? layers.reduce((a, b) => (b.score > a.score ? b : a)) : null
+  const secondaryLayers = layers.filter(l => l !== primaryLayer && l.score >= 5)
+  const highScoreLayers = layers.filter(l => l.score >= 5)
+  const isConvergence = highScoreLayers.length >= 2
+  const isUrgent = scores ? scores.urgency >= 7 : false
 
   const isLeftHalf = (clientX: number) => {
     if (!cardRef.current) return true
@@ -127,7 +144,11 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
         display: "flex",
         padding: "14px 20px 14px 18px",
         borderBottom: "1px solid var(--border)",
-        borderLeft: `2px solid ${article.signalLens === "OPPORTUNITY" ? "var(--accent-secondary)" : "transparent"}`,
+        borderLeft: `2px solid ${
+          mode === "synthesis"
+            ? (isConvergence ? "var(--accent-secondary)" : "transparent")
+            : (article.signalLens === "OPPORTUNITY" ? "var(--accent-secondary)" : "transparent")
+        }`,
         background: hovered ? "var(--bg-surface)" : "transparent",
         cursor: isExternal ? "pointer" : hasSignal ? "default" : "default",
         transition: "background 0.12s",
@@ -135,7 +156,7 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Eyebrow: source · category · time */}
+        {/* Eyebrow */}
         <div
           style={{
             fontSize: 11,
@@ -146,13 +167,72 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            transition: "opacity 0.3s ease",
           }}
         >
-          {article.source}
-          <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
-          {article.category}
-          <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
-          {timeAgo(article.publishedAt)}
+          {mode === "synthesis" ? (
+            <>
+              {primaryLayer && (
+                <span style={{
+                  fontSize: 9,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase" as const,
+                  padding: "1px 5px",
+                  borderRadius: 3,
+                  background: "var(--bg-elevated)",
+                  color: "var(--accent-secondary)",
+                  fontWeight: 600,
+                }}>
+                  {primaryLayer.name}
+                </span>
+              )}
+              {secondaryLayers.map(l => (
+                <span key={l.name} style={{
+                  fontSize: 9,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase" as const,
+                  padding: "1px 5px",
+                  borderRadius: 3,
+                  background: "var(--bg-elevated)",
+                  color: "var(--text-tertiary)",
+                  fontWeight: 600,
+                  opacity: 0.7,
+                }}>
+                  {l.name}
+                </span>
+              ))}
+              {isUrgent && (
+                <span style={{
+                  fontSize: 9,
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase" as const,
+                  padding: "1px 5px",
+                  borderRadius: 3,
+                  background: "var(--accent-secondary)",
+                  color: "var(--bg-primary)",
+                  fontWeight: 700,
+                }}>
+                  URG
+                </span>
+              )}
+              <span style={{ opacity: 0.4 }}>·</span>
+              <span>{timeAgo(article.publishedAt)}</span>
+            </>
+          ) : (
+            <>
+              {article.source}
+              <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
+              {article.category}
+              <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
+              {timeAgo(article.publishedAt)}
+            </>
+          )}
         </div>
 
         {/* Headline */}
@@ -169,21 +249,42 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
           {article.title}
         </div>
 
-        {/* Summary — static one-liner, always shown, never swaps to relevancy */}
-        {article.summary && (
-          <div
-            style={{
-              fontSize: 13,
-              color: "var(--text-tertiary)",
-              lineHeight: 1.55,
-              letterSpacing: "-0.005em",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {article.summary}
-          </div>
+        {/* Summary / Relevance */}
+        {mode === "synthesis" ? (
+          (article.relevance || article.summary) && (
+            <div
+              style={{
+                fontSize: 13,
+                color: article.relevance ? "var(--text-tertiary)" : "var(--text-tertiary)",
+                opacity: article.relevance ? 1 : 0.6,
+                lineHeight: 1.55,
+                letterSpacing: "-0.005em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                transition: "opacity 0.3s ease",
+              }}
+            >
+              {article.relevance || article.summary}
+            </div>
+          )
+        ) : (
+          article.summary && (
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--text-tertiary)",
+                lineHeight: 1.55,
+                letterSpacing: "-0.005em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                transition: "opacity 0.3s ease",
+              }}
+            >
+              {article.summary}
+            </div>
+          )
         )}
       </div>
     </div>
