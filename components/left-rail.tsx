@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Radio, AudioLines, Blend, Maximize2 } from "lucide-react"
+import { Radio, AudioLines, Blend, Aperture, Maximize2 } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 
@@ -325,7 +325,7 @@ export function LeftRail({
               { id: "signal" as const,    Icon: Radio,      title: "Signal"    },
               { id: "audio" as const,     Icon: AudioLines, title: "Audio"     },
               { id: "synthesis" as const, Icon: Blend,      title: "Synthesis" },
-              { id: "zen" as const,       Icon: Maximize2,  title: "Zen"       },
+              { id: "zen" as const,       Icon: Aperture,   title: "Zen"       },
             ]).map(tab => {
               const isActive = viewMode === tab.id
               return (

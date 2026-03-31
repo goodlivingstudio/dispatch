@@ -58,11 +58,22 @@ async function fetchArenaBlocks(): Promise<ZenBlock[]> {
 // Extract hero images from design/architecture/culture RSS feeds
 
 const IMAGE_FEEDS = [
+  // Design & Architecture editorial
   { url: "https://www.dezeen.com/feed/",                 source: "Dezeen" },
   { url: "https://www.dezeen.com/architecture/feed/",    source: "Dezeen" },
   { url: "https://www.itsnicethat.com/rss",              source: "It's Nice That" },
   { url: "https://www.architectural-review.com/rss",     source: "Arch Review" },
   { url: "https://www.core77.com/feed",                  source: "Core77" },
+
+  // Design galleries & showcases
+  { url: "https://searchsystem.co/rss",                  source: "SearchSystem" },
+  { url: "https://www.awwwards.com/blog/feed",           source: "Awwwards" },
+  { url: "https://www.cssdesignawards.com/rss/new-sites.xml", source: "CSS Design Awards" },
+  { url: "https://dribbble.com/shots/popular.rss",       source: "Dribbble" },
+  { url: "https://tympanus.net/codrops/feed/",           source: "Codrops" },
+  { url: "https://refero.design/rss",                    source: "Refero" },
+  { url: "https://minimal.gallery/feed",                 source: "Minimal Gallery" },
+  { url: "https://bestwebsite.gallery/feed",             source: "Best Website Gallery" },
 ]
 
 function extractImageFromItem(item: string): string {
