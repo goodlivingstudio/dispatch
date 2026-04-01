@@ -1002,68 +1002,89 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Mobile bottom tab bar */}
-        <div
-          style={{
-            flexShrink: 0,
-            height: 72,
-            display: "flex",
-            alignItems: "stretch",
-            borderTop: "1px solid var(--border)",
-            background: "var(--bg-surface)",
-          }}
-        >
-          {([
-            { id: "signal",    Icon: Radio,      label: "Signal"    },
-            { id: "audio",     Icon: AudioLines, label: "Sound"     },
-            { id: "synthesis", Icon: Blend,      label: "Synthesis" },
-            { id: "cerebro",   Icon: Brain,      label: "Cerebro"   },
-          ] as const).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setMobileTab(tab.id)}
-              aria-label={tab.label}
+        {/* Mobile bottom tab bar with sliding indicator */}
+        {(() => {
+          const tabs = [
+            { id: "signal" as const,    Icon: Radio,      label: "Signal"    },
+            { id: "audio" as const,     Icon: AudioLines, label: "Sound"     },
+            { id: "synthesis" as const, Icon: Blend,      label: "Synthesis" },
+            { id: "cerebro" as const,   Icon: Brain,      label: "Cerebro"   },
+          ]
+          const activeIdx = tabs.findIndex(t => t.id === mobileTab)
+          return (
+            <div
               style={{
-                flex: 1,
+                flexShrink: 0,
+                height: 72,
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 4,
-                minHeight: 72,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
+                alignItems: "stretch",
+                borderTop: "1px solid var(--border)",
+                background: "var(--bg-surface)",
                 position: "relative",
+                overflow: "hidden",
               }}
             >
-              {/* Active pill indicator */}
-              {mobileTab === tab.id && (
-                <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: 20,
-                  height: 4,
-                  borderRadius: 4,
-                  background: "var(--accent-secondary)",
-                }} />
-              )}
-              <tab.Icon size={20} strokeWidth={1.5} />
-              <span
+              {/* Sliding blob indicator */}
+              <div
                 style={{
-                  fontSize: 10,
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  color: mobileTab === tab.id ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                  position: "absolute",
+                  top: 4,
+                  left: `calc(${activeIdx * 25}% + 4px)`,
+                  width: "calc(25% - 8px)",
+                  height: "calc(100% - 8px)",
+                  background: "var(--bg-elevated)",
+                  borderRadius: 14,
+                  transition: "left 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+                  zIndex: 0,
                 }}
-              >
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
+              />
+              {tabs.map(tab => {
+                const isActive = mobileTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setMobileTab(tab.id)}
+                    aria-label={tab.label}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 4,
+                      minHeight: 72,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    <tab.Icon
+                      size={20}
+                      strokeWidth={1.5}
+                      style={{
+                        color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                        transition: "color 0.3s ease",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 10,
+                        textTransform: "uppercase",
+                        fontWeight: 500,
+                        color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                        transition: "color 0.3s ease",
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })()}
       </div>
     )
   }
