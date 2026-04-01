@@ -34,6 +34,7 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
         <div style={{ padding: article.relevance ? "8px 16px 8px" : "8px 16px" }}>
           <div style={{
             fontSize: 12,
+            fontFamily: "var(--font-geist-mono), monospace",
             fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-tertiary)",
@@ -51,6 +52,7 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
         }}>
           <div style={{
             fontSize: 12,
+            fontFamily: "var(--font-geist-mono), monospace",
             fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-primary)",
@@ -138,7 +140,7 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
         {/* Eyebrow */}
         <div
           style={{
-            fontSize: 11,
+            fontSize: 10,
             color: "var(--text-tertiary)",
             marginBottom: 4,
             whiteSpace: "nowrap",
@@ -161,7 +163,7 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
         <div
           style={{
             fontSize: 15,
-            fontWeight: 550,
+            fontWeight: 600,
             color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
             lineHeight: 1.4,
             marginBottom: article.summary ? 8 : 0,

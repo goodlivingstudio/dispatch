@@ -191,7 +191,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                 <div style={{
                   fontSize: 10,
                   fontFamily: "var(--font-geist-mono), monospace",
-                  color: "var(--accent-muted)",
+                  color: "var(--accent-secondary)",
                   textTransform: "uppercase",
                   fontWeight: 600,
                   marginBottom: 8,
@@ -199,7 +199,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                   {signal.label}
                 </div>
                 {signal.body && (
-                  <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-primary)", lineHeight: 1.6 }}>
                     {signal.body}
                   </div>
                 )}
@@ -254,7 +254,7 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
             style={{
               fontSize: 10,
               fontFamily: "var(--font-geist-mono), monospace",
-              color: "var(--accent-muted)",
+              color: "var(--accent-secondary)",
               textTransform: "uppercase",
               marginBottom: 8,
             }}
@@ -263,7 +263,7 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
             {signal.label}
           </div>
           {signal.body ? (
-            <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-primary)", lineHeight: 1.6 }}>
               {signal.body}
             </div>
           ) : briefLoading ? (

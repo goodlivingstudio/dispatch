@@ -34,21 +34,23 @@ const ALL_LAYERS: LayerKey[] = ["opportunity", "position", "discipline", "landsc
 // ─── Shared styles ──────────────────────────────────────────────────────────
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: 11,
-  color: "var(--text-tertiary)",
+  fontSize: 10,
+  color: "var(--accent-secondary)",
   textTransform: "uppercase",
   fontWeight: 600,
   marginBottom: 8,
 }
 
 const bodyStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: 12,
+  fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--text-secondary)",
   lineHeight: 1.6,
 }
 
 const headingStyle: React.CSSProperties = {
   fontSize: 15,
+  fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--text-primary)",
   fontWeight: 550,
 }
@@ -311,7 +313,7 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
               >
                 {/* Eyebrow */}
                 <div style={{
-                  fontSize: 11,
+                  fontSize: 10,
                   color: "var(--text-tertiary)", marginBottom: 4,
                 }}>
                   {a.source} · {a.category} · {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -393,7 +395,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
           onClick={() => setActiveModal("briefing")}
         >
           <div style={sectionLabelStyle}>Current Briefing</div>
-          <div style={{ ...bodyStyle, fontSize: 13 }}>
+          <div style={bodyStyle}>
             Intelligence briefing will appear here when the annotation engine is active. This view synthesizes patterns across all five layers — Opportunity, Position, Discipline, Landscape, and Culture — to surface the single most important insight for your mandate right now.
           </div>
         </div>
@@ -415,10 +417,10 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => onDeliberate(p.text)}
               >
-                <div style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>
+                <div style={{ fontSize: 10, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>
                   {p.label}
                 </div>
-                <div style={{ flex: 1, fontSize: 13, fontStyle: "italic", color: "var(--accent-secondary)", lineHeight: 1.6 }}>
+                <div style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", fontStyle: "italic", color: "var(--accent-secondary)", lineHeight: 1.6 }}>
                   {p.text}
                 </div>
                 <div style={{ marginTop: 16 }}>
@@ -491,7 +493,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
             </div>
 
             {/* Opening */}
-            <div style={{ ...bodyStyle, fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>
+            <div style={{ ...bodyStyle, lineHeight: 1.6, marginBottom: 24 }}>
               Intelligence briefing will appear here when the annotation engine is active. This view synthesizes patterns across all five layers — Opportunity, Position, Discipline, Landscape, and Culture — to surface the single most important insight for your mandate right now.
             </div>
 
@@ -536,7 +538,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                   {pattern.layers.map(l => <LayerPill key={l} layer={l} />)}
                 </div>
                 <div style={{ ...headingStyle, fontSize: 18, marginBottom: 8 }}>{pattern.title}</div>
-                <div style={{ ...bodyStyle, fontSize: 13, lineHeight: 1.6 }}>{pattern.description}</div>
+                <div style={{ ...bodyStyle, lineHeight: 1.6 }}>{pattern.description}</div>
               </div>
 
               <div>

@@ -116,7 +116,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             {/* THE WHAT — Synopsis */}
             <div style={{ marginBottom: 24 }}>
               <div style={{
-                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase",
                 fontWeight: 600, marginBottom: 8,
               }}>
                 Synopsis
@@ -129,30 +129,30 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             {/* THE META — Particulars */}
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
               <div style={{
-                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase",
                 fontWeight: 600, marginBottom: 16,
               }}>
                 Details
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Show</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 3 }}>Show</div>
                   <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.showName}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Duration</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 3 }}>Duration</div>
                   <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.duration || "—"}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Published</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 3 }}>Published</div>
                   <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{formatDate(episode.publishedAt)}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Category</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 3 }}>Category</div>
                   <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{episode.category}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 3 }}>Layer</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 3 }}>Layer</div>
                   <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{LAYER_LABELS[episode.layer] || episode.layer}</div>
                 </div>
               </div>
@@ -161,7 +161,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             {/* THE WHY — Mandate relevance */}
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
               <div style={{
-                fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+                fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase",
                 fontWeight: 600, marginBottom: 8,
               }}>
                 Why It Matters
@@ -268,7 +268,7 @@ function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => vo
         {/* Eyebrow */}
         <div
           style={{
-            fontSize: 11, color: "var(--text-tertiary)",
+            fontSize: 10, color: "var(--text-tertiary)",
             marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}
         >
@@ -333,7 +333,7 @@ export function AudioView({ onDeliberate }: { onDeliberate?: (text: string) => v
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <div style={{
-          fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
+          fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase",
           fontWeight: 600,
         }}>
           Audio Intelligence
