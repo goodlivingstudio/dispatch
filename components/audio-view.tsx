@@ -93,7 +93,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 6 }}>
               {episode.showName}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 650, color: "var(--text-primary)", lineHeight: 1.35, letterSpacing: "-0.02em" }}>
+            <div style={{ fontSize: 18, fontWeight: 650, color: "var(--text-primary)", lineHeight: 1.35 }}>
               {episode.title}
             </div>
           </div>
@@ -117,7 +117,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             <div style={{ marginBottom: 24 }}>
               <div style={{
                 fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
-                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 8,
+                fontWeight: 600, marginBottom: 8,
               }}>
                 Synopsis
               </div>
@@ -130,7 +130,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
               <div style={{
                 fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
-                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 16,
+                fontWeight: 600, marginBottom: 16,
               }}>
                 Details
               </div>
@@ -162,7 +162,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
               <div style={{
                 fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
-                letterSpacing: "0.04em", fontWeight: 600, marginBottom: 8,
+                fontWeight: 600, marginBottom: 8,
               }}>
                 Why It Matters
               </div>
@@ -268,7 +268,7 @@ function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => vo
         {/* Eyebrow */}
         <div
           style={{
-            fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.01em",
+            fontSize: 11, color: "var(--text-tertiary)",
             marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}
         >
@@ -285,7 +285,7 @@ function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => vo
           style={{
             fontSize: 15, fontWeight: 550,
             color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
-            lineHeight: 1.4, letterSpacing: "-0.02em", transition: "color 0.15s",
+            lineHeight: 1.4, transition: "color 0.15s",
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical" as const, overflow: "hidden",
           }}
@@ -334,7 +334,7 @@ export function AudioView({ onDeliberate }: { onDeliberate?: (text: string) => v
       <div style={{ marginBottom: 16 }}>
         <div style={{
           fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
-          letterSpacing: "0.04em", fontWeight: 600,
+          fontWeight: 600,
         }}>
           Audio Intelligence
         </div>
@@ -369,7 +369,6 @@ export function AudioView({ onDeliberate }: { onDeliberate?: (text: string) => v
                   fontSize: 12,
                   color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
                   fontWeight: isActive ? 600 : 400,
-                  letterSpacing: "-0.01em",
                   transition: "color 0.15s",
                 }}>
                   {layer.label}

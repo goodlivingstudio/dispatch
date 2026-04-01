@@ -211,7 +211,6 @@ export function LeftRail({
           style={{
             fontSize: 22,
             fontWeight: 700,
-            letterSpacing: "-0.04em",
             color: "var(--text-primary)",
             lineHeight: 1,
             margin: 0,
@@ -223,7 +222,6 @@ export function LeftRail({
           style={{
             fontSize: 12,
             color: "var(--text-tertiary)",
-            letterSpacing: "0.005em",
             marginTop: 8,
             lineHeight: 1.5,
           }}
@@ -241,7 +239,6 @@ export function LeftRail({
         <div style={{
           fontSize: 12,
           color: "var(--text-secondary)",
-          letterSpacing: "0.01em",
           fontWeight: 500,
           marginBottom: 8,
         }}>
@@ -267,8 +264,7 @@ export function LeftRail({
           />
           <span style={{
             fontSize: 11,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.04em",
+            fontFamily: "var(--font-geist-mono), monospace",
             textTransform: "uppercase",
             color: dotColor,
             fontWeight: 700,
@@ -390,7 +386,6 @@ export function LeftRail({
                       fontSize: 12,
                       color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
                       fontWeight: isActive ? 600 : 400,
-                      letterSpacing: "-0.01em",
                       transition: "color 0.15s",
                     }}
                   >

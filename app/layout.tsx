@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 
 export const viewport: Viewport = {
@@ -7,7 +7,19 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const geist = localFont({
+  src: "./fonts/Geist-Medium.woff2",
+  weight: "500",
+  variable: "--font-geist-sans",
+  display: "swap",
+})
+
+const geistMono = localFont({
+  src: "./fonts/GeistMono-Medium.woff2",
+  weight: "500",
+  variable: "--font-geist-mono",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dispatch.goodliving.studio"),
@@ -25,7 +37,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} h-full`}>
       <body className="h-full antialiased">
         <a href="#main-feed" className="skip-link">Skip to feed</a>
         {children}
@@ -33,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div style={{
             position: "fixed", bottom: 8, left: 8, zIndex: 9999, pointerEvents: "none",
             background: "#1a6cf0", color: "#fff", fontSize: 10, fontFamily: "monospace",
-            letterSpacing: "0.1em", padding: "3px 8px", borderRadius: 3, opacity: 0.85,
+            padding: "3px 8px", borderRadius: 3, opacity: 0.85,
           }}>
             DISPATCH · :3001
           </div>

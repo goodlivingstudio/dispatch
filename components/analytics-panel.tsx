@@ -224,10 +224,10 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
     case "snapshot": {
       return (
         <div>
-          <div style={{ fontSize: 64, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.04em", lineHeight: 1 }}>
+          <div style={{ fontSize: 64, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
             {analytics.total}
           </div>
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 6, marginBottom: 16, fontWeight: 700 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase", marginTop: 6, marginBottom: 16, fontWeight: 700 }}>
             signals tracked today
           </div>
           <ProportionBar segments={[
@@ -241,7 +241,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             {(["OPPORTUNITY", "POSITION", "DISCIPLINE", "LANDSCAPE", "CULTURE"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: LAYER_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.04em", fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600 }}>
                   {k.charAt(0) + k.slice(1).toLowerCase()} {analytics.layers[k]}
                 </span>
               </div>
@@ -266,16 +266,16 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
             { value: analytics.layers.CULTURE,     color: LAYER_COLOR.CULTURE     },
           ]} />
           <div>
-            <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <div style={{ fontSize: 44, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
               {pct}%
             </div>
-            <div style={{ fontSize: 11, color: LAYER_COLOR[dominant[0]] || "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
+            <div style={{ fontSize: 11, color: LAYER_COLOR[dominant[0]] || "var(--text-tertiary)", textTransform: "uppercase", marginTop: 4, marginBottom: 12, fontWeight: 700 }}>
               {dominant[0].charAt(0) + dominant[0].slice(1).toLowerCase()} dominant
             </div>
             {(["OPPORTUNITY","POSITION","DISCIPLINE","LANDSCAPE","CULTURE"] as const).map(k => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: LAYER_COLOR[k], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600 }}>
                   {k.charAt(0) + k.slice(1).toLowerCase()} — {analytics.layers[k]}
                 </span>
               </div>
@@ -290,10 +290,10 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
       const max  = top?.count || 1
       return (
         <div>
-          <div style={{ fontSize: 42, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>
+          <div style={{ fontSize: 42, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
             {top?.label || "—"}
           </div>
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 5, marginBottom: 14, fontWeight: 700 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase", marginTop: 5, marginBottom: 14, fontWeight: 700 }}>
             most active · {top?.count || 0} articles
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -305,7 +305,6 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
                 fontSize: 11,
                 fontWeight: 600,
                 color: "var(--text-secondary)",
-                letterSpacing: "0.05em",
                 textTransform: "uppercase",
               }}>
                 {cat.label}
@@ -329,7 +328,6 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
                 fontWeight: i === 0 ? 550 : 400,
                 color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
                 lineHeight: 1.3,
-                letterSpacing: "-0.01em",
                 marginBottom: 6,
                 overflow: "hidden",
                 whiteSpace: "nowrap",
@@ -359,7 +357,7 @@ function CardViz({ id, analytics }: { id: string; analytics: Analytics }) {
           {top5.map(item => (
             <div key={item.source}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontSize: 13, color: "var(--text-secondary)", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "82%", fontWeight: 500 }}>
+                <span style={{ fontSize: 13, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "82%", fontWeight: 500 }}>
                   {item.source}
                 </span>
                 <span style={{ fontSize: 12, color: "var(--text-tertiary)", flexShrink: 0, fontWeight: 700 }}>
@@ -410,7 +408,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       ]
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", marginBottom: 24 }}>
             Average AI-scored signal strength across {analytics.annotatedCount} annotated articles — scored 0–10 per dimension
           </div>
           <ResponsiveContainer width="100%" height={260}>
@@ -430,8 +428,8 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
               { label: "Stub fallback", value: analytics.stubCount },
             ].map(stat => (
               <div key={stat.label}>
-                <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1 }}>{stat.value}</div>
-                <div style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase", marginTop: 4 }}>{stat.label}</div>
+                <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>{stat.value}</div>
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase", marginTop: 4 }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -463,9 +461,9 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
               <div key={item.name}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.color }} />
-                  <span style={{ fontSize: 11, color: "var(--text-tertiary)", letterSpacing: "0.03em", textTransform: "uppercase" }}>{item.name}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{item.name}</span>
                 </div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", paddingLeft: 16 }}>
+                <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", paddingLeft: 16 }}>
                   {item.value}
                   <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-tertiary)", marginLeft: 6 }}>
                     {total > 0 ? Math.round((item.value / total) * 100) : 0}%
@@ -482,7 +480,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       const data = analytics.categoryData.map(c => ({ name: c.label, count: c.count }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", marginBottom: 24 }}>
             Article volume by category across {analytics.total} signals — darker fill = higher concentration
           </div>
           <ResponsiveContainer width="100%" height={360}>
@@ -504,7 +502,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", marginBottom: 24 }}>
             Highest urgency signals today — AI-scored 0–10 (10 = act now, 0 = evergreen)
           </div>
           <ResponsiveContainer width="100%" height={360}>
@@ -523,7 +521,7 @@ function ModalChart({ id, analytics }: { id: string; analytics: Analytics }) {
       const data = analytics.topSources.map(s => ({ name: s.source, count: s.count }))
       return (
         <div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", marginBottom: 24 }}>
             Publication volume across {analytics.topSources.length} sources — signals per outlet today
           </div>
           <ResponsiveContainer width="100%" height={360}>
@@ -603,10 +601,10 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
           flexShrink: 0,
         }}>
           <div>
-            <span style={{ fontSize: 11, color: accent, letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>
+            <span style={{ fontSize: 11, color: accent, textTransform: "uppercase", fontWeight: 600 }}>
               {card.label}
             </span>
-            <span style={{ marginLeft: 16, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em" }}>
+            <span style={{ marginLeft: 16, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)" }}>
               {analytics.annotatedCount} annotated · {analytics.total} total
             </span>
           </div>
@@ -642,7 +640,6 @@ function AnalyticsModal({ card, analytics, onClose, onDeliberate }: {
               borderRadius: 8,
               padding: "11px 24px",
               fontSize: 11,
-              letterSpacing: "0.03em",
               textTransform: "uppercase",
               cursor: "pointer",
               fontWeight: 700,
@@ -697,7 +694,6 @@ function AnalyticsCard({ card, analytics, onClick }: {
         <span style={{
           fontSize: 12,
           color: accent,
-          letterSpacing: "0.03em",
           textTransform: "uppercase",
           fontWeight: 700,
         }}>

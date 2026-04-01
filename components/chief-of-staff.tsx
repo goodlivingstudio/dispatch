@@ -115,9 +115,8 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
         }}>
           <div style={{
             fontSize: 10,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            fontFamily: "var(--font-geist-mono), monospace",
             color: "var(--accent-muted)",
-            letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
           }}>
@@ -147,9 +146,8 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                 key={i}
                 style={{
                   fontSize: 10,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontFamily: "var(--font-geist-mono), monospace",
                   color: i === statusIdx ? "var(--accent-muted)" : "var(--text-tertiary)",
-                  letterSpacing: "0.03em",
                   opacity: i === statusIdx ? 1 : 0.5,
                   animation: i === statusIdx ? "status-fade 0.2s ease both" : "none",
                 }}
@@ -192,9 +190,8 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
               >
                 <div style={{
                   fontSize: 10,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontFamily: "var(--font-geist-mono), monospace",
                   color: "var(--accent-muted)",
-                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   fontWeight: 600,
                   marginBottom: 8,
@@ -202,7 +199,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                   {signal.label}
                 </div>
                 {signal.body && (
-                  <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6, letterSpacing: "-0.01em" }}>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6 }}>
                     {signal.body}
                   </div>
                 )}
@@ -219,7 +216,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       padding: "2px 0",
                       cursor: "pointer",
                       fontSize: 11,
-                      letterSpacing: "0.02em",
                       fontWeight: 500,
                       color: "var(--accent-secondary)",
                       opacity: isHovered ? 1 : 0,
@@ -257,9 +253,8 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
           <div
             style={{
               fontSize: 10,
-              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              fontFamily: "var(--font-geist-mono), monospace",
               color: "var(--accent-muted)",
-              letterSpacing: "0.08em",
               textTransform: "uppercase",
               marginBottom: 8,
             }}
@@ -268,7 +263,7 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
             {signal.label}
           </div>
           {signal.body ? (
-            <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6, letterSpacing: "-0.01em" }}>
+            <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6 }}>
               {signal.body}
             </div>
           ) : briefLoading ? (

@@ -366,8 +366,7 @@ function Cerebro({ articles, pendingPrompt }: {
         <span
           style={{
             fontSize: 10,
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
-            letterSpacing: "0.08em",
+            fontFamily: "var(--font-geist-mono), monospace",
             textTransform: "uppercase",
             color: "var(--accent-muted)",
           }}
@@ -380,9 +379,8 @@ function Cerebro({ articles, pendingPrompt }: {
               title="Conversation memory active — Cerebro remembers previous sessions"
               style={{
                 fontSize: 9,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontFamily: "var(--font-geist-mono), monospace",
                 color: "var(--accent-muted)",
-                letterSpacing: "0.04em",
                 opacity: 0.7,
               }}
             >
@@ -393,7 +391,7 @@ function Cerebro({ articles, pendingPrompt }: {
             <span
               style={{
                 fontSize: 10,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontFamily: "var(--font-geist-mono), monospace",
                 fontVariantNumeric: "tabular-nums",
                 color: "var(--text-tertiary)",
               }}
@@ -416,8 +414,7 @@ function Cerebro({ articles, pendingPrompt }: {
                 background: escalateCopied ? "var(--accent-secondary)" : "transparent",
                 color: escalateCopied ? "var(--bg-primary)" : "var(--text-tertiary)",
                 fontSize: 9,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                letterSpacing: "0.02em",
+                fontFamily: "var(--font-geist-mono), monospace",
                 cursor: "pointer",
                 transition: "all 0.2s",
               }}
@@ -445,10 +442,9 @@ function Cerebro({ articles, pendingPrompt }: {
             <div
               style={{
                 fontSize: 12.5,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontFamily: "var(--font-geist-mono), monospace",
                 color: "var(--text-tertiary)",
                 lineHeight: 1.8,
-                letterSpacing: "-0.01em",
               }}
             >
               Strategic intelligence ready.
@@ -482,7 +478,7 @@ function Cerebro({ articles, pendingPrompt }: {
                 style={{
                   padding: "0 16px",
                   fontSize: 11,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontFamily: "var(--font-geist-mono), monospace",
                   color: "var(--text-tertiary)",
                   lineHeight: 1.5,
                   display: "flex",
@@ -499,12 +495,11 @@ function Cerebro({ articles, pendingPrompt }: {
                 style={{
                   padding: "0 16px",
                   fontSize: 12.5,
-                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontFamily: "var(--font-geist-mono), monospace",
                   color: "var(--text-secondary)",
                   lineHeight: 1.75,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
-                  letterSpacing: "-0.01em",
                 }}
               >
                 {m.content}
@@ -526,11 +521,10 @@ function Cerebro({ articles, pendingPrompt }: {
             {/* Inline follow-up question — machine voice */}
             <div style={{
               fontSize: 12,
-              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              fontFamily: "var(--font-geist-mono), monospace",
               color: "var(--accent-muted)",
               lineHeight: 1.65,
               fontStyle: "italic",
-              letterSpacing: "-0.01em",
               marginBottom: followUps.alternatives.length > 0 ? 16 : 0,
             }}>
               {followUps.question}
@@ -579,7 +573,7 @@ function Cerebro({ articles, pendingPrompt }: {
               className="cursor-blink"
               style={{
                 fontSize: 13,
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontFamily: "var(--font-geist-mono), monospace",
               }}
             >
               ▊
@@ -726,7 +720,7 @@ function Cerebro({ articles, pendingPrompt }: {
                   onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
                   onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)"; e.currentTarget.style.background = "transparent" }}
                 >
-                  <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.06em" }}>BUMP</span>
+                  <span style={{ fontSize: 10, fontWeight: 600 }}>BUMP</span>
                   <ArrowUpRight size={13} strokeWidth={2} />
                 </button>
               ) : <div />}
@@ -1058,7 +1052,6 @@ export default function Page() {
               <span
                 style={{
                   fontSize: 10,
-                  letterSpacing: "0.02em",
                   textTransform: "uppercase",
                   fontWeight: 500,
                   color: mobileTab === tab.id ? "var(--accent-secondary)" : "var(--text-tertiary)",

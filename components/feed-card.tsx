@@ -37,7 +37,6 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
             fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-tertiary)",
-            letterSpacing: "-0.01em",
           }}>
             {article.synopsis}
           </div>
@@ -55,7 +54,6 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
             fontWeight: 400,
             lineHeight: 1.55,
             color: "var(--text-primary)",
-            letterSpacing: "-0.01em",
           }}>
             {article.relevance}
           </div>
@@ -142,7 +140,6 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
           style={{
             fontSize: 11,
             color: "var(--text-tertiary)",
-            letterSpacing: "0.01em",
             marginBottom: 4,
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -167,7 +164,6 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
             fontWeight: 550,
             color: hovered ? "var(--text-primary)" : "var(--text-secondary)",
             lineHeight: 1.4,
-            letterSpacing: "-0.02em",
             marginBottom: article.summary ? 8 : 0,
           }}
         >
@@ -181,7 +177,6 @@ export function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }
               fontSize: 13,
               color: "var(--text-tertiary)",
               lineHeight: 1.6,
-              letterSpacing: "-0.005em",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",

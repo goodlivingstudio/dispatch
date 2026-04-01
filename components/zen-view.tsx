@@ -72,7 +72,7 @@ export function ZenView() {
       <div style={{ padding: "24px 24px 16px" }}>
         <div style={{
           fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase",
-          letterSpacing: "0.04em", fontWeight: 600,
+          fontWeight: 600,
         }}>
           Zen
         </div>

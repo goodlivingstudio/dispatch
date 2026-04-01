@@ -158,7 +158,6 @@ export function Ticker({
                 <span
                   style={{
                     fontSize: 9,
-                    letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     padding: "2px 8px",
                     borderRadius: 3,
@@ -174,7 +173,6 @@ export function Ticker({
                   className="ticker-text"
                   style={{
                     fontSize: 12.5,
-                    letterSpacing: "-0.01em",
                   }}
                 >
                   {h.text}

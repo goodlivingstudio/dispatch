@@ -37,7 +37,6 @@ const sectionLabelStyle: React.CSSProperties = {
   fontSize: 11,
   color: "var(--text-tertiary)",
   textTransform: "uppercase",
-  letterSpacing: "0.04em",
   fontWeight: 600,
   marginBottom: 8,
 }
@@ -52,7 +51,6 @@ const headingStyle: React.CSSProperties = {
   fontSize: 15,
   color: "var(--text-primary)",
   fontWeight: 550,
-  letterSpacing: "-0.02em",
 }
 
 const cardBase: React.CSSProperties = {
@@ -66,7 +64,6 @@ const cardBase: React.CSSProperties = {
 
 const pillStyle: React.CSSProperties = {
   fontSize: 10,
-  letterSpacing: "0.04em",
   textTransform: "uppercase",
   padding: "2px 8px",
   borderRadius: 3,
@@ -85,7 +82,6 @@ const bumpButtonStyle: React.CSSProperties = {
   color: "var(--text-secondary)",
   fontSize: 10,
   fontWeight: 600,
-  letterSpacing: "0.04em",
   textTransform: "uppercase",
   cursor: "pointer",
   transition: "all 0.15s",
@@ -316,14 +312,14 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
                 {/* Eyebrow */}
                 <div style={{
                   fontSize: 11,
-                  color: "var(--text-tertiary)", letterSpacing: "0.01em", marginBottom: 4,
+                  color: "var(--text-tertiary)", marginBottom: 4,
                 }}>
                   {a.source} · {a.category} · {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </div>
                 {/* Headline */}
                 <div style={{
                   fontSize: 13, fontWeight: 550, color: "var(--text-primary)",
-                  lineHeight: 1.4, letterSpacing: "-0.01em",
+                  lineHeight: 1.4,
                 }}>
                   {a.title}
                 </div>
@@ -419,7 +415,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => onDeliberate(p.text)}
               >
-                <div style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600, marginBottom: 8 }}>
+                <div style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>
                   {p.label}
                 </div>
                 <div style={{ flex: 1, fontSize: 13, fontStyle: "italic", color: "var(--accent-secondary)", lineHeight: 1.6 }}>
