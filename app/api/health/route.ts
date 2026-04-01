@@ -1,27 +1,27 @@
-// Diagnostic endpoint — confirms env vars and Anthropic reachability
+// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
+// Diagnostic endpoint — confirms env vars and OpenAI reachability
 // Visit /api/health to debug deployment issues
 
 export async function GET() {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY
+  const openaiKey = process.env.OPENAI_API_KEY
 
   const status = {
     env: {
-      ANTHROPIC_API_KEY: anthropicKey
-        ? `set (${anthropicKey.length} chars)`
+      OPENAI_API_KEY: openaiKey
+        ? `set (${openaiKey.length} chars)`
         : "MISSING",
     },
-    anthropic: "not tested",
+    openai: "not tested",
     timestamp: new Date().toISOString(),
     node: process.version,
   }
 
-  // List available models to find correct IDs for this account
-  if (anthropicKey) {
+  // List available models to confirm API connectivity
+  if (openaiKey) {
     try {
-      const res = await fetch("https://api.anthropic.com/v1/models", {
+      const res = await fetch("https://api.openai.com/v1/models", {
         headers: {
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
+          "Authorization": `Bearer ${openaiKey}`,
         },
         signal: AbortSignal.timeout(8000),
       })
@@ -29,17 +29,17 @@ export async function GET() {
       if (res.ok) {
         const data = await res.json()
         const models = (data.data || []).map((m: { id: string }) => m.id)
-        status.anthropic = `ok — ${models.length} models available`
+        status.openai = `ok — ${models.length} models available`
         ;(status as Record<string, unknown>).available_models = models
       } else {
         const body = await res.json().catch(() => ({}))
-        status.anthropic = `error ${res.status}: ${JSON.stringify(body).slice(0, 200)}`
+        status.openai = `error ${res.status}: ${JSON.stringify(body).slice(0, 200)}`
       }
     } catch (err) {
-      status.anthropic = `exception: ${err instanceof Error ? err.message : String(err)}`
+      status.openai = `exception: ${err instanceof Error ? err.message : String(err)}`
     }
   } else {
-    status.anthropic = "skipped — no key"
+    status.openai = "skipped — no key"
   }
 
   return Response.json(status, {

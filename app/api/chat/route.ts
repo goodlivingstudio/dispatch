@@ -1,10 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk"
+// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
+import OpenAI from "openai"
 import { loadHistory, saveHistory, KV_AVAILABLE } from "@/lib/memory"
 
 function getClient() {
-  const key = process.env.ANTHROPIC_API_KEY
-  if (!key) throw new Error("ANTHROPIC_API_KEY not configured")
-  return new Anthropic({ apiKey: key })
+  const key = process.env.OPENAI_API_KEY
+  if (!key) throw new Error("OPENAI_API_KEY not configured")
+  return new OpenAI({ apiKey: key })
 }
 
 // ─── System Prompt ────────────────────────────────────────────────────────────
@@ -90,21 +91,24 @@ function parseFollowUp(text: string): {
   return { cleanText, followUp: { question, alternatives: alternatives.slice(0, 2) } }
 }
 
-// ─── Web Search Tool ──────────────────────────────────────────────────────────
+// ─── Web Search Tool (OpenAI function calling format) ────────────────────────
 
-const WEB_SEARCH_TOOL: Anthropic.Tool = {
-  name: "web_search",
-  description:
-    "Search the live web for current intelligence. Use for: recent company news, executive interviews, hiring signals, analyst reports, anything post-training or requiring current specificity. Be precise with queries — include names, dates, organizations.",
-  input_schema: {
-    type: "object" as const,
-    properties: {
-      query: {
-        type: "string",
-        description: "Specific search query. Example: 'Eli Lilly Diogo Rau AI design 2025'",
+const WEB_SEARCH_TOOL: OpenAI.ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "web_search",
+    description:
+      "Search the live web for current intelligence. Use for: recent company news, executive interviews, hiring signals, analyst reports, anything post-training or requiring current specificity. Be precise with queries — include names, dates, organizations.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Specific search query. Example: 'Eli Lilly Diogo Rau AI design 2025'",
+        },
       },
+      required: ["query"],
     },
-    required: ["query"],
   },
 }
 
@@ -175,83 +179,85 @@ export async function POST(req: Request) {
       }
     }
 
+    // Build OpenAI messages array with system prompt
+    const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
+      { role: "system", content: SYSTEM_PROMPT },
+    ]
+
     // Inject feed context into last user message + handle multimodal images
-    const initialMessages: Anthropic.MessageParam[] = baseMessages.map(
-      (m: { role: string; content: string }, i: number) => {
-        const isLast = i === baseMessages.length - 1 && m.role === "user"
-        let textContent = m.content
-        if (isLast && feedContext) {
-          textContent = `${m.content}\n\n---\nCurrent feed (${feedContext.count} articles):\n${feedContext.articles}`
-        }
-
-        // Multimodal: attach images to the last user message
-        if (isLast && Array.isArray(images) && images.length > 0) {
-          type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp"
-          const blocks: Anthropic.ContentBlockParam[] = images.map(
-            (img: { media_type: string; data: string }) => ({
-              type: "image" as const,
-              source: { type: "base64" as const, media_type: img.media_type as ImageMediaType, data: img.data },
-            })
-          )
-          blocks.push({ type: "text" as const, text: textContent })
-          return { role: "user" as const, content: blocks }
-        }
-
-        return { role: m.role as "user" | "assistant", content: textContent }
+    for (let i = 0; i < baseMessages.length; i++) {
+      const m = baseMessages[i]
+      const isLast = i === baseMessages.length - 1 && m.role === "user"
+      let textContent = m.content
+      if (isLast && feedContext) {
+        textContent = `${m.content}\n\n---\nCurrent feed (${feedContext.count} articles):\n${feedContext.articles}`
       }
-    )
+
+      // Multimodal: attach images to the last user message
+      if (isLast && Array.isArray(images) && images.length > 0) {
+        const parts: OpenAI.ChatCompletionContentPart[] = images.map(
+          (img: { media_type: string; data: string }) => ({
+            type: "image_url" as const,
+            image_url: { url: `data:${img.media_type};base64,${img.data}` },
+          })
+        )
+        parts.push({ type: "text" as const, text: textContent })
+        openaiMessages.push({ role: "user" as const, content: parts })
+      } else {
+        openaiMessages.push({ role: m.role as "user" | "assistant", content: textContent })
+      }
+    }
 
     // ── Agentic loop — handles tool calls ────────────────────────────────────
-    let currentMessages: Anthropic.MessageParam[] = [...initialMessages]
+    let currentMessages = [...openaiMessages]
     const searchesPerformed: string[] = []
     let totalInput  = 0
     let totalOutput = 0
     let finalText   = ""
 
     for (let iteration = 0; iteration < 5; iteration++) {
-      const response = await client.messages.create({
-        model:      "claude-sonnet-4-6",
+      const response = await client.chat.completions.create({
+        model:      "gpt-4o",
         max_tokens: 1000,
-        system:     SYSTEM_PROMPT,
-        tools,
+        tools:      tools.length > 0 ? tools : undefined,
         messages:   currentMessages,
       })
 
-      totalInput  += response.usage.input_tokens
-      totalOutput += response.usage.output_tokens
+      totalInput  += response.usage?.prompt_tokens || 0
+      totalOutput += response.usage?.completion_tokens || 0
+
+      const choice = response.choices[0]
 
       // No tool calls — we have a final answer
-      if (response.stop_reason === "end_turn") {
-        finalText = response.content.find(c => c.type === "text")?.text || ""
+      if (choice.finish_reason === "stop" || !choice.message.tool_calls?.length) {
+        finalText = choice.message.content || ""
         break
       }
 
-      // Tool use — execute and loop
-      if (response.stop_reason === "tool_use") {
-        const toolBlocks = response.content.filter(
-          (c): c is Anthropic.ToolUseBlock => c.type === "tool_use"
-        )
-
-        // Append assistant turn (with tool use blocks)
-        currentMessages.push({ role: "assistant", content: response.content })
+      // Tool calls — execute and loop
+      if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
+        // Append assistant turn (with tool call info)
+        currentMessages.push(choice.message)
 
         // Execute each tool and collect results
-        const toolResults: Anthropic.ToolResultBlockParam[] = []
-        for (const block of toolBlocks) {
-          if (block.name === "web_search") {
-            const query = (block.input as { query: string }).query
+        for (const toolCall of choice.message.tool_calls) {
+          if (toolCall.type !== "function") continue
+          if (toolCall.function.name === "web_search") {
+            const args = JSON.parse(toolCall.function.arguments)
+            const query = args.query as string
             searchesPerformed.push(query)
             const result = await exaSearch(query)
-            toolResults.push({ type: "tool_result", tool_use_id: block.id, content: result })
+            currentMessages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: result,
+            })
           }
         }
-
-        // Append tool results as user turn
-        currentMessages.push({ role: "user", content: toolResults })
-        // Loop continues → Claude sees results and produces next response
+        // Loop continues → model sees results and produces next response
       } else {
-        // Unexpected stop reason — extract whatever text we have
-        finalText = response.content.find(c => c.type === "text")?.text || ""
+        // Unexpected state — extract whatever text we have
+        finalText = choice.message.content || ""
         break
       }
     }

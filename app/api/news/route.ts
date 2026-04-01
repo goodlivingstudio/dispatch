@@ -1,3 +1,4 @@
+// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
 export const revalidate = 1800 // 30 min cache
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -282,7 +283,7 @@ function interleave(items: Article[]): Article[] {
 // One Haiku call per 30-min cache window — annotates all articles at ingestion
 
 async function addRelevanceAnnotations(articles: Article[]): Promise<Article[]> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey || articles.length === 0) return articles
 
   const system = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
@@ -325,19 +326,20 @@ Return only valid JSON array. No prose.`
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 12000)
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       signal: controller.signal,
       headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "gpt-4o-mini",
         max_tokens: 3000,
-        system,
-        messages: [{ role: "user", content: items + "\n\nReturn JSON array." }],
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: items + "\n\nReturn JSON array." },
+        ],
       }),
     })
 
@@ -345,7 +347,7 @@ Return only valid JSON array. No prose.`
     if (!res.ok) return articles
 
     const data = await res.json()
-    const text: string = data.content?.[0]?.text || ""
+    const text: string = data.choices?.[0]?.message?.content || ""
 
     // Extract JSON array from response
     const match = text.match(/\[[\s\S]*\]/)

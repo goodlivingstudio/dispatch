@@ -1,9 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk"
+// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
+import OpenAI from "openai"
 
 function getClient() {
-  const key = process.env.ANTHROPIC_API_KEY
-  if (!key) throw new Error("ANTHROPIC_API_KEY not configured in environment variables")
-  return new Anthropic({ apiKey: key })
+  const key = process.env.OPENAI_API_KEY
+  if (!key) throw new Error("OPENAI_API_KEY not configured in environment variables")
+  return new OpenAI({ apiKey: key })
 }
 
 const BRIEF_SYSTEM = `You are the chief of staff for Jeremy Grant. Your job is to brief him on what matters most right now.
@@ -62,11 +63,11 @@ export async function POST(req: Request) {
       .map((a, i) => `${i + 1}. [${a.category}] ${a.source}: ${a.title}${a.summary ? ` — ${a.summary.slice(0, 120)}` : ""}`)
       .join("\n")
 
-    const response = await getClient().messages.create({
-      model: "claude-haiku-4-5-20251001",
+    const response = await getClient().chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 500,
-      system: BRIEF_SYSTEM,
       messages: [
+        { role: "system", content: BRIEF_SYSTEM },
         {
           role: "user",
           content: `Feed (${articles.length} articles):\n\n${context}\n\nGenerate the brief.`,
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
       ],
     })
 
-    const text = response.content[0].type === "text" ? response.content[0].text.trim() : ""
+    const text = response.choices[0]?.message?.content?.trim() || ""
 
     // Parse three signals separated by |||
     const parts = text.split("|||").map(s => s.trim()).filter(Boolean)
