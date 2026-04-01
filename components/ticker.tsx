@@ -19,11 +19,11 @@ const SKIN_LABEL: Record<Skin, string> = {
 // ─── Day-mode category palette ────────────────────────────────────────────────
 
 const CAT_STYLE_DAY: Record<string, { bg: string; color: string }> = {
-  AI:      { bg: "rgba(34,90,12,0.08)",    color: "#2B5A10" },
-  DESIGN:  { bg: "rgba(30,80,180,0.07)",   color: "#1A4F8C" },
-  PHARMA:  { bg: "rgba(110,40,180,0.07)",  color: "#5C2A96" },
-  CAREER:  { bg: "rgba(160,70,10,0.08)",   color: "#7A3A0A" },
-  CULTURE: { bg: "rgba(70,60,50,0.06)",    color: "#4A4038" },
+  AI:      { bg: "rgba(85,121,73,0.10)",   color: "#557949" },
+  DESIGN:  { bg: "rgba(68,119,132,0.10)",  color: "#447784" },
+  PHARMA:  { bg: "rgba(120,104,144,0.10)", color: "#786890" },
+  CAREER:  { bg: "rgba(140,106,59,0.10)",  color: "#8C6A3B" },
+  CULTURE: { bg: "rgba(156,95,83,0.10)",   color: "#9C5F53" },
 }
 
 // ─── Curated signal set — quintessential content for 5-year positioning ───────
@@ -66,11 +66,11 @@ const HEADLINES = [
 // ─── Category palette — tuned for dark terminal bg ───────────────────────────
 
 const CAT_STYLE: Record<string, { bg: string; color: string }> = {
-  AI:      { bg: "rgba(100,160,60,0.14)",  color: "#9BC472" },
-  DESIGN:  { bg: "rgba(100,170,255,0.10)", color: "#8FBBE8" },
-  PHARMA:  { bg: "rgba(190,130,255,0.10)", color: "#CDA0FF" },
-  CAREER:  { bg: "rgba(255,170,80,0.10)",  color: "#E0A870" },
-  CULTURE: { bg: "rgba(180,170,160,0.10)", color: "#B5ADA5" },
+  AI:      { bg: "rgba(123,175,106,0.14)", color: "#7BAF6A" },
+  DESIGN:  { bg: "rgba(90,158,176,0.12)",  color: "#5A9EB0" },
+  PHARMA:  { bg: "rgba(154,133,184,0.12)", color: "#9A85B8" },
+  CAREER:  { bg: "rgba(212,160,90,0.12)",  color: "#D4A05A" },
+  CULTURE: { bg: "rgba(200,122,106,0.12)", color: "#C87A6A" },
 }
 
 export function Ticker({

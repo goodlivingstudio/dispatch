@@ -24,27 +24,27 @@ export interface AnalyticsArticle {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CARD_ACCENT: Record<string, string> = {
-  snapshot: "#C8955A",
-  lens:     "#60A5FA",
-  category: "#4ade80",
-  urgency:  "#f87171",
-  sources:  "#A78BFA",
+  snapshot: "#D4A05A",
+  lens:     "#5A9EB0",
+  category: "#7BAF6A",
+  urgency:  "#C87A6A",
+  sources:  "#9A85B8",
 }
 
 const LAYER_COLOR: Record<string, string> = {
-  OPPORTUNITY: "#C8955A",
-  POSITION:    "#60A5FA",
-  DISCIPLINE:  "#4ade80",
-  LANDSCAPE:   "#A78BFA",
-  CULTURE:     "#f87171",
+  OPPORTUNITY: "#D4A05A",
+  POSITION:    "#5A9EB0",
+  DISCIPLINE:  "#7BAF6A",
+  LANDSCAPE:   "#9A85B8",
+  CULTURE:     "#C87A6A",
 }
 
 const CARD_GRADIENT: Record<string, string> = {
-  snapshot: "radial-gradient(ellipse at top left,  rgba(200,149,90,0.14) 0%, transparent 65%)",
-  lens:     "radial-gradient(ellipse at top right, rgba(96,165,250,0.11) 0%, transparent 65%)",
-  category: "radial-gradient(ellipse at bottom left, rgba(74,222,128,0.10) 0%, transparent 65%)",
-  urgency:  "radial-gradient(ellipse at top left,  rgba(248,113,113,0.12) 0%, transparent 65%)",
-  sources:  "radial-gradient(ellipse at bottom right, rgba(167,139,250,0.11) 0%, transparent 65%)",
+  snapshot: "radial-gradient(ellipse at top left,  rgba(212,160,90,0.14) 0%, transparent 65%)",
+  lens:     "radial-gradient(ellipse at top right, rgba(90,158,176,0.11) 0%, transparent 65%)",
+  category: "radial-gradient(ellipse at bottom left, rgba(123,175,106,0.10) 0%, transparent 65%)",
+  urgency:  "radial-gradient(ellipse at top left,  rgba(200,122,106,0.12) 0%, transparent 65%)",
+  sources:  "radial-gradient(ellipse at bottom right, rgba(154,133,184,0.11) 0%, transparent 65%)",
 }
 
 const TAG_LABEL: Record<string, string> = {
