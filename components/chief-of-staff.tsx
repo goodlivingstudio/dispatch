@@ -192,88 +192,69 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                 return (
                   <div
                     key={i}
-                    onMouseEnter={() => setHoveredIdx(i)}
-                    onMouseLeave={() => setHoveredIdx(null)}
-                    onClick={() => { if (onDeliberate && signal.body) onDeliberate(signal) }}
                     style={{
                       padding: "16px 20px",
                       borderRight: i < 2 ? "1px solid var(--border)" : "none",
                       animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 160}ms both`,
-                      position: "relative",
-                      cursor: signal.body ? "pointer" : "default",
-                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
                     }}
                   >
-                    {/* Signal content — dims on hover */}
                     <div style={{
-                      transition: "opacity 0.2s, filter 0.2s",
-                      opacity: isHovered ? 0.12 : 1,
-                      filter: isHovered ? "blur(3px)" : "none",
+                      fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+                      color: "var(--accent-secondary)", textTransform: "uppercase",
+                      marginBottom: 8,
                     }}>
-                      <div style={{
-                        fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
-                        color: "var(--accent-secondary)", textTransform: "uppercase",
-                        marginBottom: 8,
-                      }}>
-                        {signal.label}
-                      </div>
-                      {signal.body && (
-                        <div style={{
-                          fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
-                          color: "var(--text-primary)", lineHeight: 1.6,
-                        }}>
-                          {signal.body}
-                        </div>
-                      )}
-                      {signal.sources && signal.sources.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-                          {signal.sources.map((src, si) => (
-                            <a
-                              key={si}
-                              href={src.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              style={{
-                                fontSize: 10, color: "var(--text-tertiary)",
-                                textDecoration: "none", transition: "color 0.15s",
-                              }}
-                              onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                              onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
-                            >
-                              {src.source}{si < signal.sources!.length - 1 ? " ·" : ""}
-                            </a>
-                          ))}
-                        </div>
-                      )}
+                      {signal.label}
                     </div>
-
-                    {/* Bump overlay — centered, appears on hover */}
                     {signal.body && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          opacity: isHovered ? 1 : 0,
-                          transition: "opacity 0.2s",
-                          pointerEvents: isHovered ? "auto" : "none",
-                          backdropFilter: "blur(2px)",
-                        }}
-                      >
-                        <span style={{
-                          display: "inline-flex", alignItems: "center", gap: 6,
-                          padding: "10px 24px",
-                          background: "var(--accent-secondary)",
-                          borderRadius: 8,
-                          fontSize: 13, fontWeight: 500,
-                          color: "var(--bg-primary)",
-                        }}>
-                          Bump ↗
-                        </span>
+                      <div style={{
+                        fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
+                        color: "var(--text-primary)", lineHeight: 1.6,
+                        flex: 1,
+                      }}>
+                        {signal.body}
                       </div>
+                    )}
+                    {signal.sources && signal.sources.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+                        {signal.sources.map((src, si) => (
+                          <a
+                            key={si}
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            style={{
+                              fontSize: 10, color: "var(--text-tertiary)",
+                              textDecoration: "none", transition: "color 0.15s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
+                            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
+                          >
+                            {src.source}{si < signal.sources!.length - 1 ? " ·" : ""}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {/* Bump CTA — always visible at bottom */}
+                    {onDeliberate && signal.body && (
+                      <button
+                        onClick={() => onDeliberate(signal)}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 6,
+                          padding: "6px 12px", marginTop: 12,
+                          background: "transparent", border: "none",
+                          fontSize: 11, color: "var(--accent-secondary)",
+                          cursor: "pointer", transition: "color 0.15s",
+                          alignSelf: "flex-start",
+                          fontFamily: "inherit",
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
+                      >
+                        Bump ↗
+                      </button>
                     )}
                   </div>
                 )
