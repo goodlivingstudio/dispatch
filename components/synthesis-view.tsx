@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { ArrowUpRight } from "lucide-react"
 import type { Article } from "@/lib/types"
 import { TYPE, labelStyle, bodyStyle as sharedBodyStyle, metaStyle } from "@/lib/styles"
@@ -309,10 +309,49 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
 export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
+  const [aiBriefing, setAiBriefing] = useState<string | null>(null)
+  const [aiPatterns, setAiPatterns] = useState<DerivedPattern[]>([])
+  const [aiBlindSpotNote, setAiBlindSpotNote] = useState<string | null>(null)
+  const [synthesisLoading, setSynthesisLoading] = useState(false)
+  const synthesisRef = useRef(false)
 
   const layerCounts = useMemo(() => countByLayer(articles), [articles])
-  const patterns = useMemo(() => derivePatterns(articles), [articles])
+  const localPatterns = useMemo(() => derivePatterns(articles), [articles])
   const blindSpots = useMemo(() => findBlindSpots(layerCounts), [layerCounts])
+
+  // Use AI patterns when available, fall back to local derivation
+  const patterns = aiPatterns.length > 0 ? aiPatterns : localPatterns
+
+  // Fetch AI synthesis when articles are available
+  useEffect(() => {
+    if (articles.length === 0 || synthesisRef.current) return
+    const annotated = articles.filter(a => a.synopsis || a.relevance)
+    if (annotated.length < 3) return // wait for annotations
+    synthesisRef.current = true
+    setSynthesisLoading(true)
+    fetch("/api/synthesis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articles: annotated.slice(0, 25) }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.briefing) setAiBriefing(data.briefing)
+        if (data.blindSpotNote) setAiBlindSpotNote(data.blindSpotNote)
+        if (data.patterns?.length > 0) {
+          setAiPatterns(data.patterns.map((p: { title: string; description: string; layers: string[]; signalCount: number }, i: number) => ({
+            id: `ai-${i}`,
+            layers: p.layers as LayerKey[],
+            title: p.title,
+            description: p.description,
+            articles: [],
+            signalCount: p.signalCount,
+          })))
+        }
+        setSynthesisLoading(false)
+      })
+      .catch(() => setSynthesisLoading(false))
+  }, [articles])
 
   const provocations = [
     {
@@ -349,7 +388,13 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
         >
           <div style={sectionLabelStyle}>Current Briefing</div>
           <div style={bodyStyle}>
-            Intelligence briefing will appear here when the annotation engine is active. This view synthesizes patterns across all five layers to surface the single most important insight for your mandate right now.
+            {synthesisLoading ? (
+              <span className="loading-pulse" style={{ opacity: 0.5 }}>Synthesizing patterns across today&apos;s signal...</span>
+            ) : aiBriefing ? (
+              aiBriefing
+            ) : (
+              "Intelligence briefing will appear when annotated articles are available."
+            )}
           </div>
         </div>
 
@@ -423,7 +468,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
         >
           <div style={sectionLabelStyle}>Blind Spots</div>
           <div style={{ ...TYPE.body, color: "var(--text-tertiary)", marginBottom: 16 }}>
-            Layers trending cold
+            {aiBlindSpotNote || "Layers trending cold"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {blindSpots.length === 0 ? (
