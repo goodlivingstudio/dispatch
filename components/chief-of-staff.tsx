@@ -227,8 +227,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
           </div>
         </>
       )}
-      {/* Dotted separator — indented to card padding */}
-      <div style={{ height: 1, borderBottom: "1px dotted var(--border)", margin: "0 16px" }} />
+      <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
     </div>
   )
 }
