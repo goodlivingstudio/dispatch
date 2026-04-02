@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Copy, Check, ArrowUpRight } from "lucide-react"
-import { TYPE, labelStyle, bodyStyle, metaStyle } from "@/lib/styles"
+import { TYPE, MONO, labelStyle, bodyStyle, metaStyle } from "@/lib/styles"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -215,7 +215,7 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
 
         {/* Header */}
         <div style={{ animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
-          <div style={sectionLabel}>Dispatch</div>
+          <div style={{ ...sectionLabel, fontFamily: MONO }}>Dispatch</div>
           <div style={{ ...bodyStyle, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
             {loading ? (
               <span className="loading-pulse">Analyzing the week&apos;s signal to generate content pitches...</span>

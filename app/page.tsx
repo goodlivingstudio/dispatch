@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Radio, AudioLines, Blend, Send, Brain, Settings } from "lucide-react"
+import { Radio, AudioLines, Blend, Send, Brain, Settings, ChevronRight, ChevronLeft } from "lucide-react"
 import { Ticker } from "@/components/ticker"
 import { LeftRail } from "@/components/left-rail"
 import { useChiefOfStaff, ChiefOfStaffBand } from "@/components/chief-of-staff"
@@ -154,6 +154,7 @@ export default function Page() {
   const [feedLoading,    setFeedLoading]    = useState(true)
   const [viewMode,       setViewMode]       = useState<ViewMode>("signal")
   const [cerebroCollapsed, setCerebroCollapsed] = useState(false)
+  const [leftRailCollapsed, setLeftRailCollapsed] = useState(false)
   const [active,         setActive]         = useState("all")
   const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "dispatch" | "cerebro" | "config">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
@@ -474,18 +475,68 @@ export default function Page() {
 
       {/* Three-column workspace */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        <LeftRail
-          articles={articles}
-          active={active}
-          onSelect={setActive}
-          isLive={isLive}
-          feedLoading={feedLoading}
-          width={leftWidth}
-          viewMode={viewMode}
-          onViewChange={setViewMode}
-          excludedSources={excludedSources}
-          onToggleSource={handleToggleSource}
-        />
+        <div
+          style={{
+            width: leftRailCollapsed ? 42 : leftWidth,
+            flexShrink: 0,
+            transition: "width 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          {leftRailCollapsed ? (
+            <button
+              onClick={() => setLeftRailCollapsed(false)}
+              title="Expand panel"
+              style={{
+                width: 42, height: "100%",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12,
+                background: "var(--bg-primary)",
+                borderRight: "1px solid var(--border)",
+                border: "none", borderRightStyle: "solid", borderRightWidth: 1, borderRightColor: "var(--border)",
+                cursor: "pointer",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-primary)" }}
+            >
+              <ChevronRight size={14} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
+              <span style={{ writingMode: "vertical-rl", ...TYPE.sm, color: "var(--accent-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>
+                Dispatch
+              </span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setLeftRailCollapsed(true)}
+                title="Collapse panel"
+                style={{
+                  position: "absolute", top: 8, right: 8, zIndex: 2,
+                  width: 28, height: 28,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "transparent", border: "none", borderRadius: 6,
+                  cursor: "pointer", transition: "background 0.15s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+              >
+                <ChevronLeft size={14} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
+              </button>
+              <LeftRail
+                articles={articles}
+                active={active}
+                onSelect={setActive}
+                isLive={isLive}
+                feedLoading={feedLoading}
+                width={leftRailCollapsed ? 42 : leftWidth}
+                viewMode={viewMode}
+                onViewChange={setViewMode}
+                excludedSources={excludedSources}
+                onToggleSource={handleToggleSource}
+              />
+            </>
+          )}
+        </div>
         <Divider onMouseDown={e => startResize("left", e)} />
         {viewMode === "config"
           ? <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} skin={skin} onSkinChange={setSkin} isDay={isDay} onToggleMode={toggleMode} />
@@ -499,7 +550,7 @@ export default function Page() {
         <Divider onMouseDown={e => startResize("right", e)} />
         <div
           style={{
-            width: cerebroCollapsed ? 40 : rightWidth,
+            width: cerebroCollapsed ? 42 : rightWidth,
             flexShrink: 0,
             transition: "width 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
             position: "relative",
@@ -511,20 +562,21 @@ export default function Page() {
               onClick={() => setCerebroCollapsed(false)}
               title="Expand Cerebro"
               style={{
-                width: 40, height: "100%",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 42, height: "100%",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12,
                 background: "var(--bg-surface)",
                 borderLeft: "1px solid var(--border)",
                 border: "none", borderLeftStyle: "solid", borderLeftWidth: 1, borderLeftColor: "var(--border)",
-                cursor: "pointer", writingMode: "vertical-rl",
-                ...TYPE.sm, color: "var(--accent-muted)", textTransform: "uppercase",
-                letterSpacing: "0.08em", fontWeight: 500,
-                transition: "color 0.15s",
+                cursor: "pointer",
+                transition: "background 0.15s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-              onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
             >
-              Cerebro
+              <ChevronLeft size={14} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
+              <span style={{ writingMode: "vertical-rl", ...TYPE.sm, color: "var(--accent-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>
+                Cerebro
+              </span>
             </button>
           ) : (
             <>
@@ -532,16 +584,16 @@ export default function Page() {
                 onClick={() => setCerebroCollapsed(true)}
                 title="Collapse Cerebro"
                 style={{
-                  position: "absolute", top: 12, right: 12, zIndex: 2,
-                  width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                  position: "absolute", top: 0, right: 0, zIndex: 2,
+                  width: 40, height: 40,
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   background: "transparent", border: "none",
-                  color: "var(--text-tertiary)", cursor: "pointer",
-                  ...TYPE.sm, transition: "color 0.15s",
+                  cursor: "pointer", transition: "background 0.15s",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--text-secondary)" }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
               >
-                ›
+                <ChevronRight size={14} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
               </button>
               <Cerebro articles={articles} pendingPrompt={cerebroPrompt} />
             </>
