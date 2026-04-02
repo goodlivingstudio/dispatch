@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Copy, Check, RefreshCw, Trash2, Download } from "lucide-react"
+// Skin removed from props — controlled via ticker header
 import { FEEDS } from "@/lib/feeds"
 import { PODCAST_FEEDS } from "@/lib/podcasts"
+import { GALLERY_SOURCES } from "@/lib/gallery"
 import { MONO, TYPE, labelStyle, metaStyle } from "@/lib/styles"
-import type { FeedHealth, Skin } from "@/lib/types"
+import type { FeedHealth } from "@/lib/types"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -13,10 +15,6 @@ interface ConfigViewProps {
   excludedSources: Set<string>
   onToggleSource: (source: string) => void
   feedHealth: FeedHealth | null
-  skin: Skin
-  onSkinChange: (skin: Skin) => void
-  isDay: boolean
-  onToggleMode: () => void
 }
 
 const LAYERS = ["opportunity", "position", "discipline", "landscape", "culture"] as const
@@ -282,9 +280,58 @@ function CerebroStation() {
   )
 }
 
+// ─── Source Grid — two-column layout for source lists ───────────────────
+
+function SourceGrid({ sources, type, excludedSources, onToggleSource }: {
+  sources: Record<string, Array<{ url: string; source?: string; show?: string; category: string; layer: string }>>
+  type: "source" | "show"
+  excludedSources: Set<string>
+  onToggleSource: (name: string) => void
+}) {
+  return (
+    <>
+      {LAYERS.map(layer => {
+        const items = sources[layer]
+        if (!items?.length) return null
+        const getName = (f: { source?: string; show?: string }) => type === "show" ? f.show || "" : f.source || ""
+        return (
+          <div key={layer} style={{ marginBottom: 16 }}>
+            <div style={{ ...TYPE.sm, fontWeight: 500, color: LAYER_DOT[layer], textTransform: "uppercase", marginBottom: 6, paddingLeft: 4 }}>
+              {LAYER_LABELS[layer]}
+              <span style={{ color: "var(--text-tertiary)", marginLeft: 6 }}>
+                ({items.filter(f => !excludedSources.has(getName(f))).length})
+              </span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+              {items.map(feed => {
+                const name = getName(feed)
+                const active = !excludedSources.has(name)
+                return (
+                  <div
+                    key={feed.url}
+                    onClick={() => onToggleSource(name)}
+                    style={{ ...rowStyle, opacity: active ? 1 : 0.5, padding: "6px 8px" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+                  >
+                    <Toggle active={active} onToggle={() => onToggleSource(name)} />
+                    <span style={{ ...TYPE.body, color: active ? "var(--text-primary)" : "var(--text-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {name}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
 // ─── ConfigView ─────────────────────────────────────────────────────────────
 
-export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, onSkinChange, isDay, onToggleMode }: ConfigViewProps) {
+export function ConfigView({ excludedSources, onToggleSource, feedHealth }: ConfigViewProps) {
   const [health, setHealth] = useState<Record<string, unknown> | null>(null)
   const [healthLoading, setHealthLoading] = useState(false)
 
@@ -331,40 +378,9 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, 
               {activeNewsCount}/{newsFeedsOnly.length} active
             </span>
           </div>
-          <CopyButton text={inventoryMd.split("## Podcast")[0]} label="Copy news" />
         </div>
 
-        {LAYERS.map(layer => {
-          const items = newsGroups[layer]
-          if (!items?.length) return null
-          return (
-            <div key={layer} style={{ marginBottom: 16 }}>
-              <div style={{ ...TYPE.sm, fontWeight: 500, color: LAYER_DOT[layer], textTransform: "uppercase", marginBottom: 6, paddingLeft: 12 }}>
-                {LAYER_LABELS[layer]}
-                <span style={{ color: "var(--text-tertiary)", marginLeft: 6 }}>({items.filter(f => !excludedSources.has(f.source)).length})</span>
-              </div>
-              {items.map(feed => {
-                const active = !excludedSources.has(feed.source)
-                return (
-                  <div
-                    key={feed.url}
-                    onClick={() => onToggleSource(feed.source)}
-                    style={{ ...rowStyle, opacity: active ? 1 : 0.5 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
-                  >
-                    <Toggle active={active} onToggle={() => onToggleSource(feed.source)} />
-                    <span style={{ ...TYPE.body, color: active ? "var(--text-primary)" : "var(--text-tertiary)" }}>
-                      {feed.source}
-                    </span>
-                    <span style={badgeStyle(LAYER_DOT[layer])}>{layer.slice(0, 3)}</span>
-                    <span style={categoryStyle}>{feed.category}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
+        <SourceGrid sources={newsGroups} type="source" excludedSources={excludedSources} onToggleSource={onToggleSource} />
       </div>
 
       <div style={separator} />
@@ -380,41 +396,7 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, 
           </div>
         </div>
 
-        <div style={{ ...TYPE.body, color: "var(--text-tertiary)", marginBottom: 12, lineHeight: 1.6 }}>
-          Newsletters, essays, editorial voices. Different nutrient than news — same feed.
-        </div>
-
-        {LAYERS.map(layer => {
-          const items = socialGroups[layer]
-          if (!items?.length) return null
-          return (
-            <div key={layer} style={{ marginBottom: 16 }}>
-              <div style={{ ...TYPE.sm, fontWeight: 500, color: LAYER_DOT[layer], textTransform: "uppercase", marginBottom: 6, paddingLeft: 12 }}>
-                {LAYER_LABELS[layer]}
-                <span style={{ color: "var(--text-tertiary)", marginLeft: 6 }}>({items.filter(f => !excludedSources.has(f.source)).length})</span>
-              </div>
-              {items.map(feed => {
-                const active = !excludedSources.has(feed.source)
-                return (
-                  <div
-                    key={feed.url}
-                    onClick={() => onToggleSource(feed.source)}
-                    style={{ ...rowStyle, opacity: active ? 1 : 0.5 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
-                  >
-                    <Toggle active={active} onToggle={() => onToggleSource(feed.source)} />
-                    <span style={{ ...TYPE.body, color: active ? "var(--text-primary)" : "var(--text-tertiary)" }}>
-                      {feed.source}
-                    </span>
-                    <span style={badgeStyle(LAYER_DOT[layer])}>{layer.slice(0, 3)}</span>
-                    <span style={categoryStyle}>{feed.category}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
+        <SourceGrid sources={socialGroups} type="source" excludedSources={excludedSources} onToggleSource={onToggleSource} />
       </div>
 
       <div style={separator} />
@@ -428,47 +410,36 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, 
               {activePodCount}/{PODCAST_FEEDS.length} active
             </span>
           </div>
-          <CopyButton text={"## Podcast" + inventoryMd.split("## Podcast")[1]} label="Copy podcasts" />
         </div>
 
-        {LAYERS.map(layer => {
-          const items = podGroups[layer]
-          if (!items?.length) return null
-          return (
-            <div key={layer} style={{ marginBottom: 16 }}>
-              <div style={{ ...TYPE.sm, fontWeight: 500, color: LAYER_DOT[layer], textTransform: "uppercase", marginBottom: 6, paddingLeft: 12 }}>
-                {LAYER_LABELS[layer]}
-                <span style={{ color: "var(--text-tertiary)", marginLeft: 6 }}>({items.filter(f => !excludedSources.has(f.show)).length})</span>
-              </div>
-              {items.map(feed => {
-                const active = !excludedSources.has(feed.show)
-                return (
-                  <div
-                    key={feed.url}
-                    onClick={() => onToggleSource(feed.show)}
-                    style={{ ...rowStyle, opacity: active ? 1 : 0.5 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
-                  >
-                    <Toggle active={active} onToggle={() => onToggleSource(feed.show)} />
-                    <span style={{ ...TYPE.body, color: active ? "var(--text-primary)" : "var(--text-tertiary)" }}>
-                      {feed.show}
-                    </span>
-                    <span style={badgeStyle(LAYER_DOT[layer])}>{layer.slice(0, 3)}</span>
-                    <span style={categoryStyle}>{feed.category}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
+        <SourceGrid sources={podGroups} type="show" excludedSources={excludedSources} onToggleSource={onToggleSource} />
       </div>
 
       <div style={separator} />
 
-      {/* ── Export Inventory ── */}
+      {/* ── Gallery Sources ── */}
       <div style={{ marginBottom: 8 }}>
-        <div style={sectionLabel}>Export Inventory</div>
+        <div style={sectionLabel}>
+          Gallery Sources
+          <span style={{ color: "var(--text-tertiary)", marginLeft: 8, fontWeight: 400 }}>
+            {GALLERY_SOURCES.length} feeds
+          </span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {GALLERY_SOURCES.map(src => (
+            <div key={src.url} style={{ ...rowStyle, cursor: "default" }}>
+              <span style={{ ...TYPE.body, color: "var(--text-primary)" }}>{src.name}</span>
+              <span style={badgeStyle("var(--text-tertiary)")}>{src.type}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={separator} />
+
+      {/* ── Export ── */}
+      <div style={{ marginBottom: 8 }}>
+        <div style={sectionLabel}>Export</div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <CopyButton text={inventoryMd} label="Copy full inventory (Markdown)" />
         </div>
@@ -568,72 +539,7 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, 
 
       <div style={separator} />
 
-      {/* ── Preferences ── */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={sectionLabel}>Preferences</div>
-
-        {/* Manual feed refresh */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ ...metaStyle, marginBottom: 8 }}>Feed</div>
-          <button
-            onClick={() => {
-              localStorage.removeItem("dispatch-annotations-v3")
-              window.location.reload()
-            }}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "6px 16px", borderRadius: 6,
-              border: "1px solid var(--border)", background: "transparent",
-              color: "var(--text-tertiary)",
-              ...TYPE.sm, cursor: "pointer", transition: "all 0.15s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
-          >
-            <RefreshCw size={12} />
-            Refresh feed &amp; clear cache
-          </button>
-        </div>
-
-        {/* Skin */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ ...metaStyle, marginBottom: 8 }}>Skin</div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {(["mineral", "slate", "forest"] as Skin[]).map(s => (
-              <button
-                key={s}
-                onClick={() => onSkinChange(s)}
-                style={{
-                  padding: "6px 16px", borderRadius: 6,
-                  border: skin === s ? "1px solid var(--accent-secondary)" : "1px solid var(--border)",
-                  background: skin === s ? "var(--accent-primary)" : "transparent",
-                  color: skin === s ? "var(--accent-secondary)" : "var(--text-tertiary)",
-                  ...TYPE.sm, cursor: "pointer",
-                  textTransform: "capitalize", transition: "all 0.15s",
-                }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Theme */}
-        <div>
-          <div style={{ ...metaStyle, marginBottom: 8 }}>Theme</div>
-          <button
-            onClick={onToggleMode}
-            style={{
-              padding: "6px 16px", borderRadius: 6,
-              border: "1px solid var(--border)", background: "transparent",
-              ...metaStyle,
-              cursor: "pointer", transition: "all 0.15s",
-            }}
-          >
-            {isDay ? "Switch to night" : "Switch to day"}
-          </button>
-        </div>
-      </div>
+      <div style={{ height: 32 }} />
     </div>
   )
 }
