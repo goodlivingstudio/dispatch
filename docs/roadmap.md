@@ -1,45 +1,38 @@
 # Dispatch Roadmap
 Updated: 2026-04-02
 
-## Next Session — Foundation Layer
-1. **Server-side annotation** — merge annotate into news API ISR cycle. Eliminates second round-trip on page load. Pre-annotated articles returned from /api/news directly.
-2. **Article persistence in Redis** — 7-day rolling window in Upstash KV. Store scored articles so Synthesis and Dispatch can analyze trends over time, not just today's feed.
-3. **Synthesis activation** — replace hardcoded pattern templates with real AI-generated convergence analysis. Needs a dedicated AI endpoint that reads annotated articles and produces narrative patterns.
+## Completed Today
+1. ✅ Server-side annotation — articles arrive pre-annotated from /api/news
+2. ✅ Article persistence in Redis — 7-day rolling window for historical analysis
+3. ✅ Synthesis activation — AI-generated briefing, patterns, blind spots
+4. ✅ Dispatch tab — weekly brief → 4-5 content pitches with platform targeting
+5. ✅ Atlas API key swap — all routes on Anthropic Claude
+6. ✅ Lilly API key swap — chat route on Anthropic Claude
+7. ✅ Type scale consolidation — 6 tokens, 92 tokenized declarations
+8. ✅ Unified prompt architecture — lib/prompts.ts, single source of truth for all 5 AI surfaces
+9. ✅ Braintrust — deferred to optimization phase (infrastructure ready)
+10. ✅ Settings polish — manual feed refresh, Cerebro Station, diagnostics
 
-## Second Session — The Dispatch Tab
-4. **Dispatch tab (Operations)** — the action layer. Weekly brief → content brief pipeline.
-   - Aggregate week's highest multi-layer signals from Redis history
-   - AI-generated pitches: 4-5 publishable angles per week
-   - Content briefs: thesis, target platform, talking points, adaptation notes
-   - Two output modes: thought leadership (LinkedIn/Medium/Substack) vs. creative expression (IG/Lummi)
-   - Track what's been published and what performed
-
-## Parallel / Quick Wins
-5. **Atlas API key swap** — OpenAI → Anthropic (all routes)
-6. **Lilly API key swap** — add Anthropic key, swap code
-7. **Apply shared style constants** — finish remaining TYPE token replacements across components
-
-## Strategic (Dependent on Architecture Conversation)
-8. **Mandate refinement** — restructure the five intelligence layers, update all system prompts across Brief/Chat/Annotate
-9. **Braintrust integration** — prompt quality evaluation, A/B testing prompt versions
-10. **Settings page polish** — annotation TTL controls, manual feed refresh, session data export
-
-## Completed (2026-04-02)
-- Full Anthropic Claude swap (Haiku for COS/Annotation, Sonnet for Cerebro)
-- Exa web search + Upstash KV conversation memory
-- Citation hover popovers (COS + Cerebro) with source provenance
-- Configuration page: source inventory, Cerebro Station, diagnostics, preferences
-- Social intelligence feeds: 10 Substack/Medium sources integrated
+## Also Completed Today (Design + Infrastructure)
+- Full Anthropic Claude swap (Haiku for COS/Annotation, Sonnet for Cerebro/Dispatch)
+- Exa web search + Upstash KV conversation memory + article persistence
+- Citation hover popovers across COS and Cerebro
+- Configuration page with full source inventory + diagnostics + Cerebro Station
+- Social intelligence feeds (10 Substack/Medium sources)
 - Typography system: Geist Sans everywhere, Mono reserved for Cerebro voice
-- Type scale consolidation: 6 tokens (xs/sm/body/reading/heading/display), 92 tokenized declarations
-- Accessibility: contrast boost across all dark skins, 11px text floor, card tints per skin
-- Card-based layouts across all views (feed, audio, synthesis, DCOS)
-- Staggered reveal animations on all three tabs
-- DCOS → cards with collapsible panel, renamed from COS
+- Card-based layouts across all views with unified 8px spacing
+- Staggered reveal animations on all tabs
+- Accessibility: contrast boost, 11px text floor, card tints per skin
+- DCOS cards with collapsible panel
 - Cerebro extracted to own component (580 lines out of page.tsx)
-- 850+ lines dead code removed (analytics panel, recharts, dead annotation function)
-- React.memo on FeedCard, shared feed data in lib/feeds.ts + lib/podcasts.ts
-- Duplicate Economist key error fixed
-- Architecture brief compiled for Claude conversation (docs/dispatch-architecture-brief.md)
-- Global arrow key navigation for view modes
-- Gear icon settings access in left rail
+- 850+ lines dead code removed, React.memo, bundle trimmed
+- Architecture brief v2 compiled
+
+## Next Up
+- **Mandate deep refinement** — restructure layers based on architecture conversation
+- **Braintrust SDK integration** — when ready to evaluate prompt quality
+- **Twitter/X integration** — if API access becomes viable
+- **Dispatch cadence** — automated weekly brief generation (cron or scheduled)
+- **Article deduplication** — across feeds with similar content
+- **Synthesis depth** — expand from daily to multi-day trend analysis using article history
+- **Mobile optimization** — responsive card layouts, touch interactions
