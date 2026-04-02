@@ -155,6 +155,29 @@ export default function Page() {
   const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "cerebro" | "config">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
 
+  // Global arrow key navigation — cycle views without needing focus
+  useEffect(() => {
+    const modes: ViewMode[] = ["signal", "audio", "synthesis"]
+    const handler = (e: KeyboardEvent) => {
+      // Don't intercept when typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA") return
+
+      const current = modes.indexOf(viewMode as typeof modes[number])
+      if (current === -1) return
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault()
+        setViewMode(modes[(current + 1) % modes.length])
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        setViewMode(modes[(current - 1 + modes.length) % modes.length])
+      }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [viewMode])
+
   const handleToggleSource = useCallback((source: string) => {
     setExcludedSources(prev => {
       const next = new Set(prev)

@@ -292,21 +292,6 @@ export function LeftRail({
         {/* Signal / Audio / Synthesis — three-state toggle (arrow keys to cycle) */}
         <div style={{ padding: "8px 16px 4px", marginBottom: 4 }}>
           <div
-            tabIndex={0}
-            role="tablist"
-            aria-label="View mode"
-            onKeyDown={e => {
-              const modes: ViewMode[] = ["signal", "audio", "synthesis"]
-              const current = modes.indexOf(viewMode as typeof modes[number])
-              if (current === -1) return
-              if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-                e.preventDefault()
-                onViewChange(modes[(current + 1) % modes.length])
-              } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-                e.preventDefault()
-                onViewChange(modes[(current - 1 + modes.length) % modes.length])
-              }
-            }}
             style={{
               display: "flex",
               background: "var(--bg-elevated)",
@@ -315,7 +300,6 @@ export function LeftRail({
               gap: 0,
               position: "relative",
               overflow: "hidden",
-              outline: "none",
             }}
           >
             {/* Sliding indicator — hidden when config is active */}
