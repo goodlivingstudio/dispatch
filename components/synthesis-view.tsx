@@ -34,28 +34,25 @@ const ALL_LAYERS: LayerKey[] = ["opportunity", "position", "discipline", "landsc
 
 // ─── Shared styles — aligned to Dispatch DS ────────────────────────────────
 
-// Cerebro label: Geist Mono, accent color, uppercase
+// Section label: Geist Sans, accent color, uppercase
 const sectionLabelStyle: React.CSSProperties = {
   fontSize: 11,
-  fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--accent-secondary)",
   textTransform: "uppercase",
   fontWeight: 500,
   marginBottom: 8,
 }
 
-// Synthesis body: Geist Mono 12px
+// Synthesis body: Geist Sans 12px
 const bodyStyle: React.CSSProperties = {
   fontSize: 12,
-  fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--text-secondary)",
   lineHeight: 1.6,
 }
 
-// Heading: Geist Mono 15px, weight 500 (not 550 or 600 — synthesis voice is precise, not heavy)
+// Heading: Geist Sans 15px, weight 500
 const headingStyle: React.CSSProperties = {
   fontSize: 15,
-  fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--text-primary)",
   fontWeight: 500,
 }
@@ -71,7 +68,6 @@ const cardBase: React.CSSProperties = {
 
 const pillStyle: React.CSSProperties = {
   fontSize: 11,
-  fontFamily: "var(--font-geist-mono), monospace",
   textTransform: "uppercase",
   padding: "2px 8px",
   borderRadius: 4,
@@ -430,7 +426,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
           onClick={() => setActiveModal("blindspots")}
         >
           <div style={sectionLabelStyle}>Blind Spots</div>
-          <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)", marginBottom: 16 }}>
+          <div style={{ fontSize: 12,  color: "var(--text-tertiary)", marginBottom: 16 }}>
             Layers trending cold
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -550,8 +546,8 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 {ALL_LAYERS.map(l => (
                   <div key={l} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <LayerDot layer={l} />
-                    <span style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-secondary)", width: 80 }}>{LAYER_LABELS[l]}</span>
-                    <span style={{ fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)" }}>{layerCounts[l]} articles</span>
+                    <span style={{ fontSize: 12,  color: "var(--text-secondary)", width: 80 }}>{LAYER_LABELS[l]}</span>
+                    <span style={{ fontSize: 11,  color: "var(--text-tertiary)" }}>{layerCounts[l]} articles</span>
                   </div>
                 ))}
               </div>

@@ -264,8 +264,7 @@ export function LeftRail({
           />
           <span style={{
             fontSize: 11,
-            fontFamily: "var(--font-geist-mono), monospace",
-            textTransform: "uppercase",
+                        textTransform: "uppercase",
             color: dotColor,
             fontWeight: 700,
           }}>

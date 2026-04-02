@@ -32,15 +32,13 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
       {article.synopsis && (
         <div style={{ padding: "12px 14px", paddingBottom: article.relevance ? 8 : 12 }}>
           <div style={{
-            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
-            color: "var(--accent-secondary)", textTransform: "uppercase",
+            fontSize: 11,             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 6,
           }}>
             Synopsis
           </div>
           <div style={{
-            fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
-            lineHeight: 1.55, color: "var(--text-secondary)",
+            fontSize: 12,             lineHeight: 1.55, color: "var(--text-secondary)",
           }}>
             {article.synopsis}
           </div>
@@ -54,15 +52,13 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
           borderTop: article.synopsis ? "1px solid var(--border)" : "none",
         }}>
           <div style={{
-            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
-            color: "var(--accent-secondary)", textTransform: "uppercase",
+            fontSize: 11,             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 6,
           }}>
             Relevance
           </div>
           <div style={{
-            fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
-            lineHeight: 1.55, color: "var(--text-primary)",
+            fontSize: 12,             lineHeight: 1.55, color: "var(--text-primary)",
           }}>
             {article.relevance}
           </div>

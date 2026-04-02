@@ -69,8 +69,7 @@ function CitationChip({ num, src }: { num: string; src: CitationSource }) {
           }}
         >
           <div style={{
-            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
-            color: "var(--accent-secondary)", textTransform: "uppercase",
+            fontSize: 11,             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 4,
           }}>
             {displayName}
@@ -81,8 +80,7 @@ function CitationChip({ num, src }: { num: string; src: CitationSource }) {
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
             style={{
-              fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
-              color: "var(--text-primary)", lineHeight: 1.5,
+              fontSize: 11,               color: "var(--text-primary)", lineHeight: 1.5,
               textDecoration: "none", display: "block",
               transition: "color 0.15s",
             }}
