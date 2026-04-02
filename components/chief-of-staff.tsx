@@ -69,6 +69,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
   const [statusIdx,  setStatusIdx]  = useState(0)
   const [revealed,   setRevealed]   = useState(false)
   const [expanded,   setExpanded]   = useState(true)
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const wasLoading = useRef(true)
 
   // Advance status text while fetching
@@ -189,12 +190,18 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
               {signals.map((signal, i) => (
                   <div
                     key={i}
+                    onClick={() => onDeliberate && signal.body && onDeliberate(signal)}
+                    onMouseEnter={() => setHoveredIdx(i)}
+                    onMouseLeave={() => setHoveredIdx(null)}
                     style={{
                       padding: "16px 20px",
                       borderRight: i < 2 ? "1px solid var(--border)" : "none",
                       animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 160}ms both`,
                       display: "flex",
                       flexDirection: "column",
+                      cursor: signal.body ? "pointer" : "default",
+                      background: hoveredIdx === i ? "var(--bg-surface)" : "transparent",
+                      transition: "background 0.12s",
                     }}
                   >
                     <div style={{
@@ -207,51 +214,13 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                     {signal.body && (
                       <div style={{
                         fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
-                        color: "var(--text-primary)", lineHeight: 1.6,
+                        color: hoveredIdx === i ? "var(--text-primary)" : "var(--text-secondary)",
+                        lineHeight: 1.6,
                         flex: 1,
+                        transition: "color 0.12s",
                       }}>
                         {signal.body}
                       </div>
-                    )}
-                    {signal.sources && signal.sources.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-                        {signal.sources.map((src, si) => (
-                          <a
-                            key={si}
-                            href={src.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            style={{
-                              fontSize: 10, color: "var(--text-tertiary)",
-                              textDecoration: "none", transition: "color 0.15s",
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
-                          >
-                            {src.source}{si < signal.sources!.length - 1 ? " ·" : ""}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    {/* Bump CTA — always visible at bottom */}
-                    {onDeliberate && signal.body && (
-                      <button
-                        onClick={() => onDeliberate(signal)}
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: 6,
-                          padding: "6px 12px", marginTop: 12,
-                          background: "transparent", border: "none",
-                          fontSize: 11, color: "var(--accent-secondary)",
-                          cursor: "pointer", transition: "color 0.15s",
-                          alignSelf: "flex-start",
-                          fontFamily: "inherit",
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
-                        onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                      >
-                        Bump ↗
-                      </button>
                     )}
                   </div>
               ))}

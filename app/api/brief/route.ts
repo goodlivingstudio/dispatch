@@ -122,10 +122,7 @@ export async function POST(req: Request) {
         sources = matched.filter(s => { if (seen.has(s.source)) return false; seen.add(s.source); return true })
       }
 
-      // Clean citation brackets from display text
-      const body = rawBody.replace(/\s*\[\d+\]/g, "")
-
-      return { label, body, sources }
+      return { label, body: rawBody, sources }
     })
 
     // Pad to exactly 3

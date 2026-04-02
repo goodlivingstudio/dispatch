@@ -10,7 +10,6 @@ import { useChiefOfStaff, ChiefOfStaffBand } from "@/components/chief-of-staff"
 import { FeedCard, SignalCard } from "@/components/feed-card"
 import { SynthesisView } from "@/components/synthesis-view"
 import { AudioView } from "@/components/audio-view"
-import { ZenView } from "@/components/zen-view"
 import { Divider } from "@/components/divider"
 import type { Article, Message, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
 
@@ -160,7 +159,6 @@ function Cerebro({ articles, pendingPrompt }: {
   const [sessionId, setSessionId] = useState("")
   const [followUps, setFollowUps] = useState<{ question: string; alternatives: string[] } | null>(null)
   const [lastSources, setLastSources] = useState<Array<{ title: string; url: string }>>([])
-  const [sourcesByMsgIdx, setSourcesByMsgIdx] = useState<Record<number, Array<{ title: string; url: string }>>>({})
   const [attachments, setAttachments] = useState<{ data: string; media_type: string; name: string; preview: string }[]>([])
   const [isRecording, setIsRecording] = useState(false)
   const inputRef  = useRef<HTMLTextAreaElement>(null)
@@ -297,10 +295,7 @@ function Cerebro({ articles, pendingPrompt }: {
           )
           setMessages(prev => {
             const newMsgs = [...prev, ...searchLines, { role: "assistant" as const, content: data.text || "// empty response" }]
-            // Store sources keyed to the assistant message index
             if (data.sources?.length > 0) {
-              const assistantIdx = newMsgs.length - 1
-              setSourcesByMsgIdx(prev => ({ ...prev, [assistantIdx]: data.sources }))
               setLastSources(data.sources)
             }
             return newMsgs
@@ -511,27 +506,6 @@ function Cerebro({ articles, pendingPrompt }: {
                 >
                   {m.content}
                 </div>
-                {/* Source attribution */}
-                {sourcesByMsgIdx[i] && sourcesByMsgIdx[i].length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8, paddingBottom: 4 }}>
-                    {sourcesByMsgIdx[i].slice(0, 5).map((src, si) => (
-                      <a
-                        key={si}
-                        href={src.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: 10, color: "var(--text-tertiary)",
-                          textDecoration: "none", transition: "color 0.15s",
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
-                      >
-                        {new URL(src.url).hostname.replace("www.", "")}{si < Math.min(sourcesByMsgIdx[i].length, 5) - 1 ? " ·" : ""}
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -837,7 +811,7 @@ export default function Page() {
   const [feedLoading,    setFeedLoading]    = useState(true)
   const [viewMode,       setViewMode]       = useState<ViewMode>("signal")
   const [active,         setActive]         = useState("all")
-  const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "zen" | "cerebro">("signal")
+  const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "cerebro">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
 
   const handleToggleSource = useCallback((source: string) => {
@@ -1022,7 +996,6 @@ export default function Page() {
             {mobileTab === "signal" && feedContent}
             {mobileTab === "synthesis" && <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />}
             {mobileTab === "audio"     && <AudioView onDeliberate={handleSynthesisDeliberate} />}
-            {mobileTab === "zen"       && <ZenView />}
             {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
           </div>
         </div>
@@ -1146,8 +1119,6 @@ export default function Page() {
           ? <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />
           : viewMode === "audio"
           ? <AudioView onDeliberate={handleSynthesisDeliberate} />
-          : viewMode === "zen"
-          ? <ZenView />
           : feedContent}
         <Divider onMouseDown={e => startResize("right", e)} />
         <div style={{ width: rightWidth, flexShrink: 0 }}>

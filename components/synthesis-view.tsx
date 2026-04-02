@@ -414,28 +414,6 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 <div style={{ ...bodyStyle, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                   {pattern.description}
                 </div>
-                {/* Top contributing sources */}
-                {pattern.articles.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-                    {[...new Map(pattern.articles.slice(0, 3).map(a => [a.source, a])).values()].map((a, si, arr) => (
-                      <a
-                        key={a.id}
-                        href={a.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                          fontSize: 10, color: "var(--text-tertiary)",
-                          textDecoration: "none", transition: "color 0.15s",
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
-                      >
-                        {a.source}{si < arr.length - 1 ? " ·" : ""}
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
