@@ -99,13 +99,28 @@ export async function POST(req: Request) {
       const citationMatches = rawBody.match(/\[(\d+)\]/g) || []
       const citedIndices = [...new Set(citationMatches.map(m => parseInt(m.replace(/[\[\]]/g, ""), 10) - 1))]
 
-      // Map to actual articles
-      const sources = citedIndices
+      // Map cited indices to actual articles
+      let sources = citedIndices
         .filter(idx => idx >= 0 && idx < inputArticles.length)
         .map(idx => {
           const a = inputArticles[idx]
           return { title: a.title, url: a.url || "#", source: a.source }
         })
+
+      // Fallback: if model didn't cite, match by keyword overlap
+      if (sources.length === 0 && rawBody.length > 0) {
+        const bodyLower = rawBody.toLowerCase()
+        const matched = inputArticles
+          .filter(a => {
+            const words = a.title.toLowerCase().split(/\s+/).filter(w => w.length > 4)
+            return words.some(w => bodyLower.includes(w))
+          })
+          .slice(0, 3)
+          .map(a => ({ title: a.title, url: a.url || "#", source: a.source }))
+        // Deduplicate by source name
+        const seen = new Set<string>()
+        sources = matched.filter(s => { if (seen.has(s.source)) return false; seen.add(s.source); return true })
+      }
 
       // Clean citation brackets from display text
       const body = rawBody.replace(/\s*\[\d+\]/g, "")
