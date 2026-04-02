@@ -235,32 +235,14 @@ export function LeftRail({
       <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
 
       {/* ── Operational status zone ── */}
-      <div style={{ padding: "16px 16px 16px", borderBottom: "1px solid var(--border)" }}>
-        {/* Date + time — unified line */}
-        <div style={{
-          ...TYPE.body,
-          color: "var(--text-secondary)",
-          fontWeight: 500,
-          marginBottom: 8,
-        }}>
-          {day}, {date}
-          <span style={{
-            marginLeft: 8,
-            color: "var(--text-tertiary)",
-            fontVariantNumeric: "tabular-nums",
-            fontWeight: 400,
-          }}>
-            {time}
-          </span>
-        </div>
-
-        {/* Status line: LIVE · sources · signals */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+      <div style={{ padding: "16px 16px 16px" }}>
+        {/* LIVE | date | time */}
+        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
           <span
             className={!feedLoading && !isError ? "live-beacon" : undefined}
             style={{
               width: 5, height: 5, borderRadius: "50%",
-              background: dotColor, flexShrink: 0,
+              background: dotColor, flexShrink: 0, marginRight: 6,
             }}
           />
           <span style={{
@@ -271,22 +253,19 @@ export function LeftRail({
           }}>
             {statusLabel}
           </span>
-          <span style={{ color: "var(--border)", ...TYPE.sm }}>·</span>
-          <SourceFilter articles={articles} excludedSources={excludedSources} onToggleSource={onToggleSource} />
-          <span style={{ color: "var(--border)", ...TYPE.sm }}>·</span>
-          <span style={{ ...metaStyle }}>
-            {articles.length} signals
+          <span style={{ width: 1, height: 12, background: "var(--border)", margin: "0 10px", flexShrink: 0 }} />
+          <span style={{ ...TYPE.body, color: "var(--text-secondary)", fontWeight: 500 }}>
+            {day}, {date}
           </span>
-          {annotatedCount > 0 && (
-            <>
-              <span style={{ color: "var(--border)", ...TYPE.sm }}>·</span>
-              <span style={{ ...metaStyle }}>
-                {annotatedCount} annotated
-              </span>
-            </>
-          )}
+          <span style={{ width: 1, height: 12, background: "var(--border)", margin: "0 10px", flexShrink: 0 }} />
+          <span style={{ ...TYPE.body, color: "var(--text-tertiary)", fontVariantNumeric: "tabular-nums" }}>
+            {time}
+          </span>
         </div>
       </div>
+
+      {/* ── Separator — indented ── */}
+      <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
 
       {/* Navigation */}
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
