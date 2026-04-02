@@ -122,7 +122,18 @@ export async function POST(req: Request) {
         sources = matched.filter(s => { if (seen.has(s.source)) return false; seen.add(s.source); return true })
       }
 
-      return { label, body: rawBody, sources }
+      // Renumber citations so [N] matches sources array index (1-based)
+      // e.g. if model cited [3] and [16], sources = [article3, article16]
+      // rewrite body: [3] → [1], [16] → [2]
+      let body = rawBody
+      const renumberMap = new Map<number, number>()
+      citedIndices.forEach((origIdx, i) => renumberMap.set(origIdx + 1, i + 1))
+      body = body.replace(/\[(\d+)\]/g, (match, num) => {
+        const newNum = renumberMap.get(parseInt(num, 10))
+        return newNum ? `[${newNum}]` : match
+      })
+
+      return { label, body, sources }
     })
 
     // Pad to exactly 3
