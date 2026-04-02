@@ -312,17 +312,17 @@ export default function Page() {
       }}
     >
       {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} />}
-      <div id="main-feed" role="feed" aria-label="Intelligence feed" tabIndex={-1} style={{ flex: 1, overflowY: "auto" }}>
+      <div id="main-feed" role="feed" aria-label="Intelligence feed" tabIndex={-1} style={{ flex: 1, overflowY: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
         {feedLoading ? (
-          <div style={{ padding: "32px 24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
                 className="loading-pulse"
                 style={{
-                  padding: "16px 24px 16px 16px",
-                  borderBottom: "1px solid var(--border)",
-                  borderLeft: "2px solid transparent",
+                  padding: "16px 20px",
+                  borderRadius: 12,
+                  background: "var(--bg-surface)",
                 }}
               >
                 <div style={{ height: 10, width: `${60 + (i % 3) * 15}%`, background: "var(--border)", borderRadius: 4, marginBottom: 8 }} />

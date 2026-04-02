@@ -132,14 +132,15 @@ export const FeedCard = memo(function FeedCard({ article, onSignalEnter, onSigna
       onMouseLeave={handleMouseLeave}
       style={{
         display: "flex",
-        padding: "16px 24px 16px 16px",
-        borderBottom: "1px solid var(--border)",
+        padding: "16px 20px",
+        borderRadius: 12,
         borderLeft: `2px solid ${
           article.signalLens === "OPPORTUNITY" ? "var(--accent-secondary)" : "transparent"
         }`,
-        background: hovered ? "var(--bg-surface)" : "transparent",
-        cursor: isExternal ? "pointer" : hasSignal ? "default" : "default",
-        transition: "background 0.12s",
+        background: hovered ? "var(--bg-elevated)" : "var(--bg-surface)",
+        cursor: isExternal ? "pointer" : "default",
+        transition: "background 0.15s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        transform: hovered ? "scale(1.008)" : "scale(1)",
         gap: 0,
       }}
     >
