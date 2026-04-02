@@ -290,7 +290,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
               {signals.map((signal, i) => (
                   <div
                     key={i}
-                    onClick={() => onDeliberate && signal.body && onDeliberate(signal)}
                     onMouseEnter={() => setHoveredIdx(i)}
                     onMouseLeave={() => setHoveredIdx(null)}
                     style={{
@@ -299,7 +298,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 160}ms both`,
                       display: "flex",
                       flexDirection: "column",
-                      cursor: signal.body ? "pointer" : "default",
                       background: hoveredIdx === i ? "var(--bg-surface)" : "transparent",
                       transition: "background 0.12s",
                     }}
@@ -321,6 +319,26 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       }}>
                         {renderCitedBody(signal.body, signal.sources)}
                       </div>
+                    )}
+                    {onDeliberate && signal.body && (
+                      <button
+                        onClick={() => onDeliberate(signal)}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 6,
+                          padding: "6px 0", marginTop: 10,
+                          background: "transparent", border: "none",
+                          fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+                          color: hoveredIdx === i ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                          cursor: "pointer", transition: "color 0.15s",
+                          alignSelf: "flex-start",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.04em",
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
+                        onMouseLeave={e => { e.currentTarget.style.color = hoveredIdx === i ? "var(--accent-secondary)" : "var(--text-tertiary)" }}
+                      >
+                        Bump ↗
+                      </button>
                     )}
                   </div>
               ))}
