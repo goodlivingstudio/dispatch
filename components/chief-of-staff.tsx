@@ -156,7 +156,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               width: "100%", padding: "0 20px", height: 40,
-              background: "none", border: "none", borderBottom: expanded ? "1px solid var(--border)" : "none",
+              background: "none", border: "none",
               cursor: "pointer", transition: "background 0.15s",
             }}
             onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
@@ -185,7 +185,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
             overflow: "hidden",
             transition: "max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, padding: "12px 16px 16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "0 16px 8px" }}>
               {signals.map((signal, i) => (
                   <div
                     key={i}
