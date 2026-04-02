@@ -101,6 +101,11 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
         flexShrink: 0,
         position: "relative",
         overflow: "hidden",
+        paddingBottom: expanded && !isLoading && !briefError ? 4 : 0,
+        boxShadow: expanded && !isLoading && !briefError
+          ? "0 8px 16px -4px rgba(0,0,0,0.25)"
+          : "none",
+        zIndex: 1,
       }}
     >
       {briefError ? (
