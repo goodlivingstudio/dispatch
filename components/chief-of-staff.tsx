@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { ChevronUp } from "lucide-react"
 import type { Article, Signal, SignalSource } from "@/lib/types"
 
@@ -41,7 +42,7 @@ function CitationChip({ num, src }: { num: string; src: SignalSource }) {
       >
         {num}
       </span>
-      {show && (
+      {show && createPortal(
         <div
           onMouseEnter={() => setShow(true)}
           onMouseLeave={() => setShow(false)}
@@ -83,7 +84,8 @@ function CitationChip({ num, src }: { num: string; src: SignalSource }) {
           >
             {src.title}
           </a>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
