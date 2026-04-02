@@ -1,6 +1,7 @@
-// News feed aggregator — fetches RSS sources, deduplicates, sorts by recency
+// News feed aggregator — fetches RSS sources, annotates via Claude, sorts by recency
 export const revalidate = 1800 // 30 min cache
 
+import Anthropic from "@anthropic-ai/sdk"
 import { FEEDS, type FeedDef } from "@/lib/feeds"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -15,6 +16,7 @@ interface Article {
   category: string
   tag: string
   imageUrl?: string
+  synopsis?: string
   relevance?: string
   signalType?: string
   signalLens?: string
@@ -200,6 +202,71 @@ function interleave(items: Article[]): Article[] {
   return result
 }
 
+// ─── Server-Side Annotation ──────────────────────────────────────────────────
+// Annotates top articles via Claude Haiku during ISR. If it fails or times out,
+// articles are returned unannotated — the client can still call /api/annotate.
+
+const ANNOTATE_PROMPT = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
+
+DISPATCH processes signal through five intelligence layers:
+
+1. OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target but not the only one.
+2. POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics.
+3. DISCIPLINE — How design leadership is evolving as a function. CDO roles, AI impact on practice, design engineering convergence.
+4. LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation.
+5. CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory.
+
+For each numbered headline, return a JSON array. One object per article, same order:
+{
+  "synopsis": "one plain sentence — what this article covers, framed for the mandate",
+  "hook": "one sharp sentence — why this signal matters. Never say 'not relevant' — find the signal.",
+  "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
+  "lens": one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
+}
+
+Return only valid JSON array. No prose.`
+
+async function annotateArticles(articles: Article[]): Promise<Article[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey || articles.length === 0) return articles
+
+  const toAnnotate = articles.slice(0, 20)
+  const items = toAnnotate.map((a, i) => `${i + 1}. [${a.category}] ${a.title}`).join("\n")
+
+  try {
+    const client = new Anthropic({ apiKey })
+    const response = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 6000,
+      system: ANNOTATE_PROMPT,
+      messages: [{ role: "user", content: items + "\n\nReturn JSON array." }],
+    })
+
+    const text = response.content[0]?.type === "text" ? response.content[0].text : ""
+    const match = text.match(/\[[\s\S]*\]/)
+    if (!match) return articles
+
+    const raw: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] =
+      JSON.parse(match[0])
+
+    // Merge annotations into the first N articles
+    return articles.map((a, i) => {
+      if (i >= toAnnotate.length || !raw[i]) return a
+      return {
+        ...a,
+        synopsis:     raw[i].synopsis || "",
+        relevance:    raw[i].hook || "",
+        signalType:   raw[i].type || "",
+        signalLens:   raw[i].lens || "",
+        signalScores: raw[i].scores,
+      }
+    })
+  } catch {
+    return articles // graceful fallback — never break the feed
+  }
+}
+
 // ─── GET Handler ──────────────────────────────────────────────────────────────
 
 export async function GET() {
@@ -240,8 +307,11 @@ export async function GET() {
     )
   )
 
+  // Annotate top articles server-side (runs within ISR cache window)
+  const annotated = await annotateArticles(sorted)
+
   return Response.json({
-    articles: sorted,
+    articles: annotated,
     fetchedAt: new Date().toISOString(),
     isLive: liveCount > 0,
     feedHealth: {
