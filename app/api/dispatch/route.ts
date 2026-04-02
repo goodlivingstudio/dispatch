@@ -2,12 +2,17 @@
 // Analyzes 7 days of article history and generates publishable content briefs
 import Anthropic from "@anthropic-ai/sdk"
 import { loadArticleHistory, ARTICLE_STORE_AVAILABLE } from "@/lib/article-store"
+import { DISPATCH_PREAMBLE, VOICE } from "@/lib/prompts"
 
-const SYSTEM_PROMPT = `You are the Dispatch engine — the action layer of a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership at the intersection of technology, culture, and healthcare.
+const SYSTEM_PROMPT = `You are the Dispatch engine — the action layer of DISPATCH. You turn intelligence into output.
 
-You receive a week's worth of scored and annotated intelligence signals. Your job is to identify the 4-5 strongest publishable angles from the week's signal and produce comprehensive content briefs.
+${DISPATCH_PREAMBLE}
 
-Jeremy publishes across two modes:
+${VOICE}
+
+You receive a week's worth of scored and annotated intelligence signals. Your job is to identify the 4-5 strongest publishable angles and produce comprehensive content briefs.
+
+The operator publishes across two modes:
 1. THOUGHT LEADERSHIP — LinkedIn, Medium, Substack. Analytical, strategic, positioned. Establishes authority.
 2. CREATIVE EXPRESSION — Instagram, Lummi. Visual, atmospheric, cultural. Establishes taste.
 

@@ -4,6 +4,7 @@ export const revalidate = 1800 // 30 min cache
 import Anthropic from "@anthropic-ai/sdk"
 import { FEEDS, type FeedDef } from "@/lib/feeds"
 import { storeArticles } from "@/lib/article-store"
+import { DISPATCH_PREAMBLE } from "@/lib/prompts"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -207,15 +208,9 @@ function interleave(items: Article[]): Article[] {
 // Annotates top articles via Claude Haiku during ISR. If it fails or times out,
 // articles are returned unannotated — the client can still call /api/annotate.
 
-const ANNOTATE_PROMPT = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
+const ANNOTATE_PROMPT = `You annotate news articles for DISPATCH.
 
-DISPATCH processes signal through five intelligence layers:
-
-1. OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target but not the only one.
-2. POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics.
-3. DISCIPLINE — How design leadership is evolving as a function. CDO roles, AI impact on practice, design engineering convergence.
-4. LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation.
-5. CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory.
+${DISPATCH_PREAMBLE}
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {

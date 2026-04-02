@@ -3,6 +3,7 @@
 // Decoupled from /api/news to avoid Vercel function timeout during ISR
 
 import Anthropic from "@anthropic-ai/sdk"
+import { DISPATCH_PREAMBLE } from "@/lib/prompts"
 
 interface ArticleInput {
   id: string
@@ -19,15 +20,9 @@ interface Annotation {
   signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
-const SYSTEM_PROMPT = `You annotate news articles for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership in healthcare, technology, and culture.
+const SYSTEM_PROMPT = `You annotate news articles for DISPATCH.
 
-DISPATCH processes signal through five intelligence layers:
-
-1. OPPORTUNITY — Healthcare, pharma, AI-health intersection. Eli Lilly is the current primary target but not the only one. Pharma digital transformation, patient experience, direct-to-patient models, AI in drug discovery and care coordination.
-2. POSITION — Jeremy's career trajectory. Design leadership hiring, compensation, talent dynamics, interview intelligence, agency-to-in-house transitions.
-3. DISCIPLINE — How design leadership is evolving as a function. CDO roles, design org structure, AI's impact on practice, design engineering convergence, tools on the vanguard (Figma, Claude, Cursor, Vercel).
-4. LANDSCAPE — Broader forces. AI policy and capability, technology business models, economics, regulation, market movements.
-5. CULTURE — Taste, criticism, creative practice. Architecture, film, music, cultural theory. The intellectual currents that make a design leader worth following.
+${DISPATCH_PREAMBLE}
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {

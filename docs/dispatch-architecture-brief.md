@@ -1,14 +1,14 @@
-# DISPATCH — Architecture Brief for Strategic Review
-
-You are helping Jeremy Grant restructure the intelligence architecture of DISPATCH, his personal intelligence system. This document contains the complete current state: mandate, signal taxonomy, feed sources, AI surface configurations, and how everything connects. Jeremy wants to refine the layers, sources, and prompts. Use this as the foundation for that conversation.
-
----
+# DISPATCH — Architecture Brief v2
+Updated: 2026-04-02
 
 ## WHAT DISPATCH IS
 
-Dispatch is a personal intelligence system: **Directed Intelligence for Strategic Positioning Across Technology, Culture & Healthcare.**
+A personal intelligence system: **Directed Intelligence for Strategic Positioning Across Technology, Culture & Healthcare.** It monitors 48 RSS sources (38 news + 10 social/editorial) and 37 podcasts, classifies every article through AI annotation across five intelligence layers, synthesizes cross-domain patterns, generates weekly content briefs, and maintains a conversational strategic advisor (Cerebro).
 
-It continuously monitors 27 RSS text sources and 40 podcast feeds, classifies every article through AI annotation across five intelligence layers, synthesizes cross-domain patterns, and provides a conversational strategic advisor (Cerebro). It runs at dispatch.goodliving.studio.
+**Production:** dispatch.goodliving.studio
+**Engine:** Anthropic Claude (Haiku 4.5 for annotation/brief, Sonnet 4 for Cerebro/Dispatch)
+**Search:** Exa API (live web intelligence)
+**Memory:** Upstash Redis via Vercel KV (conversation persistence + 7-day article history)
 
 ---
 
@@ -18,9 +18,9 @@ Jeremy Grant. Design Director, 15 years agency experience, founder of Good Livin
 
 - **Immediate priority:** Permalance engagement at Eli Lilly's innovation team
 - **Five-year target:** Head of Design (or CDO equivalent) at a significant product organization at the intersection of technology, culture, and healthcare
-- **Operating thesis:** The most important design problems of the next decade live at the intersection of AI capability, healthcare delivery, and human experience. The leaders who shape these spaces need systems thinking, domain fluency, and cultural authority — not just craft excellence.
+- **Operating thesis:** The most important design problems of the next decade live at the intersection of AI capability, healthcare delivery, and human experience
 
-### Lilly Context (Primary Opportunity)
+### Lilly Context
 - 51M patients, $80-83B projected 2026 revenue
 - Diogo Rau (EVP & CIDO): mandated every employee engage with AI daily
 - $1B NVIDIA AI partnership, active OpenAI collaboration
@@ -28,239 +28,161 @@ Jeremy Grant. Design Director, 15 years agency experience, founder of Good Livin
 - Donanemab: monthly infusions, biomarker monitoring, new care coordination challenge
 - 7M Americans with Alzheimer's, most undiagnosed
 - 73% of pharma digital transformations fail
-- Rau: "The whole space of interacting directly with consumers is completely untouched by any medicine company in the world"
+- Strategic argument: Lilly's science has outpaced the experience of receiving it
 
 ---
 
-## THE FIVE INTELLIGENCE LAYERS (Current)
+## FIVE INTELLIGENCE LAYERS
 
-Every article gets scored 0-10 on ALL five layers. Multi-layer signals (high on 2+) are the most valuable. The layers are used for filtering the feed and for structuring AI analysis.
+| Layer | What It Tracks |
+|-------|---------------|
+| **Opportunity** | Healthcare, pharma, AI-health. Lilly primary but not exclusive |
+| **Position** | Career trajectory — hiring, comp, competitive positioning |
+| **Discipline** | Design leadership evolution — CDO roles, AI impact, tools |
+| **Landscape** | Broader forces — AI policy, business models, regulation |
+| **Culture** | Taste, criticism, creative practice — architecture, film, music |
 
-### Layer 1: OPPORTUNITY
-Healthcare, pharma, AI-health intersection. Lilly primary but not exclusive.
-- Pharma digital transformation (successes, failures, investments)
-- Patient experience design and direct-to-patient models
-- AI in drug discovery, clinical operations, care coordination
-- Healthcare system design challenges (access, adherence, navigation)
-- Company intelligence: Lilly, J&J, Pfizer, Roche, Novo Nordisk, Anthem, UnitedHealth
-- FDA policy shifts that create new design requirements
-
-### Layer 2: POSITION
-Jeremy's career trajectory. Hiring signals, compensation, competitive positioning.
-- Senior design leadership job postings (CDO, VP Design, Head of Design) in healthcare, pharma, regulated industries
-- Compensation benchmarks and trends
-- Who is hiring, who is leaving, what transitions signal
-- Agency-to-in-house migration patterns
-- Permalance and fractional leadership models
-
-### Layer 3: DISCIPLINE
-How design leadership is evolving as a function. Not Jeremy's career — the profession itself.
-- How the best design organizations are structured
-- What CDOs at Fortune 500 companies actually do day-to-day
-- Where design authority is expanding (regulated industries, AI governance) vs. contracting (execution automation)
-- Design engineering convergence — how it reshapes teams, roles, value
-- AI's impact on design practice: what it automates, what it amplifies, what it can't touch
-- Tools shaping practice: Figma, Cursor, v0, Claude, Vercel
-
-### Layer 4: LANDSCAPE
-Broader forces. Technology, policy, economics, business model shifts.
-- AI policy, regulation, capability shifts (Anthropic, OpenAI, Google DeepMind, NVIDIA)
-- AI tooling and infrastructure
-- Technology business model evolution
-- Economic signals affecting hiring, investment, industry direction
-- Political and regulatory dynamics reshaping healthcare, tech, creative industries
-
-### Layer 5: CULTURE
-Taste, criticism, creative practice. The intellectual currents that make a design leader worth following.
-- Architecture, industrial design, spatial practice
-- Film, music, literary criticism
-- Cultural commentary on technology, society, creativity
-- Creative practices and philosophies of people doing exceptional work
-- Emerging aesthetics, movements, counter-movements
+Multi-layer signals (high on 2+) are the highest value.
 
 ---
 
-## THREE AI SURFACES
+## AI SURFACES
 
-### 1. COS (Chief of Staff) — The Brief
-Reads the day's feed and surfaces the 3 signals that matter most right now. Runs on page load.
+All five surfaces share operator context, Lilly intelligence, layer definitions, and voice directives from a single source of truth (`lib/prompts.ts`).
 
-**Current voice directive:**
-- Composed, direct, unhurried. No urgency theater.
-- One signal may be Lilly-specific, one broader market/career, one something Jeremy might miss.
-- Cites sources inline as [1], [2] with hover popovers showing provenance.
-- Clicking a signal card sends it to Cerebro for deeper deliberation.
+### 1. DCOS (Chief of Staff) — The Brief
+- **Model:** Claude Haiku 4.5
+- **Trigger:** Page load
+- **Output:** 3 signal cards with inline citations
+- **Role:** Surface the 3 signals that matter most right now
 
 ### 2. Cerebro — The Advisor
-Conversational strategic advisor with web search and conversation memory.
-
-**Current voice directive:**
-- Trusted senior advisor, not a search engine or yes-machine
-- Synthesis first — surface connections Jeremy might miss
-- Name patterns across layers
-- Flag noise explicitly — "this doesn't move your needle"
-- Maximum 3 paragraphs. No bullet points. Tight paragraphs.
-- Sycophancy is a system failure. Challenge weak reasoning.
-- Labels claims: established fact, informed inference, working assumption, speculation
-- Cites web search results inline as [1], [2]
-- After every response: follow-up question + 2 alternative directions
-
-**Cerebro has access to:**
-- The full day's signal feed (injected as context)
-- Web search via Exa API (5 results per query, agentic loop up to 5 searches)
-- Conversation history (persisted 30 days via Vercel KV)
+- **Model:** Claude Sonnet 4
+- **Trigger:** User conversation
+- **Capabilities:** Web search (Exa), conversation memory (KV), feed context injection, image analysis
+- **Voice:** The Wise Counselor — composed, direct, challenges weak reasoning
+- **Output:** Tight paragraphs with follow-up provocations
 
 ### 3. Annotation Engine — The Classifier
-Silently classifies every article in the feed. Runs on each article batch.
+- **Model:** Claude Haiku 4.5
+- **Trigger:** Server-side during ISR (30-min cache) + client-side fallback
+- **Output:** Synopsis, relevance hook, signal type, primary layer, 5-layer scores + urgency
 
-**For each article, produces:**
-- `synopsis` — one sentence: what this article covers, framed for the mandate
-- `hook` (displayed as "relevance") — one sentence: why it matters to DISPATCH
-- `type` — DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL
-- `lens` — primary layer: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE
-- `scores` — 0-10 on all five layers + urgency (0 = evergreen, 10 = act now)
+### 4. Synthesis — The Pattern Layer
+- **Model:** Claude Haiku 4.5
+- **Trigger:** When annotated articles are available
+- **Output:** Narrative briefing, 2-4 convergence patterns, blind spot analysis
 
-### 4. Synthesis View (Partially Built)
-Pattern detection across layers. Currently uses hardcoded templates for convergence patterns, not AI-generated. The briefing module is placeholder text. This surface is the least developed.
-
----
-
-## COMPLETE FEED SOURCES
-
-### RSS Text Sources (27 feeds)
-
-**OPPORTUNITY — Healthcare & Pharma (6 sources)**
-| Source | Category |
-|--------|----------|
-| STAT News | Healthcare & Pharma |
-| BioPharma Dive | Healthcare & Pharma |
-| Fierce Healthcare | Healthcare & Pharma |
-| Endpoints News | Pharma Deals & FDA |
-| Lilly Newsroom | Eli Lilly (direct) |
-| New York Times Health | Health |
-
-**POSITION — Design Leadership (4 sources)**
-| Source | Category |
-|--------|----------|
-| Eye on Design (AIGA) | Design Leadership |
-| Fast Company (Co.Design) | Design & Business |
-| Core77 | Design Industry |
-| Harvard Business Review (via Google News) | Business & Leadership |
-
-**DISCIPLINE — Design Practice & Tooling (8 sources)**
-| Source | Category |
-|--------|----------|
-| Vercel | Platform & Tooling |
-| Linear (changelog) | Product Engineering |
-| Linear (blog, via Google News) | Product Engineering |
-| IBM Design | Enterprise Design |
-| Dezeen (design) | Design Practice |
-| Figma Blog (via Google News) | Design Tooling |
-| Anthropic (via Google News) | AI Platform |
-| Cursor (via Google News) | Design Engineering |
-
-**LANDSCAPE — Technology, Policy & Markets (12 sources)**
-| Source | Category |
-|--------|----------|
-| The Verge | Technology |
-| Wired | Technology & Culture |
-| MIT Technology Review | Deep Technology |
-| TechCrunch | Startups & Venture |
-| Politico | Policy & Regulation |
-| Axios | Policy & Tech |
-| Bloomberg Markets | Markets & Finance |
-| The Economist (direct) | Global Business |
-| The Economist (via Google News) | Global Analysis |
-| New York Times Technology | Technology |
-| New York Times Business | Business |
-| Reuters (via Google News) | Global Wire |
-
-**CULTURE — Taste & Criticism (9 sources)**
-| Source | Category |
-|--------|----------|
-| The Atlantic | Ideas & Culture |
-| Slate | Culture & Commentary |
-| New York Times Arts | Arts & Culture |
-| Dezeen (architecture) | Architecture |
-| Architectural Review | Architecture Criticism |
-| Pitchfork | Music & Criticism |
-| n+1 | Literary & Ideas |
-| Fast Company (latest) | Innovation & Culture |
-| Criterion (via Google News) | Film & Cinema |
+### 5. Dispatch — The Action Layer
+- **Model:** Claude Sonnet 4
+- **Trigger:** On-demand (weekly cadence)
+- **Output:** 4-5 content pitches with thesis, platform targeting, evidence, urgency
+- **Two modes:** Thought leadership (LinkedIn/Medium/Substack) vs. creative (IG/Lummi)
 
 ---
 
-### Podcast Sources (40 shows)
+## FEED SOURCES
 
-**OPPORTUNITY (1 show)**
-- The Readout Loud — Healthcare
+### News (38 sources)
+- **Opportunity (6):** STAT News, BioPharma Dive, Fierce Healthcare, Endpoints News, Lilly Newsroom, NYT Health
+- **Position (4):** Eye on Design, Fast Company, Core77, HBR
+- **Discipline (8):** Vercel, Linear, IBM Design, Dezeen, Figma Blog, Anthropic, Cursor, Linear Blog
+- **Landscape (12):** The Verge, Wired, MIT Tech Review, TechCrunch, Politico, Axios, Bloomberg, The Economist, NYT Tech/Business, Reuters
+- **Culture (9):** The Atlantic, Slate, NYT Arts, Dezeen Architecture, Arch Review, Pitchfork, n+1, Fast Company, Criterion
 
-**POSITION (7 shows)**
-- Lenny's Podcast — Product & Design
-- Design Matters — Design Leadership
-- HBR IdeaCast — Business
-- HBR On Leadership — Leadership
-- HBR On Strategy — Strategy
-- McKinsey Podcast — Strategy
-- Inside the Strategy Room — Strategy
+### Social/Editorial (10 sources)
+- **Substack:** Lenny Rachitsky, Julie Zhuo, John Cutler, Brian Lovin, Digital Native, Stratechery
+- **Medium:** Julie Zhuo, Google Design, UX Collective, Mule Design
 
-**DISCIPLINE (6 shows)**
-- The a16z Show — Tech & Venture
-- Hard Fork — Technology
-- AI Daily Brief — AI
-- Acquired — Tech & Business
-- Latent Space — AI Engineering
-- No Priors — AI & Venture
-
-**LANDSCAPE (12 shows)**
-- The Daily — News
-- Ezra Klein Show — Policy & Ideas
-- Up First — News
-- Today, Explained — News & Policy
-- Consider This — News
-- Bloomberg Tech — Technology
-- Big Take — Business
-- Bloomberg Businessweek — Business
-- Economist Podcasts — Global Analysis
-- On with Kara Swisher — Tech & Media
-- The Political Scene — Politics
-- Political Gabfest — Politics
-
-**CULTURE (11 shows)**
-- Radiolab — Science & Ideas
-- Hidden Brain — Behavioral Science
-- Throughline — History
-- Fresh Air — Interviews
-- Time Sensitive — Design & Culture
-- Broken Record — Music & Creativity
-- New Yorker Radio Hour — Culture & Ideas
-- 99% Invisible — Design & Architecture
-- Code Switch — Culture
-- Book of the Day — Books
-- The Rewatchables — Film
+### Podcasts (37 shows)
+- **Opportunity (1):** The Readout Loud
+- **Position (7):** Lenny's Podcast, Design Matters, HBR IdeaCast/Leadership/Strategy, McKinsey, Inside the Strategy Room
+- **Discipline (6):** a16z, Hard Fork, AI Daily Brief, Acquired, Latent Space, No Priors
+- **Landscape (12):** The Daily, Ezra Klein, Up First, Today Explained, Consider This, Bloomberg Tech/Big Take/Businessweek, Economist, Kara Swisher, Political Scene, Political Gabfest
+- **Culture (11):** Radiolab, Hidden Brain, Throughline, Fresh Air, Time Sensitive, Broken Record, New Yorker Radio Hour, 99% Invisible, Code Switch, Book of the Day, The Rewatchables
 
 ---
 
-## SIGNAL PROCESSING PRINCIPLES
+## INFRASTRUCTURE
 
-1. **Relevance is not binary.** Every signal exists on a spectrum from noise to essential. The system scores, it does not hide.
-2. **Multi-layer signals are the most valuable.** Cross-domain convergence is the highest-value intelligence.
-3. **Recency decays.** Today's signal > last week's. Urgency scoring reflects this.
-4. **Source credibility is weighted.** HBR analysis ≠ TechCrunch headline. Anthropic research paper ≠ blog post about Anthropic.
-5. **The whole corpus is available.** Nothing filtered out. Architecture makes it navigable.
-6. **Everything flows toward Cerebro.** Every view, every signal, every synthesis has a path to the conversational layer.
+### Data Flow
+1. RSS feeds fetched in parallel (30-min ISR cache)
+2. Top 20 articles annotated server-side by Claude Haiku during ISR
+3. Annotated articles persisted to Redis (7-day rolling window, 8-day TTL)
+4. Client receives pre-annotated feed in single round-trip
+5. Client-side annotation fallback for any articles not covered
+
+### Storage
+- **Vercel KV (Upstash Redis):** Cerebro conversation memory (30-day TTL, 30 messages max) + article history (7-day window)
+- **localStorage:** Annotation cache (2-hour TTL), view preferences, excluded sources, session ID
+
+### Prompt Architecture
+All system prompts import from `lib/prompts.ts`:
+- `OPERATOR` — who Jeremy is, what he's positioning for
+- `LILLY_CONTEXT` — Lilly intelligence data points
+- `FIVE_LAYERS` — layer definitions with scoring guidance
+- `VOICE` — The Wise Counselor directive
+- `DISPATCH_PREAMBLE` — combined context block for all surfaces
 
 ---
 
-## WHAT JEREMY WANTS TO RETHINK
+## DESIGN SYSTEM
 
-Jeremy is looking at this architecture with fresh eyes after seeing it function. Areas for discussion:
+### Typography
+- **Geist Sans** — all interface text (labels, metadata, headlines, body)
+- **Geist Mono** — Cerebro voice only (chat responses, processing animations, diagnostics terminal)
+- **Type scale:** 6 tokens (xs/10, sm/11, body/12, reading/13, heading/15, display/17+)
 
-1. **The five layers** — Are these the right categories? Do the labels make sense as user-facing filters? Should they be restructured?
-2. **Feed sources** — Are these the right 27 text sources and 40 podcasts? What's missing? What's noise?
-3. **How the layers surface in the UI** — The filters currently show counts (e.g., "Opportunity 30") but the labels feel abstract when scanning a feed.
-4. **Synthesis** — This surface is underdeveloped. What should it become?
-5. **COS brief quality** — Are the right 3 signals being surfaced? Is the prompt effective?
-6. **Cerebro personality** — Is the voice right? Is the advisory useful?
+### Color System (3 skins × 2 modes)
+- **Mineral** (warm amber) — default
+- **Slate** (cool blue)
+- **Forest** (organic green)
+- Each skin has dark and day modes with full variable sets
 
-This is a strategic conversation about the intelligence architecture, not a coding task. Help Jeremy think through what this system should be.
+### Card Language
+- 12px border-radius, bg-surface fill, 8px gaps
+- Hover: bg-elevated shift (no scale on feed, subtle scale on audio/synthesis)
+- Consistent across all views: Signal, Audio, Synthesis, Dispatch
+
+### Semantic Boundaries
+- Font = semantic signal: sans = interface presenting, mono = Cerebro speaking
+- `--card-tint` per skin for insight popovers
+- `--accent-secondary` marks machine presence (citations, labels, active states)
+
+---
+
+## CONFIGURATION PAGE
+
+Accessible via gear icon (bottom-left of left rail):
+- **News Sources** — 38 feeds, grouped by layer, toggleable
+- **Social Sources** — 10 feeds, grouped by layer, toggleable
+- **Podcast Sources** — 37 shows, grouped by layer, toggleable
+- **Export Inventory** — copy full source list as Markdown for Claude analysis
+- **Cerebro Station** — session info, export thread, clear memory
+- **Diagnostics** — API health (Anthropic, Exa, KV), feed health, annotation cache
+- **Preferences** — skin picker, theme toggle
+
+---
+
+## NAVIGATION
+
+### Desktop
+- Four-mode toggle: Signal / Audio / Synthesis / Dispatch
+- Settings via gear icon (bottom-left)
+- Arrow keys cycle through modes
+- Cerebro sidebar always visible
+
+### Mobile
+- Tab bar: Signal / Audio / Synthesis / Dispatch / Cerebro / Config
+- Dynamic width per tab count
+
+---
+
+## WHAT'S NEXT (Roadmap)
+
+1. **Mandate refinement** — restructure layers based on architecture conversation
+2. **Braintrust integration** — prompt quality evaluation and A/B testing
+3. **Settings polish** — annotation TTL controls, manual feed refresh, session export
+4. **Twitter/X integration** — if API access becomes viable
+5. **Dispatch cadence** — automated weekly brief generation
+6. **Article deduplication** — across feeds with similar content

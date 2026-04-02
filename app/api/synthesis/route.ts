@@ -1,14 +1,17 @@
 // Synthesis endpoint — generates narrative intelligence briefing from today's feed
 import Anthropic from "@anthropic-ai/sdk"
+import { DISPATCH_PREAMBLE, VOICE } from "@/lib/prompts"
 
-const SYSTEM_PROMPT = `You are the synthesis engine for DISPATCH — a personal intelligence system for Jeremy Grant, a Design Director positioning for senior design leadership at the intersection of technology, culture, and healthcare.
+const SYSTEM_PROMPT = `You are the synthesis engine inside DISPATCH.
+
+${DISPATCH_PREAMBLE}
+
+${VOICE}
 
 You receive today's scored and annotated articles. Your job is to produce a narrative intelligence briefing that answers:
 1. What is the single most important pattern across today's signals?
 2. What multi-layer convergences are emerging (signals that score high on 2+ layers)?
-3. What should Jeremy be paying attention to that he might miss?
-
-VOICE: Composed, direct, analytical. No filler. Lead with the implication, not the event.
+3. What should the operator be paying attention to that they might miss?
 
 Return a JSON object with this structure:
 {
