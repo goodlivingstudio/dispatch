@@ -80,7 +80,7 @@ export type SignalCallbacks = {
   onSignalLeave: () => void
 }
 
-export const FeedCard = memo(function FeedCard({ article, onSignalEnter, onSignalMove, onSignalLeave }: { article: Article } & SignalCallbacks) {
+export const FeedCard = memo(function FeedCard({ article, index, onSignalEnter, onSignalMove, onSignalLeave }: { article: Article; index?: number } & SignalCallbacks) {
   const isExternal   = article.url !== "#"
   const hasSignal    = !!(article.synopsis || article.relevance)
   const [hovered, setHovered] = useState(false)
@@ -140,6 +140,7 @@ export const FeedCard = memo(function FeedCard({ article, onSignalEnter, onSigna
         background: hovered ? "var(--bg-elevated)" : "var(--bg-surface)",
         cursor: isExternal ? "pointer" : "default",
         transition: "background 0.15s",
+        animation: index !== undefined ? `signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(index * 50, 500)}ms both` : undefined,
         gap: 0,
       }}
     >

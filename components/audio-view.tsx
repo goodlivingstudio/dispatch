@@ -223,7 +223,7 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
 
 // ─── Episode Card ────────────────────────────────────────────────────────────
 
-function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => void }) {
+function EpisodeCard({ episode, index, onClick }: { episode: Episode; index?: number; onClick: () => void }) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -240,6 +240,7 @@ function EpisodeCard({ episode, onClick }: { episode: Episode; onClick: () => vo
         cursor: "pointer",
         transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         transform: hovered ? "scale(1.015)" : "scale(1)",
+        animation: index !== undefined ? `signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(index * 60, 600)}ms both` : undefined,
       }}
     >
       {/* Artwork */}
@@ -414,8 +415,8 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
         </div>
       ) : (
         <div className="episode-grid" style={{ gap: 12 }}>
-          {filtered.map(ep => (
-            <EpisodeCard key={ep.id} episode={ep} onClick={() => setActiveEpisode(ep)} />
+          {filtered.map((ep, i) => (
+            <EpisodeCard key={ep.id} episode={ep} index={i} onClick={() => setActiveEpisode(ep)} />
           ))}
         </div>
       )}

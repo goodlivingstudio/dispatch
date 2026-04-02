@@ -335,10 +335,11 @@ export default function Page() {
             No articles
           </div>
         ) : (
-          filtered.map(a => (
+          filtered.map((a, i) => (
             <FeedCard
               key={a.id}
               article={a}
+              index={i}
               onSignalEnter={handleSignalEnter}
               onSignalMove={handleSignalMove}
               onSignalLeave={handleSignalLeave}
