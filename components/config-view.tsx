@@ -572,6 +572,29 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth, skin, 
       <div style={{ marginBottom: 32 }}>
         <div style={sectionLabel}>Preferences</div>
 
+        {/* Manual feed refresh */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ ...metaStyle, marginBottom: 8 }}>Feed</div>
+          <button
+            onClick={() => {
+              localStorage.removeItem("dispatch-annotations-v3")
+              window.location.reload()
+            }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "6px 16px", borderRadius: 6,
+              border: "1px solid var(--border)", background: "transparent",
+              color: "var(--text-tertiary)",
+              ...TYPE.sm, cursor: "pointer", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+          >
+            <RefreshCw size={12} />
+            Refresh feed &amp; clear cache
+          </button>
+        </div>
+
         {/* Skin */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ ...metaStyle, marginBottom: 8 }}>Skin</div>
