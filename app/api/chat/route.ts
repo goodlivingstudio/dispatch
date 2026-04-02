@@ -1,11 +1,10 @@
-// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
-import OpenAI from "openai"
+import Anthropic from "@anthropic-ai/sdk"
 import { loadHistory, saveHistory, KV_AVAILABLE } from "@/lib/memory"
 
 function getClient() {
-  const key = process.env.OPENAI_API_KEY
-  if (!key) throw new Error("OPENAI_API_KEY not configured")
-  return new OpenAI({ apiKey: key })
+  const key = process.env.ANTHROPIC_API_KEY
+  if (!key) throw new Error("ANTHROPIC_API_KEY not configured")
+  return new Anthropic({ apiKey: key })
 }
 
 // ─── System Prompt ────────────────────────────────────────────────────────────
@@ -83,20 +82,21 @@ function parseFollowUp(text: string): {
 } {
   const marker = "---follow-up---"
   const idx = text.indexOf(marker)
+
   if (idx === -1) return { cleanText: text.trim(), followUp: null }
 
   const cleanText = text.slice(0, idx).trim()
-  const block = text.slice(idx + marker.length).trim()
+  const followSection = text.slice(idx + marker.length).trim()
+  const lines = followSection.split("\n").map(l => l.trim()).filter(Boolean)
 
   let question = ""
   const alternatives: string[] = []
 
-  for (const line of block.split("\n")) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith("question:")) {
-      question = trimmed.slice("question:".length).trim()
-    } else if (trimmed.startsWith("alt:")) {
-      alternatives.push(trimmed.slice("alt:".length).trim())
+  for (const line of lines) {
+    if (line.toLowerCase().startsWith("question:")) {
+      question = line.slice(9).trim()
+    } else if (line.toLowerCase().startsWith("alt:")) {
+      alternatives.push(line.slice(4).trim())
     }
   }
 
@@ -105,24 +105,21 @@ function parseFollowUp(text: string): {
   return { cleanText, followUp: { question, alternatives: alternatives.slice(0, 2) } }
 }
 
-// ─── Web Search Tool (OpenAI function calling format) ────────────────────────
+// ─── Web Search Tool (Anthropic tool_use format) ────────────────────────────
 
-const WEB_SEARCH_TOOL: OpenAI.ChatCompletionTool = {
-  type: "function",
-  function: {
-    name: "web_search",
-    description:
-      "Search the live web for current intelligence. Use for: recent company news, executive interviews, hiring signals, analyst reports, anything post-training or requiring current specificity. Be precise with queries — include names, dates, organizations.",
-    parameters: {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Specific search query. Example: 'Eli Lilly Diogo Rau AI design 2025'",
-        },
+const WEB_SEARCH_TOOL: Anthropic.Tool = {
+  name: "web_search",
+  description:
+    "Search the live web for current intelligence. Use for: recent company news, executive interviews, hiring signals, analyst reports, anything post-training or requiring current specificity. Be precise with queries — include names, dates, organizations.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      query: {
+        type: "string",
+        description: "Specific search query. Example: 'Eli Lilly Diogo Rau AI design 2025'",
       },
-      required: ["query"],
     },
+    required: ["query"],
   },
 }
 
@@ -187,26 +184,19 @@ export async function POST(req: Request) {
     const tools    = hasExa ? [WEB_SEARCH_TOOL] : []
 
     // ── Load persisted history (if KV configured and sessionId provided) ─────
-    // History gives Cerebro memory across page refreshes.
-    // Client messages take precedence — we only prepend history if the client
-    // is sending fewer messages than we have stored (i.e. fresh page load).
     let baseMessages: Array<{ role: "user" | "assistant"; content: string }> = messages
     if (KV_AVAILABLE && sessionId && messages.length <= 2) {
       const history = await loadHistory(sessionId)
       if (history.length > 0) {
-        // Merge: history from KV + current messages (deduplicated by content)
         const historyContents = new Set(history.map(m => m.content))
         const newOnly = messages.filter((m: { content: string }) => !historyContents.has(m.content))
         baseMessages = [...history, ...newOnly]
       }
     }
 
-    // Build OpenAI messages array with system prompt
-    const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT },
-    ]
+    // Build Anthropic messages array
+    const anthropicMessages: Anthropic.MessageParam[] = []
 
-    // Inject feed context into last user message + handle multimodal images
     for (let i = 0; i < baseMessages.length; i++) {
       const m = baseMessages[i]
       const isLast = i === baseMessages.length - 1 && m.role === "user"
@@ -217,21 +207,25 @@ export async function POST(req: Request) {
 
       // Multimodal: attach images to the last user message
       if (isLast && Array.isArray(images) && images.length > 0) {
-        const parts: OpenAI.ChatCompletionContentPart[] = images.map(
+        const content: Anthropic.ContentBlockParam[] = images.map(
           (img: { media_type: string; data: string }) => ({
-            type: "image_url" as const,
-            image_url: { url: `data:${img.media_type};base64,${img.data}` },
+            type: "image" as const,
+            source: {
+              type: "base64" as const,
+              media_type: img.media_type as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+              data: img.data,
+            },
           })
         )
-        parts.push({ type: "text" as const, text: textContent })
-        openaiMessages.push({ role: "user" as const, content: parts })
+        content.push({ type: "text" as const, text: textContent })
+        anthropicMessages.push({ role: "user" as const, content })
       } else {
-        openaiMessages.push({ role: m.role as "user" | "assistant", content: textContent })
+        anthropicMessages.push({ role: m.role as "user" | "assistant", content: textContent })
       }
     }
 
     // ── Agentic loop — handles tool calls ────────────────────────────────────
-    let currentMessages = [...openaiMessages]
+    let currentMessages = [...anthropicMessages]
     const searchesPerformed: string[] = []
     const searchSources: SearchSource[] = []
     let totalInput  = 0
@@ -239,49 +233,51 @@ export async function POST(req: Request) {
     let finalText   = ""
 
     for (let iteration = 0; iteration < 5; iteration++) {
-      const response = await client.chat.completions.create({
-        model:      "gpt-4o",
+      const response = await client.messages.create({
+        model:      "claude-sonnet-4-20250514",
         max_tokens: 1000,
+        system:     SYSTEM_PROMPT,
         tools:      tools.length > 0 ? tools : undefined,
         messages:   currentMessages,
       })
 
-      totalInput  += response.usage?.prompt_tokens || 0
-      totalOutput += response.usage?.completion_tokens || 0
+      totalInput  += response.usage?.input_tokens || 0
+      totalOutput += response.usage?.output_tokens || 0
 
-      const choice = response.choices[0]
+      // Extract text from response
+      const textBlocks = response.content.filter(b => b.type === "text")
+      const toolBlocks = response.content.filter(b => b.type === "tool_use")
 
       // No tool calls — we have a final answer
-      if (choice.finish_reason === "stop" || !choice.message.tool_calls?.length) {
-        finalText = choice.message.content || ""
+      if (response.stop_reason !== "tool_use" || toolBlocks.length === 0) {
+        finalText = textBlocks.map(b => b.type === "text" ? b.text : "").join("")
         break
       }
 
       // Tool calls — execute and loop
-      if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
-        // Append assistant turn (with tool call info)
-        currentMessages.push(choice.message)
+      if (toolBlocks.length > 0) {
+        // Append assistant turn with all content blocks
+        currentMessages.push({ role: "assistant", content: response.content })
 
         // Execute each tool and collect results
-        for (const toolCall of choice.message.tool_calls) {
-          if (toolCall.type !== "function") continue
-          if (toolCall.function.name === "web_search") {
-            const args = JSON.parse(toolCall.function.arguments)
-            const query = args.query as string
+        const toolResults: Anthropic.ToolResultBlockParam[] = []
+        for (const block of toolBlocks) {
+          if (block.type === "tool_use" && block.name === "web_search") {
+            const query = (block.input as { query: string }).query
             searchesPerformed.push(query)
             const { text: searchText, sources } = await exaSearch(query)
             searchSources.push(...sources)
-            currentMessages.push({
-              role: "tool",
-              tool_call_id: toolCall.id,
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: block.id,
               content: searchText,
             })
           }
         }
-        // Loop continues → model sees results and produces next response
+
+        currentMessages.push({ role: "user", content: toolResults })
       } else {
-        // Unexpected state — extract whatever text we have
-        finalText = choice.message.content || ""
+        finalText = textBlocks.map(b => b.type === "text" ? b.text : "").join("")
         break
       }
     }

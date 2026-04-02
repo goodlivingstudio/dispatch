@@ -1,4 +1,4 @@
-// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
+// News feed aggregator — fetches RSS sources, deduplicates, sorts by recency
 export const revalidate = 1800 // 30 min cache
 
 // ─── Types ───────────────────────────────────────────────────────────────────

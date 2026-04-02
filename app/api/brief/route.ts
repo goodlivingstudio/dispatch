@@ -1,10 +1,9 @@
-// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
-import OpenAI from "openai"
+import Anthropic from "@anthropic-ai/sdk"
 
 function getClient() {
-  const key = process.env.OPENAI_API_KEY
-  if (!key) throw new Error("OPENAI_API_KEY not configured in environment variables")
-  return new OpenAI({ apiKey: key })
+  const key = process.env.ANTHROPIC_API_KEY
+  if (!key) throw new Error("ANTHROPIC_API_KEY not configured")
+  return new Anthropic({ apiKey: key })
 }
 
 const BRIEF_SYSTEM = `You are the chief of staff for Jeremy Grant. Your job is to brief him on what matters most right now.
@@ -45,13 +44,11 @@ WATCH CLOSELY
 Nothing else. No preamble. No sign-off. Three signals, one ||| between each.`
 
 interface ArticleInput {
-  id?: string
   title: string
-  category: string
   source: string
-  url?: string
+  category: string
   summary?: string
-  relevance?: string
+  url?: string
 }
 
 export async function POST(req: Request) {
@@ -61,9 +58,9 @@ export async function POST(req: Request) {
     if (!articles?.length) {
       return Response.json({
         signals: [
-          { label: "FEED UNAVAILABLE", body: "No articles to analyze." },
-          { label: "—", body: "" },
-          { label: "—", body: "" },
+          { label: "FEED UNAVAILABLE", body: "No articles to analyze.", sources: [] },
+          { label: "—", body: "", sources: [] },
+          { label: "—", body: "", sources: [] },
         ],
       })
     }
@@ -74,11 +71,11 @@ export async function POST(req: Request) {
       .map((a, i) => `${i + 1}. [${a.category}] ${a.source}: ${a.title}${a.summary ? ` — ${a.summary.slice(0, 120)}` : ""}`)
       .join("\n")
 
-    const response = await getClient().chat.completions.create({
-      model: "gpt-4o-mini",
+    const response = await getClient().messages.create({
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 600,
+      system: BRIEF_SYSTEM,
       messages: [
-        { role: "system", content: BRIEF_SYSTEM },
         {
           role: "user",
           content: `Feed (${articles.length} articles):\n\n${context}\n\nGenerate the brief.`,
@@ -86,7 +83,7 @@ export async function POST(req: Request) {
       ],
     })
 
-    const text = response.choices[0]?.message?.content?.trim() || ""
+    const text = response.content[0]?.type === "text" ? response.content[0].text.trim() : ""
 
     // Parse three signals separated by |||
     const parts = text.split("|||").map(s => s.trim()).filter(Boolean)
@@ -123,8 +120,6 @@ export async function POST(req: Request) {
       }
 
       // Renumber citations so [N] matches sources array index (1-based)
-      // e.g. if model cited [3] and [16], sources = [article3, article16]
-      // rewrite body: [3] → [1], [16] → [2]
       let body = rawBody
       const renumberMap = new Map<number, number>()
       citedIndices.forEach((origIdx, i) => renumberMap.set(origIdx + 1, i + 1))
@@ -145,16 +140,12 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error("Brief error:", message)
-    return Response.json(
-      {
-        signals: [
-          { label: "API UNAVAILABLE", body: message },
-          { label: "—", body: "" },
-          { label: "—", body: "" },
-        ],
-        error: message,
-      },
-      { status: 500 }
-    )
+    return Response.json({
+      signals: [
+        { label: "BRIEF ERROR", body: message, sources: [] },
+        { label: "—", body: "", sources: [] },
+        { label: "—", body: "", sources: [] },
+      ],
+    })
   }
 }

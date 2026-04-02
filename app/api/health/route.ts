@@ -1,45 +1,50 @@
-// Temporary OpenAI swap — restore to Anthropic when Claude Console access is back
-// Diagnostic endpoint — confirms env vars and OpenAI reachability
+// Diagnostic endpoint — confirms env vars and Anthropic API reachability
 // Visit /api/health to debug deployment issues
 
 export async function GET() {
-  const openaiKey = process.env.OPENAI_API_KEY
+  const anthropicKey = process.env.ANTHROPIC_API_KEY
+  const exaKey       = process.env.EXA_API_KEY
+  const kvUrl        = process.env.KV_REST_API_URL
 
-  const status = {
+  const status: Record<string, unknown> = {
     env: {
-      OPENAI_API_KEY: openaiKey
-        ? `set (${openaiKey.length} chars)`
-        : "MISSING",
+      ANTHROPIC_API_KEY: anthropicKey ? `set (${anthropicKey.length} chars)` : "MISSING",
+      EXA_API_KEY:       exaKey       ? `set (${exaKey.length} chars)`       : "not configured (web search disabled)",
+      KV_REST_API_URL:   kvUrl        ? "set"                                : "not configured (memory disabled)",
     },
-    openai: "not tested",
+    anthropic: "not tested",
     timestamp: new Date().toISOString(),
     node: process.version,
   }
 
-  // List available models to confirm API connectivity
-  if (openaiKey) {
+  if (anthropicKey) {
     try {
-      const res = await fetch("https://api.openai.com/v1/models", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
         headers: {
-          "Authorization": `Bearer ${openaiKey}`,
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
         },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 5,
+          messages: [{ role: "user", content: "ping" }],
+        }),
         signal: AbortSignal.timeout(8000),
       })
 
       if (res.ok) {
-        const data = await res.json()
-        const models = (data.data || []).map((m: { id: string }) => m.id)
-        status.openai = `ok — ${models.length} models available`
-        ;(status as Record<string, unknown>).available_models = models
+        status.anthropic = "ok — API responding"
       } else {
         const body = await res.json().catch(() => ({}))
-        status.openai = `error ${res.status}: ${JSON.stringify(body).slice(0, 200)}`
+        status.anthropic = `error ${res.status}: ${JSON.stringify(body).slice(0, 200)}`
       }
     } catch (err) {
-      status.openai = `exception: ${err instanceof Error ? err.message : String(err)}`
+      status.anthropic = `exception: ${err instanceof Error ? err.message : String(err)}`
     }
   } else {
-    status.openai = "skipped — no key"
+    status.anthropic = "skipped — no key"
   }
 
   return Response.json(status, {
