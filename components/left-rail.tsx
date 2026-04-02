@@ -404,7 +404,7 @@ export function LeftRail({
       </nav>
 
       {/* Bottom bar — gallery + settings */}
-      <div style={{ flexShrink: 0, padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ flexShrink: 0, padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
         <button
           onClick={() => onViewChange("config")}
           title="Configuration"

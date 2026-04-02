@@ -154,79 +154,121 @@ function Toggle({ active, onToggle }: { active: boolean; onToggle: () => void })
   )
 }
 
-// ─── Cerebro Station — memory management & export ───────────────────────
+// ─── Cerebro Station — memory management, topic threads, selective purge ──
+
+interface ConvoThread {
+  topic: string
+  messages: Array<{ role: string; content: string }>
+  startIdx: number
+  endIdx: number
+}
+
+function groupIntoThreads(messages: Array<{ role: string; content: string }>): ConvoThread[] {
+  if (messages.length === 0) return []
+  const threads: ConvoThread[] = []
+  let current: ConvoThread | null = null
+
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i]
+    if (m.role === "user") {
+      // Start a new thread on each user message that follows an assistant message
+      if (!current || (i > 0 && messages[i - 1].role === "assistant")) {
+        if (current) threads.push(current)
+        const topic = m.content.length > 60 ? m.content.slice(0, 57) + "..." : m.content
+        current = { topic, messages: [], startIdx: i, endIdx: i }
+      }
+    }
+    if (current) {
+      current.messages.push(m)
+      current.endIdx = i
+    }
+  }
+  if (current) threads.push(current)
+  return threads
+}
 
 function CerebroStation() {
-  const [messageCount, setMessageCount] = useState<number | null>(null)
   const [exported, setExported] = useState(false)
   const [cleared, setCleared] = useState(false)
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([])
+  const [loading, setLoading] = useState(true)
 
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("cerebro-session") : null
 
-  useEffect(() => {
-    if (!sessionId) return
+  const fetchMessages = () => {
+    if (!sessionId) { setLoading(false); return }
     fetch(`/api/memory?sessionId=${sessionId}`)
       .then(r => r.json())
       .then(data => {
-        if (data.messages) {
-          setMessages(data.messages)
-          setMessageCount(data.messages.length)
-        }
+        setMessages(data.messages || [])
+        setLoading(false)
       })
-      .catch(() => {})
-  }, [sessionId])
+      .catch(() => setLoading(false))
+  }
 
-  const handleExport = () => {
+  useEffect(() => { fetchMessages() }, [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const threads = useMemo(() => groupIntoThreads(messages), [messages])
+
+  const handleExportAll = () => {
     if (messages.length === 0) return
-    const header = `# Cerebro Conversation Export\nSession: ${sessionId}\nExported: ${new Date().toISOString()}\nMessages: ${messages.length}\n\n---\n\n`
-    const thread = messages
-      .map(m => `**${m.role === "user" ? "Jeremy" : "Cerebro"}:**\n${m.content}`)
-      .join("\n\n---\n\n")
-    const footer = `\n\n---\n\n*Exported from Dispatch for continued analysis in Claude.*`
-    navigator.clipboard.writeText(header + thread + footer).then(() => {
+    const header = `# Cerebro Conversation Export\nSession: ${sessionId}\nExported: ${new Date().toISOString()}\nThreads: ${threads.length} · Messages: ${messages.length}\n\n`
+    const body = threads.map((t, i) => {
+      const threadMsgs = t.messages.map(m => `**${m.role === "user" ? "Jeremy" : "Cerebro"}:**\n${m.content}`).join("\n\n")
+      return `---\n\n## Thread ${i + 1}: ${t.topic}\n\n${threadMsgs}`
+    }).join("\n\n")
+    navigator.clipboard.writeText(header + body + "\n\n---\n\n*Exported from Dispatch.*").then(() => {
       setExported(true)
       setTimeout(() => setExported(false), 2500)
     })
   }
 
-  const handleClear = () => {
+  const handleExportThread = (thread: ConvoThread) => {
+    const body = thread.messages.map(m => `**${m.role === "user" ? "Jeremy" : "Cerebro"}:**\n${m.content}`).join("\n\n---\n\n")
+    navigator.clipboard.writeText(`# ${thread.topic}\n\n${body}`)
+  }
+
+  const handlePurgeThread = (thread: ConvoThread) => {
+    if (!sessionId) return
+    fetch(`/api/memory?sessionId=${sessionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ removeFrom: thread.startIdx, removeTo: thread.endIdx }),
+    }).then(() => fetchMessages())
+  }
+
+  const handleClearAll = () => {
     if (!sessionId) return
     fetch(`/api/memory?sessionId=${sessionId}`, { method: "DELETE" })
       .then(() => {
         setMessages([])
-        setMessageCount(0)
         setCleared(true)
         setTimeout(() => setCleared(false), 2500)
       })
-      .catch(() => {})
   }
 
   return (
     <div style={{ marginBottom: 8 }}>
       <div style={sectionLabel}>
         Cerebro Station
-        <span style={{ color: "var(--text-tertiary)", marginLeft: 8, fontWeight: 400 }}>
-          memory · export · session
-        </span>
       </div>
 
-      <div style={{ ...TYPE.body, color: "var(--text-tertiary)", marginBottom: 16, lineHeight: 1.6 }}>
-        Cerebro is your station chief. Export conversation threads for deeper analysis in Claude Desktop, or clear memory to start fresh.
+      <div style={{ ...TYPE.body, color: "var(--text-tertiary)", marginBottom: 20, lineHeight: 1.7 }}>
+        Conversation memory persists across sessions. Export threads for deeper analysis in Claude Desktop, or purge selectively to keep memory focused.
       </div>
 
-      {/* Session info */}
+      {/* Session status */}
       <div style={{
-        background: "var(--bg-surface)", borderRadius: 8, padding: "14px 16px",
-        marginBottom: 12,
+        background: "var(--bg-surface)", borderRadius: 8, padding: "16px 18px",
+        marginBottom: 16,
       }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <span style={{ ...metaStyle, textTransform: "uppercase" }}>Active Session</span>
           <span style={{
             ...TYPE.xs,
-            color: messageCount && messageCount > 0 ? "var(--live)" : "var(--text-tertiary)",
+            color: messages.length > 0 ? "var(--live)" : "var(--text-tertiary)",
           }}>
-            ● {messageCount === null ? "loading" : `${messageCount} messages`}
+            {loading ? "loading..." : `${messages.length} messages · ${threads.length} threads`}
           </span>
         </div>
         <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO }}>
@@ -234,14 +276,71 @@ function CerebroStation() {
         </div>
       </div>
 
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      {/* Thread list */}
+      {threads.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ ...metaStyle, textTransform: "uppercase", marginBottom: 10 }}>Conversation Log</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {threads.map((thread, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "var(--bg-surface)", borderRadius: 8, padding: "12px 14px",
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ ...TYPE.body, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.5 }}>
+                    {thread.topic}
+                  </div>
+                  <div style={{ ...TYPE.xs, color: "var(--text-tertiary)" }}>
+                    {thread.messages.length} messages
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                  <button
+                    onClick={() => handleExportThread(thread)}
+                    title="Copy this thread"
+                    style={{
+                      width: 26, height: 26, borderRadius: 5, border: "none",
+                      background: "transparent", color: "var(--text-tertiary)",
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+                  >
+                    <Copy size={12} />
+                  </button>
+                  <button
+                    onClick={() => handlePurgeThread(thread)}
+                    title="Purge this thread"
+                    style={{
+                      width: 26, height: 26, borderRadius: 5, border: "none",
+                      background: "transparent", color: "var(--text-tertiary)",
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "#ef4444" }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Global actions */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         <button
-          onClick={handleExport}
+          onClick={handleExportAll}
           disabled={messages.length === 0}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "6px 14px", borderRadius: 6,
+            padding: "8px 16px", borderRadius: 6,
             border: "1px solid var(--border)",
             background: exported ? "var(--accent-secondary)" : "transparent",
             color: exported ? "var(--bg-primary)" : messages.length > 0 ? "var(--text-secondary)" : "var(--text-tertiary)",
@@ -251,15 +350,15 @@ function CerebroStation() {
           }}
         >
           {exported ? <Check size={12} /> : <Download size={12} />}
-          {exported ? "Copied to clipboard" : "Export thread (Markdown)"}
+          {exported ? "Copied" : "Export all threads"}
         </button>
 
         <button
-          onClick={handleClear}
+          onClick={handleClearAll}
           disabled={messages.length === 0}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "6px 14px", borderRadius: 6,
+            padding: "8px 16px", borderRadius: 6,
             border: "1px solid var(--border)",
             background: cleared ? "var(--bg-elevated)" : "transparent",
             color: cleared ? "var(--text-secondary)" : messages.length > 0 ? "var(--text-tertiary)" : "var(--text-tertiary)",
@@ -269,12 +368,8 @@ function CerebroStation() {
           }}
         >
           {cleared ? <Check size={12} /> : <Trash2 size={12} />}
-          {cleared ? "Memory cleared" : "Clear memory"}
+          {cleared ? "Cleared" : "Purge all memory"}
         </button>
-      </div>
-
-      <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", marginTop: 10, lineHeight: 1.6 }}>
-        Export copies the full thread as Markdown — paste into Claude Desktop for extended strategic thinking. Clear memory resets Cerebro to a blank slate.
       </div>
     </div>
   )

@@ -12,6 +12,7 @@ import { AudioView } from "@/components/audio-view"
 import { ConfigView } from "@/components/config-view"
 import { DispatchView } from "@/components/dispatch-view"
 import { GalleryOverlay } from "@/components/gallery"
+import { HotkeysOverlay } from "@/components/hotkeys"
 import { Divider } from "@/components/divider"
 import type { Article, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
 import { TYPE } from "@/lib/styles"
@@ -157,32 +158,63 @@ export default function Page() {
   const [cerebroCollapsed, setCerebroCollapsed] = useState(false)
   const [leftRailCollapsed, setLeftRailCollapsed] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
+  const [hotkeysOpen, setHotkeysOpen] = useState(false)
   const [active,         setActive]         = useState("all")
   const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "dispatch" | "cerebro" | "config">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
 
-  // Global arrow key navigation — cycle views without needing focus
+  // Global keyboard shortcuts
   useEffect(() => {
     const modes: ViewMode[] = ["signal", "audio", "synthesis", "dispatch"]
     const handler = (e: KeyboardEvent) => {
-      // Don't intercept when typing in an input/textarea
       const tag = (e.target as HTMLElement)?.tagName
-      if (tag === "INPUT" || tag === "TEXTAREA") return
+      const isTyping = tag === "INPUT" || tag === "TEXTAREA"
 
+      // ? — toggle hotkeys (always works)
+      if (e.key === "?" && !isTyping) {
+        e.preventDefault()
+        setHotkeysOpen(v => !v)
+        return
+      }
+
+      // Don't intercept other keys when typing
+      if (isTyping) return
+
+      // Arrow keys — cycle views
       const current = modes.indexOf(viewMode as typeof modes[number])
-      if (current === -1) return
-
-      if (e.key === "ArrowRight") {
+      if (e.key === "ArrowRight" && current !== -1) {
         e.preventDefault()
         setViewMode(modes[(current + 1) % modes.length])
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowLeft" && current !== -1) {
         e.preventDefault()
         setViewMode(modes[(current - 1 + modes.length) % modes.length])
+      }
+
+      // Number keys — direct view access
+      else if (e.key === "1") setViewMode("signal")
+      else if (e.key === "2") setViewMode("audio")
+      else if (e.key === "3") setViewMode("synthesis")
+      else if (e.key === "4") setViewMode("dispatch")
+
+      // G — gallery
+      else if (e.key === "g" || e.key === "G") setGalleryOpen(true)
+
+      // C or / — focus Cerebro input
+      else if (e.key === "c" || e.key === "C" || e.key === "/") {
+        e.preventDefault()
+        const input = document.querySelector('[aria-label="Cerebro strategic advisor"] textarea') as HTMLTextAreaElement
+        if (input) input.focus()
+      }
+
+      // Escape — close overlays
+      else if (e.key === "Escape") {
+        if (hotkeysOpen) setHotkeysOpen(false)
+        else if (galleryOpen) setGalleryOpen(false)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [viewMode])
+  }, [viewMode, hotkeysOpen, galleryOpen])
 
   const handleToggleSource = useCallback((source: string) => {
     setExcludedSources(prev => {
@@ -610,6 +642,9 @@ export default function Page() {
 
       {/* Gallery overlay */}
       {galleryOpen && <GalleryOverlay onClose={() => setGalleryOpen(false)} />}
+
+      {/* Hotkeys overlay */}
+      {hotkeysOpen && <HotkeysOverlay onClose={() => setHotkeysOpen(false)} />}
     </div>
   )
 }
