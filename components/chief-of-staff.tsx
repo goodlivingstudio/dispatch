@@ -59,7 +59,7 @@ function CitationChip({ num, src }: { num: string; src: SignalSource }) {
           }}
         >
           <div style={{
-            fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 4,
           }}>
@@ -210,12 +210,12 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
           minHeight: 80, justifyContent: "center",
         }}>
           <div style={{
-            fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
             color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 600,
           }}>
             API Unavailable
           </div>
-          <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)", lineHeight: 1.6 }}>
+          <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)", lineHeight: 1.7 }}>
             Intelligence briefing will resume when the API connection is restored.
           </div>
         </div>
@@ -231,14 +231,14 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
               <div
                 key={i}
                 style={{
-                  fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+                  fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
                   color: i === statusIdx ? "var(--accent-muted)" : "var(--text-tertiary)",
                   opacity: i === statusIdx ? 1 : 0.5,
                   animation: i === statusIdx ? "status-fade 0.2s ease both" : "none",
                 }}
               >
                 {line}{i === statusIdx && i < SCAN_STATUSES.length - 1 && <span className="cursor-blink" style={{ marginLeft: 2 }}>_</span>}
-                {i === statusIdx && i === SCAN_STATUSES.length - 1 && <span className="loading-pulse" style={{ marginLeft: 4, fontSize: 9, opacity: 0.6 }}>…</span>}
+                {i === statusIdx && i === SCAN_STATUSES.length - 1 && <span className="loading-pulse" style={{ marginLeft: 4, fontSize: 10, opacity: 0.6 }}>…</span>}
               </div>
             ))}
           </div>
@@ -263,7 +263,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
             onMouseLeave={e => { e.currentTarget.style.background = "none" }}
           >
             <span style={{
-              fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+              fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
               color: "var(--accent-secondary)", textTransform: "uppercase",
             }}>
               COS
@@ -304,7 +304,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                     }}
                   >
                     <div style={{
-                      fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+                      fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
                       color: "var(--accent-secondary)", textTransform: "uppercase",
                       marginBottom: 8,
                     }}>
@@ -314,7 +314,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       <div style={{
                         fontSize: 12, fontFamily: "var(--font-geist-mono), monospace",
                         color: hoveredIdx === i ? "var(--text-primary)" : "var(--text-secondary)",
-                        lineHeight: 1.6,
+                        lineHeight: 1.7,
                         flex: 1,
                         transition: "color 0.12s",
                       }}>
@@ -347,7 +347,7 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
         >
           <div
             style={{
-              fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+              fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
               color: "var(--accent-secondary)", textTransform: "uppercase", marginBottom: 8,
             }}
             className={briefLoading && i === 0 ? "loading-pulse" : ""}
@@ -355,7 +355,7 @@ export function AnalysisPanelMobile({ signals, briefLoading }: { signals: Signal
             {signal.label}
           </div>
           {signal.body ? (
-            <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-primary)", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-primary)", lineHeight: 1.7 }}>
               {signal.body}
             </div>
           ) : briefLoading ? (

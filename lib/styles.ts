@@ -6,9 +6,9 @@ import type { CSSProperties } from "react"
 /** Monospace font stack — used across all signal/synthesis surfaces */
 export const MONO = "var(--font-geist-mono), monospace"
 
-/** Common label style: 10px mono, uppercase, accent-secondary */
+/** Common label style: 11px mono, uppercase, accent-secondary */
 export const labelStyle: CSSProperties = {
-  fontSize: 10,
+  fontSize: 11,
   fontFamily: MONO,
   color: "var(--accent-secondary)",
   textTransform: "uppercase",

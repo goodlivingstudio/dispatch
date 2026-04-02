@@ -157,7 +157,7 @@ export function Ticker({
               >
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 10,
                     textTransform: "uppercase",
                     padding: "2px 8px",
                     borderRadius: 4,

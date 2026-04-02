@@ -36,7 +36,7 @@ const ALL_LAYERS: LayerKey[] = ["opportunity", "position", "discipline", "landsc
 
 // Cerebro label: Geist Mono, accent color, uppercase
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: 10,
+  fontSize: 11,
   fontFamily: "var(--font-geist-mono), monospace",
   color: "var(--accent-secondary)",
   textTransform: "uppercase",
@@ -70,7 +70,7 @@ const cardBase: React.CSSProperties = {
 }
 
 const pillStyle: React.CSSProperties = {
-  fontSize: 10,
+  fontSize: 11,
   fontFamily: "var(--font-geist-mono), monospace",
   textTransform: "uppercase",
   padding: "2px 8px",
@@ -289,7 +289,7 @@ function ContributingSignalsDrawer({ articles }: { articles: Article[] }) {
                 onMouseEnter={e => { if (isExternal) e.currentTarget.style.background = "var(--bg-surface)" }}
                 onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
               >
-                <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 4 }}>
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 4 }}>
                   {a.source} · {a.category} · {new Date(a.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", lineHeight: 1.4 }}>
@@ -406,7 +406,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                   {pattern.layers.map(l => <LayerPill key={l} layer={l} />)}
-                  <span style={{ fontSize: 10, color: "var(--text-tertiary)" }}>
+                  <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                     {pattern.signalCount} signals
                   </span>
                 </div>

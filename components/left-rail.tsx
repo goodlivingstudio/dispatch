@@ -97,7 +97,7 @@ function SourceFilter({ articles, excludedSources, onToggleSource }: {
           <div style={{ display: "flex", padding: "4px 16px 8px", borderBottom: "1px solid var(--border)" }}>
             <button
               onClick={() => sources.forEach(s => { if (excludedSources.has(s.name)) onToggleSource(s.name) })}
-              style={{ background: "none", border: "none", fontSize: 10, color: "var(--accent-secondary)", cursor: "pointer", padding: 0 }}
+              style={{ background: "none", border: "none", fontSize: 11, color: "var(--accent-secondary)", cursor: "pointer", padding: 0 }}
             >
               Reset
             </button>
@@ -140,7 +140,7 @@ function SourceFilter({ articles, excludedSources, onToggleSource }: {
                   {s.name}
                 </span>
                 <span style={{
-                  fontSize: 10, fontVariantNumeric: "tabular-nums",
+                  fontSize: 11, fontVariantNumeric: "tabular-nums",
                   color: "var(--text-tertiary)",
                   opacity: active ? 0.7 : 0.4,
                 }}>
@@ -394,7 +394,7 @@ export function LeftRail({
                   {n > 0 && (
                     <span
                       style={{
-                        fontSize: 10,
+                        fontSize: 11,
                         fontVariantNumeric: "tabular-nums",
                         color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
                         opacity: 0.7,

@@ -153,7 +153,7 @@ function parseRSS(xml: string, feed: FeedDef): Article[] {
     }
 
     items.push({
-      id: `${feed.tag}-${feed.source}-${index}`,
+      id: `${feed.tag}-${feed.source}-${feed.category}-${index}`,
       title: cleanTitle,
       source: feed.source,
       url,

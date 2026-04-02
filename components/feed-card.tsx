@@ -23,7 +23,7 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
       width: 260,
       pointerEvents: "none",
       zIndex: 1000,
-      background: "var(--bg-surface)",
+      background: "var(--card-tint)",
       borderRadius: 8,
       border: "1px solid var(--border)",
       overflow: "hidden",
@@ -32,7 +32,7 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
       {article.synopsis && (
         <div style={{ padding: "12px 14px", paddingBottom: article.relevance ? 8 : 12 }}>
           <div style={{
-            fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 6,
           }}>
@@ -54,7 +54,7 @@ export function SignalCard({ x, y, article }: { x: number; y: number; article: A
           borderTop: article.synopsis ? "1px solid var(--border)" : "none",
         }}>
           <div style={{
-            fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+            fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
             color: "var(--accent-secondary)", textTransform: "uppercase",
             marginBottom: 6,
           }}>
@@ -148,7 +148,7 @@ export const FeedCard = memo(function FeedCard({ article, onSignalEnter, onSigna
         {/* Eyebrow */}
         <div
           style={{
-            fontSize: 10,
+            fontSize: 11,
             color: "var(--text-tertiary)",
             marginBottom: 6,
             whiteSpace: "nowrap",

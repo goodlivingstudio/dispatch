@@ -250,7 +250,7 @@ export function Cerebro({ articles, pendingPrompt }: {
       >
         <span
           style={{
-            fontSize: 10,
+            fontSize: 11,
             fontFamily: "var(--font-geist-mono), monospace",
             textTransform: "uppercase",
             color: "var(--accent-muted)",
@@ -263,7 +263,7 @@ export function Cerebro({ articles, pendingPrompt }: {
             <span
               title="Conversation memory active — Cerebro remembers previous sessions"
               style={{
-                fontSize: 9,
+                fontSize: 10,
                 fontFamily: "var(--font-geist-mono), monospace",
                 color: "var(--accent-muted)",
                 opacity: 0.7,
@@ -275,7 +275,7 @@ export function Cerebro({ articles, pendingPrompt }: {
           {tokens > 0 && (
             <span
               style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontFamily: "var(--font-geist-mono), monospace",
                 fontVariantNumeric: "tabular-nums",
                 color: "var(--text-tertiary)",
@@ -298,7 +298,7 @@ export function Cerebro({ articles, pendingPrompt }: {
                 border: "1px solid var(--border)",
                 background: escalateCopied ? "var(--accent-secondary)" : "transparent",
                 color: escalateCopied ? "var(--bg-primary)" : "var(--text-tertiary)",
-                fontSize: 9,
+                fontSize: 10,
                 fontFamily: "var(--font-geist-mono), monospace",
                 cursor: "pointer",
                 transition: "all 0.2s",
@@ -424,14 +424,14 @@ export function Cerebro({ articles, pendingPrompt }: {
                 {att.preview ? (
                   <img src={att.preview} alt={att.name} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border)" }} />
                 ) : (
-                  <div style={{ width: 48, height: 48, borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "var(--text-tertiary)", textTransform: "uppercase" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase" }}>
                     {att.name.split(".").pop()}
                   </div>
                 )}
                 <button
                   onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))}
                   aria-label={`Remove ${att.name}`}
-                  style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--text-tertiary)", color: "var(--bg-primary)", border: "none", cursor: "pointer", fontSize: 10, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--text-tertiary)", color: "var(--bg-primary)", border: "none", cursor: "pointer", fontSize: 11, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
                   ×
                 </button>
