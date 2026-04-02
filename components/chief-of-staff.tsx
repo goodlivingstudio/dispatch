@@ -195,7 +195,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                     onMouseEnter={() => setHoveredIdx(i)}
                     onMouseLeave={() => setHoveredIdx(null)}
                     style={{
-                      position: "relative",
                       padding: "18px 20px",
                       borderRadius: 12,
                       animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 160}ms both`,
@@ -203,63 +202,12 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       flexDirection: "column",
                       cursor: signal.body ? "pointer" : "default",
                       background: hoveredIdx === i ? "var(--bg-elevated)" : "var(--bg-surface)",
-                      transition: "background 0.15s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                      transform: hoveredIdx === i ? "scale(1.01)" : "scale(1)",
-                      overflow: "hidden",
+                      transition: "background 0.15s",
                     }}
                   >
-                    {/* Generative texture — unique SVG per card */}
-                    <svg
-                      style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", opacity: 0.06, pointerEvents: "none" }}
-                      viewBox="0 0 200 200"
-                      preserveAspectRatio="xMaxYMid slice"
-                    >
-                      {i === 0 && (
-                        /* Network/branching — opportunity */
-                        <g stroke="var(--accent-secondary)" strokeWidth="1" fill="none">
-                          <path d="M20,180 Q60,120 100,140 T180,60" />
-                          <path d="M40,200 Q80,140 120,160 T200,80" />
-                          <path d="M100,140 L140,100 L180,120" />
-                          <path d="M60,120 L100,80 L160,90" />
-                          <circle cx="100" cy="140" r="3" fill="var(--accent-secondary)" />
-                          <circle cx="140" cy="100" r="2" fill="var(--accent-secondary)" />
-                          <circle cx="180" cy="60" r="3" fill="var(--accent-secondary)" />
-                          <circle cx="160" cy="90" r="2" fill="var(--accent-secondary)" />
-                        </g>
-                      )}
-                      {i === 1 && (
-                        /* Ascending trajectory — position */
-                        <g stroke="var(--accent-secondary)" strokeWidth="1" fill="none">
-                          <path d="M0,180 C40,170 60,140 80,130 S120,80 160,50 S190,20 200,10" />
-                          <path d="M0,200 C50,185 70,160 100,145 S150,100 180,70" />
-                          <line x1="80" y1="130" x2="80" y2="180" strokeDasharray="3,4" />
-                          <line x1="130" y1="90" x2="130" y2="160" strokeDasharray="3,4" />
-                          <line x1="170" y1="55" x2="170" y2="130" strokeDasharray="3,4" />
-                          <circle cx="80" cy="130" r="2.5" fill="var(--accent-secondary)" />
-                          <circle cx="130" cy="90" r="2.5" fill="var(--accent-secondary)" />
-                          <circle cx="170" cy="55" r="2.5" fill="var(--accent-secondary)" />
-                        </g>
-                      )}
-                      {i === 2 && (
-                        /* Radar/scanning — watch */
-                        <g stroke="var(--accent-secondary)" strokeWidth="1" fill="none">
-                          <circle cx="160" cy="100" r="30" />
-                          <circle cx="160" cy="100" r="55" />
-                          <circle cx="160" cy="100" r="80" />
-                          <line x1="160" y1="100" x2="200" y2="60" />
-                          <line x1="160" y1="100" x2="120" y2="40" strokeDasharray="3,4" />
-                          <circle cx="185" cy="75" r="2.5" fill="var(--accent-secondary)" />
-                          <circle cx="130" cy="55" r="2" fill="var(--accent-secondary)" />
-                          <circle cx="145" cy="130" r="2" fill="var(--accent-secondary)" />
-                        </g>
-                      )}
-                    </svg>
-
                     <div style={{
                       ...labelStyle,
                       marginBottom: 10,
-                      position: "relative",
-                      zIndex: 1,
                     }}>
                       {signal.label}
                     </div>
@@ -270,8 +218,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                         lineHeight: 1.7,
                         flex: 1,
                         transition: "color 0.12s",
-                        position: "relative",
-                        zIndex: 1,
                       }}>
                         {renderCitedBody(signal.body, signal.sources)}
                       </div>
