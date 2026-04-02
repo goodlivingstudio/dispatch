@@ -4,25 +4,24 @@ import { useState, useEffect, useRef } from "react"
 import { ChevronUp } from "lucide-react"
 import type { Article, Signal, SignalSource } from "@/lib/types"
 
-// ─── Citation renderer — parses [1][2] into clickable links ─────────────────
+// ─── Citation chip — hover popover with source details ──────────────────────
 
-function renderCitedBody(body: string, sources?: SignalSource[]) {
-  if (!sources || sources.length === 0) return body
-  const parts = body.split(/(\[\d+\])/)
-  return parts.map((part, i) => {
-    const match = part.match(/^\[(\d+)\]$/)
-    if (!match) return part
-    const idx = parseInt(match[1], 10) - 1
-    const src = sources[idx]
-    if (!src) return part
-    return (
+function CitationChip({ num, src }: { num: string; src: SignalSource }) {
+  const [show, setShow] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  return (
+    <span
+      ref={ref}
+      style={{ position: "relative", display: "inline" }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
       <a
-        key={i}
         href={src.url}
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}
-        title={`${src.source}: ${src.title}`}
         style={{
           fontSize: "0.8em",
           color: "var(--accent-secondary)",
@@ -35,9 +34,67 @@ function renderCitedBody(body: string, sources?: SignalSource[]) {
         onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
         onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
       >
-        {part}
+        {num}
       </a>
-    )
+      {show && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            bottom: "calc(100% + 6px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 220,
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            zIndex: 1000,
+            pointerEvents: "auto",
+            animation: "status-fade 0.15s ease both",
+          }}
+        >
+          <div style={{
+            fontSize: 10, fontFamily: "var(--font-geist-mono), monospace",
+            color: "var(--accent-secondary)", textTransform: "uppercase",
+            marginBottom: 4,
+          }}>
+            {src.source}
+          </div>
+          <a
+            href={src.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            style={{
+              fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
+              color: "var(--text-primary)", lineHeight: 1.5,
+              textDecoration: "none", display: "block",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-primary)" }}
+          >
+            {src.title}
+          </a>
+        </div>
+      )}
+    </span>
+  )
+}
+
+// ─── Citation renderer — parses [1][2] into hoverable chips ─────────────────
+
+function renderCitedBody(body: string, sources?: SignalSource[]) {
+  if (!sources || sources.length === 0) return body
+  const parts = body.split(/(\[\d+\])/)
+  return parts.map((part, i) => {
+    const match = part.match(/^\[(\d+)\]$/)
+    if (!match) return part
+    const idx = parseInt(match[1], 10) - 1
+    const src = sources[idx]
+    if (!src) return part
+    return <CitationChip key={i} num={part} src={src} />
   })
 }
 
