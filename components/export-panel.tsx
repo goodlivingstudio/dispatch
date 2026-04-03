@@ -9,7 +9,7 @@ import type { Article, Signal } from "@/lib/types"
 
 type ExportScope = "brief" | "brief+synthesis" | "full"
 type ExportDepth = "executive" | "full"
-type ExportFormat = "markdown" | "plaintext" | "pdf" | "docx"
+type ExportFormat = "markdown" | "plaintext" | "pdf" | "docx" | "figma"
 type ExportRedaction = "full" | "redacted"
 type ExportCadence = "daily" | "weekly" | "share"
 
@@ -456,6 +456,68 @@ async function generateDOCX(content: ExportContent): Promise<void> {
   saveAs(blob, filename)
 }
 
+// ─── Figma Deck Generator ───────────────────────────────────────────────────
+
+function generateFigmaDeck(content: ExportContent): string {
+  const slides: { type: string; title?: string; subtitle?: string; body?: string; items?: { label: string; body: string }[]; meta?: string }[] = []
+
+  // Title slide
+  slides.push({
+    type: "title",
+    title: content.title,
+    subtitle: content.redactionNote || "Dispatch Intelligence System",
+    meta: content.footer,
+  })
+
+  // Signals slide
+  if (content.signals.length > 0) {
+    slides.push({
+      type: "signals",
+      title: "Today's Signals",
+      items: content.signals.map(s => ({ label: s.label, body: s.body })),
+    })
+  }
+
+  // Synthesis slide
+  if (content.synthesis) {
+    slides.push({
+      type: "synthesis",
+      title: "Pattern Intelligence",
+      body: content.synthesis.briefing,
+      items: content.synthesis.patterns.map(p => ({ label: p.title, body: p.description })),
+    })
+
+    if (content.synthesis.blindSpot) {
+      slides.push({
+        type: "blindspot",
+        title: "Blind Spot",
+        body: content.synthesis.blindSpot,
+      })
+    }
+  }
+
+  // Top signals slide
+  if (content.topArticles.length > 0) {
+    slides.push({
+      type: "ranked",
+      title: "Top Signals by Urgency",
+      items: content.topArticles.map(a => ({
+        label: `[${a.urgency}] ${a.source}`,
+        body: a.title,
+      })),
+    })
+  }
+
+  return JSON.stringify({
+    format: "figma-dispatch-deck",
+    version: 1,
+    generated: new Date().toISOString(),
+    slideCount: slides.length,
+    slides,
+    instructions: "Use this JSON with Claude Code's use_figma MCP tool or the Figma Plugin API to create a slide deck. Each slide object specifies layout type and content.",
+  }, null, 2)
+}
+
 // ─── Export Panel Component ─────────────────────────────────────────────────
 
 export function ExportPanel({ onClose, signals, articles }: {
@@ -515,6 +577,11 @@ export function ExportPanel({ onClose, signals, articles }: {
         await generatePDF(content)
       } else if (settings.format === "docx") {
         await generateDOCX(content)
+      } else if (settings.format === "figma") {
+        const json = generateFigmaDeck(content)
+        const blob = new Blob([json], { type: "application/json;charset=utf-8" })
+        const { saveAs } = await import("file-saver")
+        saveAs(blob, `dispatch-deck-${new Date().toISOString().slice(0, 10)}.json`)
       } else {
         // Markdown or plain text download as file
         const text = renderText(content, settings.format === "markdown")
@@ -529,7 +596,7 @@ export function ExportPanel({ onClose, signals, articles }: {
     setDownloading(false)
   }
 
-  const isFileFormat = settings.format === "pdf" || settings.format === "docx"
+  const isFileFormat = settings.format === "pdf" || settings.format === "docx" || settings.format === "figma"
 
   return (
     <div
@@ -604,6 +671,7 @@ export function ExportPanel({ onClose, signals, articles }: {
             { id: "plaintext", label: "Plain Text", description: "Clean text, no formatting" },
             { id: "pdf", label: "PDF", description: "Formatted document for sharing" },
             { id: "docx", label: "Word", description: "Editable document for collaboration" },
+            { id: "figma", label: "Figma Deck", description: "Structured JSON for Figma slide creation" },
           ]}
         />
 
@@ -664,7 +732,7 @@ export function ExportPanel({ onClose, signals, articles }: {
             {settings.format === "pdf" ? <FileText size={20} style={{ color: "var(--accent-muted)", flexShrink: 0 }} /> : <FileType size={20} style={{ color: "var(--accent-muted)", flexShrink: 0 }} />}
             <div>
               <div style={{ ...TYPE.body, color: "var(--text-secondary)", fontWeight: 500 }}>
-                {settings.format === "pdf" ? "PDF Document" : "Word Document (.docx)"}
+                {settings.format === "pdf" ? "PDF Document" : settings.format === "figma" ? "Figma Deck (.json)" : "Word Document (.docx)"}
               </div>
               <div style={{ ...TYPE.sm, color: "var(--text-tertiary)", marginTop: 2 }}>
                 {content.signals.length} signals{content.synthesis ? " + synthesis" : ""}{content.topArticles.length > 0 ? ` + ${content.topArticles.length} ranked articles` : ""}

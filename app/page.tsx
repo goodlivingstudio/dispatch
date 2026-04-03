@@ -11,6 +11,7 @@ import { SynthesisView } from "@/components/synthesis-view"
 import { AudioView } from "@/components/audio-view"
 import { ConfigView } from "@/components/config-view"
 import { DispatchView } from "@/components/dispatch-view"
+import { SourcePulseView } from "@/components/source-pulse"
 import { GalleryOverlay } from "@/components/gallery"
 import { HotkeysOverlay } from "@/components/hotkeys"
 import { ExportPanel } from "@/components/export-panel"
@@ -155,6 +156,7 @@ export default function Page() {
   const [isLive,         setIsLive]         = useState(false)
   const [feedHealth,     setFeedHealth]     = useState<FeedHealth | null>(null)
   const [feedLoading,    setFeedLoading]    = useState(true)
+  const [fetchedAt,      setFetchedAt]      = useState<string | null>(null)
   const [viewMode,       setViewMode]       = useState<ViewMode>("signal")
   const [cerebroCollapsed, setCerebroCollapsed] = useState(false)
   const [leftRailCollapsed, setLeftRailCollapsed] = useState(false)
@@ -247,7 +249,7 @@ export default function Page() {
       if (savedSort === "urgency" || savedSort === "layer") setSortBy(savedSort)
 
       const savedView = localStorage.getItem("dispatch-view-mode")
-      if (savedView === "signal" || savedView === "audio" || savedView === "synthesis" || savedView === "dispatch" || savedView === "config") setViewMode(savedView)
+      if (savedView === "signal" || savedView === "audio" || savedView === "synthesis" || savedView === "dispatch" || savedView === "config" || savedView === "pulse") setViewMode(savedView)
 
       const savedTab = localStorage.getItem("dispatch-mobile-tab")
       if (savedTab === "signal" || savedTab === "audio" || savedTab === "synthesis" || savedTab === "dispatch" || savedTab === "cerebro" || savedTab === "config") setMobileTab(savedTab)
@@ -335,6 +337,7 @@ export default function Page() {
       .then(data => {
         const fresh: Article[] = data.articles || []
         setIsLive(data.isLive || false)
+        if (data.fetchedAt) setFetchedAt(data.fetchedAt)
         if (data.feedHealth) setFeedHealth(data.feedHealth)
 
         // Merge any cached annotations immediately before render
@@ -676,6 +679,8 @@ export default function Page() {
         <Divider onMouseDown={e => startResize("left", e)} />
         {viewMode === "config"
           ? <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} articles={articles} />
+          : viewMode === "pulse"
+          ? <SourcePulseView articles={articles} feedHealth={feedHealth} fetchedAt={fetchedAt} />
           : viewMode === "dispatch"
           ? <DispatchView onDeliberate={handleSynthesisDeliberate} />
           : viewMode === "synthesis"

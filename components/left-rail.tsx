@@ -660,7 +660,7 @@ export function LeftRail({
           </button>
         )}
         <button
-          onClick={() => onViewChange("config")}
+          onClick={() => onViewChange("pulse")}
           title="Source Pulse — Diagnostics"
           aria-label="Source Pulse"
           style={{

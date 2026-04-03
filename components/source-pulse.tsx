@@ -1,0 +1,446 @@
+"use client"
+
+import { useState, useEffect, useMemo } from "react"
+import { RefreshCw } from "lucide-react"
+import { TYPE, MONO, metaStyle } from "@/lib/styles"
+import type { Article, FeedHealth } from "@/lib/types"
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface SourceStat {
+  name: string
+  count: number
+  annotated: number
+  live: boolean
+  tag: string
+  avgUrgency: number
+  highestUrgency: number
+}
+
+interface LayerHealth {
+  layer: string
+  articleCount: number
+  annotatedCount: number
+  avgUrgency: number
+  sources: number
+}
+
+interface PipelineStatus {
+  totalArticles: number
+  annotatedServer: number
+  annotatedClient: number
+  unannotated: number
+  deduped: boolean
+}
+
+interface CacheStatus {
+  annotationAge: string | null
+  kvAvailable: boolean
+  isrAge: string | null
+}
+
+const LAYER_LABELS: Record<string, string> = {
+  opportunity: "Opportunity",
+  position: "Position",
+  discipline: "Discipline",
+  landscape: "Landscape",
+  culture: "Culture",
+}
+
+const LAYER_COLOR: Record<string, string> = {
+  opportunity: "#D4A05A",
+  position: "#5A9EB0",
+  discipline: "#7BAF6A",
+  landscape: "#9A85B8",
+  culture: "#C87A6A",
+}
+
+// ─── Metric Card ────────────────────────────────────────────────────────────
+
+function MetricCard({ label, value, sub, color, width }: {
+  label: string
+  value: string | number
+  sub?: string
+  color?: string
+  width?: string
+}) {
+  return (
+    <div style={{
+      background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px",
+      flex: width || "1", minWidth: 0,
+    }}>
+      <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 600, fontFamily: MONO, color: color || "var(--text-primary)", lineHeight: 1 }}>
+        {value}
+      </div>
+      {sub && (
+        <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", marginTop: 4 }}>{sub}</div>
+      )}
+    </div>
+  )
+}
+
+// ─── Layer Bar ──────────────────────────────────────────────────────────────
+
+function LayerBar({ layer, health, maxArticles }: { layer: LayerHealth; health: number; maxArticles: number }) {
+  const barWidth = maxArticles > 0 ? (layer.articleCount / maxArticles) * 100 : 0
+  const annotationPct = layer.articleCount > 0 ? Math.round((layer.annotatedCount / layer.articleCount) * 100) : 0
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "6px 0" }}>
+      <div style={{ width: 80, flexShrink: 0 }}>
+        <div style={{ ...TYPE.sm, color: LAYER_COLOR[layer.layer] || "var(--text-secondary)", fontWeight: 500 }}>
+          {LAYER_LABELS[layer.layer] || layer.layer}
+        </div>
+      </div>
+      <div style={{ flex: 1, position: "relative", height: 20, background: "var(--bg-surface)", borderRadius: 4, overflow: "hidden" }}>
+        {/* Article volume bar */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, height: "100%",
+          width: `${barWidth}%`,
+          background: LAYER_COLOR[layer.layer] || "var(--accent-muted)",
+          opacity: 0.25,
+          borderRadius: 4,
+          transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        }} />
+        {/* Annotated portion */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, height: "100%",
+          width: `${barWidth * (annotationPct / 100)}%`,
+          background: LAYER_COLOR[layer.layer] || "var(--accent-muted)",
+          opacity: 0.5,
+          borderRadius: 4,
+          transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        }} />
+        {/* Count label inside bar */}
+        <div style={{
+          position: "absolute", top: 0, left: 8, height: "100%",
+          display: "flex", alignItems: "center",
+          ...TYPE.xs, fontFamily: MONO, color: "var(--text-secondary)",
+        }}>
+          {layer.articleCount}
+        </div>
+      </div>
+      <div style={{ width: 50, flexShrink: 0, textAlign: "right" }}>
+        <span style={{ ...TYPE.xs, fontFamily: MONO, color: annotationPct === 100 ? "var(--live)" : annotationPct > 50 ? "var(--text-tertiary)" : "#ef4444" }}>
+          {annotationPct}%
+        </span>
+      </div>
+      <div style={{ width: 40, flexShrink: 0, textAlign: "right" }}>
+        <span style={{ ...TYPE.xs, fontFamily: MONO, color: layer.avgUrgency >= 7 ? "#D4A05A" : "var(--text-tertiary)" }}>
+          u{layer.avgUrgency.toFixed(1)}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Source Row ──────────────────────────────────────────────────────────────
+
+function SourceRow({ source }: { source: SourceStat }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+      <span style={{
+        width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+        background: source.live ? "var(--live)" : "#ef4444",
+        boxShadow: source.live ? "0 0 4px var(--live)" : "0 0 4px #ef4444",
+      }} />
+      <span style={{
+        flex: 1, ...TYPE.sm, fontFamily: MONO,
+        color: source.live ? "var(--text-secondary)" : "var(--text-tertiary)",
+        opacity: source.live ? 1 : 0.5,
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+      }}>
+        {source.name}
+      </span>
+      <span style={{
+        ...TYPE.xs, fontFamily: MONO, color: LAYER_COLOR[source.tag] || "var(--text-tertiary)",
+        textTransform: "uppercase", width: 30, textAlign: "center",
+      }}>
+        {source.tag.slice(0, 3)}
+      </span>
+      <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-tertiary)", width: 24, textAlign: "right" }}>
+        {source.count}
+      </span>
+      <span style={{
+        ...TYPE.xs, fontFamily: MONO, width: 28, textAlign: "right",
+        color: source.annotated > 0 ? "var(--accent-muted)" : "var(--text-tertiary)",
+        opacity: source.annotated > 0 ? 1 : 0.3,
+      }}>
+        {source.annotated > 0 ? `${source.annotated}` : "—"}
+      </span>
+      <span style={{
+        ...TYPE.xs, fontFamily: MONO, width: 24, textAlign: "right",
+        color: source.highestUrgency >= 8 ? "#D4A05A" : source.highestUrgency >= 6 ? "var(--text-tertiary)" : "var(--text-tertiary)",
+        opacity: source.highestUrgency > 0 ? 1 : 0.3,
+      }}>
+        {source.highestUrgency > 0 ? source.highestUrgency : "—"}
+      </span>
+    </div>
+  )
+}
+
+// ─── Source Pulse View ──────────────────────────────────────────────────────
+
+export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
+  articles: Article[]
+  feedHealth: FeedHealth | null
+  fetchedAt: string | null
+}) {
+  const [health, setHealth] = useState<Record<string, unknown> | null>(null)
+  const [healthLoading, setHealthLoading] = useState(false)
+  const [now, setNow] = useState(Date.now())
+
+  // Live clock tick for freshness indicators
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  const fetchDiagnostics = () => {
+    setHealthLoading(true)
+    fetch("/api/health")
+      .then(r => r.json())
+      .then(data => { setHealth(data); setHealthLoading(false) })
+      .catch(() => setHealthLoading(false))
+  }
+
+  useEffect(() => { fetchDiagnostics() }, [])
+
+  // ── Derived metrics ─────────────────────────────────────────────────────
+
+  const sourceStats = useMemo((): SourceStat[] => {
+    const map: Record<string, SourceStat> = {}
+    articles.forEach(a => {
+      if (!map[a.source]) map[a.source] = { name: a.source, count: 0, annotated: 0, live: a.url !== "#", tag: a.tag, avgUrgency: 0, highestUrgency: 0 }
+      map[a.source].count++
+      if (a.synopsis || a.relevance) map[a.source].annotated++
+      const u = a.signalScores?.urgency ?? 0
+      map[a.source].avgUrgency += u
+      if (u > map[a.source].highestUrgency) map[a.source].highestUrgency = u
+    })
+    return Object.values(map)
+      .map(s => ({ ...s, avgUrgency: s.count > 0 ? s.avgUrgency / s.count : 0 }))
+      .sort((a, b) => b.count - a.count)
+  }, [articles])
+
+  const layerHealth = useMemo((): LayerHealth[] => {
+    const layers = ["opportunity", "position", "discipline", "landscape", "culture"]
+    return layers.map(layer => {
+      const layerArticles = articles.filter(a => a.tag === layer)
+      const annotated = layerArticles.filter(a => a.synopsis || a.relevance)
+      const urgencies = layerArticles.map(a => a.signalScores?.urgency ?? 0)
+      const avgUrgency = urgencies.length > 0 ? urgencies.reduce((s, v) => s + v, 0) / urgencies.length : 0
+      const sources = new Set(layerArticles.map(a => a.source)).size
+      return { layer, articleCount: layerArticles.length, annotatedCount: annotated.length, avgUrgency, sources }
+    })
+  }, [articles])
+
+  const pipeline = useMemo((): PipelineStatus => {
+    const annotated = articles.filter(a => a.synopsis || a.relevance)
+    return {
+      totalArticles: articles.length,
+      annotatedServer: annotated.filter(a => a.signalScores !== undefined).length,
+      annotatedClient: annotated.filter(a => a.signalScores === undefined).length,
+      unannotated: articles.length - annotated.length,
+      deduped: true,
+    }
+  }, [articles])
+
+  const cache = useMemo((): CacheStatus => {
+    let annotationAge: string | null = null
+    try {
+      const raw = localStorage.getItem("dispatch-annotations-v3")
+      if (raw) {
+        const { ts } = JSON.parse(raw)
+        const mins = Math.round((now - ts) / 60000)
+        annotationAge = mins < 60 ? `${mins}m` : `${Math.round(mins / 60)}h`
+      }
+    } catch { /* */ }
+
+    return {
+      annotationAge,
+      kvAvailable: !!(health?.env && typeof health.env === "object" && (health.env as Record<string, string>).KV_REST_API_URL?.startsWith("set")),
+      isrAge: fetchedAt ? `${Math.round((now - new Date(fetchedAt).getTime()) / 60000)}m` : null,
+    }
+  }, [now, health, fetchedAt])
+
+  const totalSources = feedHealth?.sourcesTotal ?? sourceStats.length
+  const liveSources = feedHealth?.sourcesLive ?? sourceStats.filter(s => s.live).length
+  const failedSources = feedHealth?.sourcesFailed ?? sourceStats.filter(s => !s.live).length
+  const healthPct = totalSources > 0 ? Math.round((liveSources / totalSources) * 100) : 0
+  const maxLayerArticles = Math.max(...layerHealth.map(l => l.articleCount), 1)
+  const annotationPct = pipeline.totalArticles > 0 ? Math.round(((pipeline.annotatedServer + pipeline.annotatedClient) / pipeline.totalArticles) * 100) : 0
+
+  const overallColor = healthPct >= 90 ? "var(--live)" : healthPct >= 70 ? "#D4A05A" : "#ef4444"
+
+  return (
+    <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--bg-primary)" }}>
+      {/* Header */}
+      <div style={{
+        flexShrink: 0, height: 40, display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 20px", borderBottom: "1px solid var(--border)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)", textTransform: "uppercase" }}>
+            Source Pulse
+          </span>
+          <span style={{
+            width: 7, height: 7, borderRadius: "50%",
+            background: overallColor,
+            boxShadow: `0 0 6px ${overallColor}`,
+          }} />
+          <span style={{ ...TYPE.xs, fontFamily: MONO, color: overallColor }}>{healthPct}%</span>
+        </div>
+        <button
+          onClick={fetchDiagnostics}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            padding: "4px 10px", borderRadius: 6,
+            border: "1px solid var(--border)", background: "transparent",
+            ...metaStyle, cursor: "pointer", transition: "all 0.15s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+        >
+          <RefreshCw size={11} style={{ animation: healthLoading ? "spin 1s linear infinite" : "none" }} />
+          Refresh
+        </button>
+      </div>
+
+      <div className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* ── Top metrics row ── */}
+          <div style={{ display: "flex", gap: 8 }}>
+            <MetricCard label="Sources" value={`${liveSources}/${totalSources}`} sub={failedSources > 0 ? `${failedSources} failed` : "all healthy"} color={failedSources > 0 ? "#D4A05A" : "var(--live)"} />
+            <MetricCard label="Articles" value={pipeline.totalArticles} sub={`${sourceStats.length} sources reporting`} />
+            <MetricCard label="Annotated" value={`${annotationPct}%`} sub={`${pipeline.annotatedServer} server · ${pipeline.annotatedClient} client`} color={annotationPct >= 80 ? "var(--live)" : annotationPct >= 50 ? "#D4A05A" : "#ef4444"} />
+            <MetricCard label="ISR Cache" value={cache.isrAge || "—"} sub={cache.annotationAge ? `annotations: ${cache.annotationAge}` : "no cache"} />
+          </div>
+
+          {/* ── API Status ── */}
+          <div>
+            <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+              API Connections
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {[
+                { name: "Anthropic", key: "ANTHROPIC_API_KEY", check: () => health?.anthropic === "ok — API responding" },
+                { name: "Exa Search", key: "EXA_API_KEY", check: () => String((health?.env as Record<string, string>)?.EXA_API_KEY || "").startsWith("set") },
+                { name: "KV Memory", key: "KV_REST_API_URL", check: () => String((health?.env as Record<string, string>)?.KV_REST_API_URL || "").startsWith("set") },
+              ].map(api => {
+                const ok = health ? api.check() : null
+                return (
+                  <div key={api.name} style={{
+                    flex: 1, background: "var(--bg-surface)", borderRadius: 8, padding: "10px 14px",
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: ok === null ? "var(--text-tertiary)" : ok ? "var(--live)" : "#ef4444",
+                      boxShadow: ok ? `0 0 4px ${ok ? "var(--live)" : "#ef4444"}` : "none",
+                    }} />
+                    <span style={{ ...TYPE.sm, fontFamily: MONO, color: ok === null ? "var(--text-tertiary)" : ok ? "var(--text-secondary)" : "#ef4444" }}>
+                      {api.name}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* ── Layer Coverage ── */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Layer Coverage
+              </div>
+              <div style={{ display: "flex", gap: 16 }}>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)" }}>volume</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", width: 50, textAlign: "right" }}>annot.</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", width: 40, textAlign: "right" }}>urg.</span>
+              </div>
+            </div>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px" }}>
+              {layerHealth.map(lh => (
+                <LayerBar key={lh.layer} layer={lh} health={0} maxArticles={maxLayerArticles} />
+              ))}
+            </div>
+          </div>
+
+          {/* ── Annotation Pipeline ── */}
+          <div>
+            <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+              Annotation Pipeline
+            </div>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px" }}>
+              {/* Pipeline bar */}
+              <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "var(--bg-elevated)", marginBottom: 10 }}>
+                {pipeline.annotatedServer > 0 && (
+                  <div style={{ width: `${(pipeline.annotatedServer / pipeline.totalArticles) * 100}%`, background: "var(--live)", transition: "width 0.6s" }} title={`Server: ${pipeline.annotatedServer}`} />
+                )}
+                {pipeline.annotatedClient > 0 && (
+                  <div style={{ width: `${(pipeline.annotatedClient / pipeline.totalArticles) * 100}%`, background: "#D4A05A", transition: "width 0.6s" }} title={`Client: ${pipeline.annotatedClient}`} />
+                )}
+              </div>
+              <div style={{ display: "flex", gap: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--live)" }} />
+                  <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-secondary)" }}>Server ISR ({pipeline.annotatedServer})</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: "#D4A05A" }} />
+                  <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-secondary)" }}>Client fallback ({pipeline.annotatedClient})</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--bg-elevated)" }} />
+                  <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-tertiary)" }}>Unannotated ({pipeline.unannotated})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Source Grid ── */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Source Grid ({sourceStats.length} sources)
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO }}>layer</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>n</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 28, textAlign: "right" }}>ann</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>urg</span>
+              </div>
+            </div>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px", maxHeight: 320, overflowY: "auto" }}>
+              {sourceStats.map(source => (
+                <SourceRow key={source.name} source={source} />
+              ))}
+            </div>
+          </div>
+
+          {/* ── Stub Fallback ── */}
+          {feedHealth?.stubCategories && feedHealth.stubCategories.length > 0 && (
+            <div style={{
+              background: "rgba(239, 68, 68, 0.08)", borderRadius: 10, padding: "12px 16px",
+              border: "1px solid rgba(239, 68, 68, 0.2)",
+            }}>
+              <div style={{ ...TYPE.xs, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                Stub Fallback Active
+              </div>
+              <div style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--text-secondary)" }}>
+                Layers on curated stubs: {feedHealth.stubCategories.join(", ")}
+              </div>
+            </div>
+          )}
+
+          <div style={{ height: 24 }} />
+        </div>
+      </div>
+    </main>
+  )
+}
