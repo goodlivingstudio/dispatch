@@ -256,7 +256,7 @@ async function annotateArticles(articles: Article[]): Promise<Article[]> {
   if (!apiKey || articles.length === 0) return articles
 
   const BATCH_SIZE = 20
-  const MAX_BATCHES = 5 // 5 × 20 = 100 articles per cycle
+  const MAX_BATCHES = 2 // 2 × 20 = 40 articles per cycle (~$0.006/cycle, ~$0.30/day)
   const client = new Anthropic({ apiKey })
 
   // Only annotate articles that don't already have annotations

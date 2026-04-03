@@ -129,9 +129,9 @@ async function fetchAnnotations(articles: Article[]): Promise<AnnotationEntry[] 
   const unannotated = articles.filter(a => !a.synopsis && !a.relevance && a.url !== "#")
   if (unannotated.length === 0) return null
 
-  // Annotate in batches of 20, up to 3 concurrent batches (60 articles client-side)
+  // Annotate in a single batch of 20 client-side (supplements server's 40)
   const BATCH_SIZE = 20
-  const MAX_BATCHES = 3
+  const MAX_BATCHES = 1
   const toAnnotate = unannotated.slice(0, BATCH_SIZE * MAX_BATCHES)
   const batches: { id: string; title: string; category: string }[][] = []
   for (let i = 0; i < toAnnotate.length; i += BATCH_SIZE) {
