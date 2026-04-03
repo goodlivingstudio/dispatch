@@ -524,9 +524,9 @@ export function Cerebro({ articles, pendingPrompt }: {
                 <button
                   onClick={() => send(PROVOCATIONS[placeholderIdx])}
                   aria-label="Discuss this prompt"
-                  style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--accent-muted)", width: 30, height: 30, borderRadius: 8, transition: "all 0.15s", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
-                  onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
-                  onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)"; e.currentTarget.style.background = "transparent" }}
+                  style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-tertiary)", width: 30, height: 30, borderRadius: 8, transition: "all 0.15s", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                  onMouseEnter={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.background = "transparent" }}
                 >
                   <ArrowUpRight size={16} strokeWidth={1.5} />
                 </button>
