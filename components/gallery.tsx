@@ -218,12 +218,10 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* Masonry grid — true vertical packing, no row gaps */}
+      {/* Masonry grid — manual 3-column distribution, vertical scroll */}
       <div style={{
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: 32,
-        columns: "3 240px",
-        columnGap: 14,
       }}>
         {loading ? (
           <div style={{ ...TYPE.body, color: "var(--text-tertiary)", padding: 32 }}>
@@ -233,39 +231,51 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
           <div style={{ ...TYPE.body, color: "var(--text-tertiary)", padding: 32 }}>
             No images available.
           </div>
-        ) : (
-          images.map((img, i) => (
-            <div
-              key={img.id}
-              onClick={() => setLightboxIdx(i)}
-              style={{
-                breakInside: "avoid",
-                marginBottom: 14,
-                borderRadius: 8,
-                overflow: "hidden",
-                cursor: "zoom-in",
-                transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                animation: `signal-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(i * 30, 600)}ms both`,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.015)" }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
-            >
-              <img
-                src={img.url}
-                alt={img.title || ""}
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  display: "block",
-                  borderRadius: 8,
-                }}
-              />
+        ) : (() => {
+          // Distribute images round-robin into 3 columns
+          const cols: typeof images[] = [[], [], []]
+          images.forEach((img, i) => cols[i % 3].push(img))
+
+          return (
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              {cols.map((col, colIdx) => (
+                <div key={colIdx} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+                  {col.map((img) => {
+                    const globalIdx = images.indexOf(img)
+                    return (
+                      <div
+                        key={img.id}
+                        onClick={() => setLightboxIdx(globalIdx)}
+                        style={{
+                          borderRadius: 8,
+                          overflow: "hidden",
+                          cursor: "zoom-in",
+                          transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                          animation: `signal-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(globalIdx * 20, 600)}ms both`,
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.015)" }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.title || ""}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                          }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
-          ))
-        )}
+          )
+        })()}
       </div>
 
       {/* Lightbox */}
