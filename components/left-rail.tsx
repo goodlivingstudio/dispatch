@@ -480,40 +480,72 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* Sort toggle + layer filter chips — visible in Signal mode only */}
+        {/* ── Feed controls — visible in Signal mode only ── */}
         {viewMode === "signal" && (
           <div style={{ padding: "8px 16px" }}>
-            {/* Sort toggle */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ ...TYPE.sm, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Sort</span>
-              {(["urgency", "layer"] as const).map(s => {
-                const isActive = sortBy === s
+            {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}
+            <div
+              style={{
+                display: "flex",
+                background: "var(--bg-elevated)",
+                borderRadius: 8,
+                padding: 3,
+                position: "relative",
+                overflow: "hidden",
+                marginBottom: 12,
+              }}
+            >
+              {/* Sliding indicator */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 3,
+                  left: sortBy === "urgency" ? "3px" : "calc(50% + 1px)",
+                  width: "calc(50% - 4px)",
+                  height: "calc(100% - 6px)",
+                  background: "var(--bg-surface)",
+                  borderRadius: 8,
+                  transition: "left 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+                  zIndex: 0,
+                }}
+              />
+              {([
+                { id: "urgency" as const, label: "Triage" },
+                { id: "layer" as const,   label: "Explore" },
+              ]).map(mode => {
+                const isActive = sortBy === mode.id
                 return (
                   <button
-                    key={s}
-                    onClick={() => onSortChange(s)}
+                    key={mode.id}
+                    onClick={() => onSortChange(mode.id)}
                     style={{
-                      ...TYPE.sm,
-                      padding: "3px 10px",
-                      borderRadius: 9999,
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "8px 0",
+                      background: "transparent",
                       border: "none",
-                      background: isActive ? "var(--accent-primary)" : "transparent",
-                      color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
-                      fontWeight: isActive ? 600 : 400,
+                      borderRadius: 8,
                       cursor: "pointer",
-                      transition: "all 0.15s",
-                      textTransform: "capitalize",
+                      position: "relative",
+                      zIndex: 1,
+                      ...TYPE.sm,
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
+                      transition: "color 0.3s ease",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em",
                     }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
                   >
-                    {s}
+                    {mode.label}
                   </button>
                 )
               })}
             </div>
-            {/* Layer filter chips — multi-select, empty = show all */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+
+            {/* Layer filters — compact row, same visual weight as metadata */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
                 const n = countFor(cat.id)
                 if (n === 0 && !feedLoading) return null
@@ -526,9 +558,9 @@ export function LeftRail({
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 4,
-                      padding: "4px 12px",
-                      borderRadius: 9999,
-                      border: "none",
+                      padding: "4px 10px",
+                      borderRadius: 6,
+                      border: isActive ? "1px solid var(--accent-muted)" : "1px solid transparent",
                       background: isActive ? "var(--accent-primary)" : "transparent",
                       cursor: "pointer",
                       transition: "all 0.15s",
@@ -538,7 +570,7 @@ export function LeftRail({
                   >
                     <span
                       style={{
-                        ...TYPE.body,
+                        ...TYPE.sm,
                         color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
                         fontWeight: isActive ? 600 : 400,
                         transition: "color 0.15s",
@@ -546,19 +578,16 @@ export function LeftRail({
                     >
                       {cat.label}
                     </span>
-                    {n > 0 && (
-                      <span
-                        style={{
-                          ...TYPE.sm,
-                          fontVariantNumeric: "tabular-nums",
-                          color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
-                          opacity: 0.7,
-                          transition: "color 0.15s",
-                        }}
-                      >
-                        {n}
-                      </span>
-                    )}
+                    <span
+                      style={{
+                        ...TYPE.xs,
+                        fontVariantNumeric: "tabular-nums",
+                        color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
+                        opacity: 0.5,
+                      }}
+                    >
+                      {n}
+                    </span>
                   </button>
                 )
               })}
