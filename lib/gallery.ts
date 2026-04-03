@@ -21,6 +21,11 @@ export const GALLERY_SOURCES: GallerySource[] = [
   { url: "https://www.designboom.com/feed/", name: "Designboom", type: "rss" },
   { url: "https://www.wallpaper.com/rss", name: "Wallpaper*", type: "rss" },
   { url: "https://www.ignant.com/feed/", name: "IGNANT", type: "rss" },
+
+  // Visual art, photography, creative practice
+  { url: "https://www.thisiscolossal.com/feed/", name: "Colossal", type: "rss" },
+  { url: "https://www.booooooom.com/feed/", name: "Booooooom", type: "rss" },
+  { url: "https://minimalissimo.com/feed/", name: "Minimalissimo", type: "rss" },
 ]
 
 export interface GalleryImage {

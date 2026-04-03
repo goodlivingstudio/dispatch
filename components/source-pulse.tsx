@@ -452,6 +452,89 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
             </div>
           </div>
 
+          {/* ── Estimated Daily Cost ── */}
+          <div>
+            <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+              Estimated Daily Cost
+            </div>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px" }}>
+              {(() => {
+                // Cost model based on Anthropic pricing (April 2026)
+                // Haiku: $0.25/M input, $1.25/M output
+                // Sonnet: $3/M input, $15/M output
+                const isrCyclesPerDay = 48 // 30-min cache
+                const annotationBatches = 2 // server-side per cycle
+                const annotationTokensIn = 1000 // ~1K input per batch
+                const annotationTokensOut = 2000 // ~2K output per batch
+                const annotationCostPerCycle = annotationBatches * ((annotationTokensIn * 0.25 / 1e6) + (annotationTokensOut * 1.25 / 1e6))
+                const annotationDaily = annotationCostPerCycle * isrCyclesPerDay
+
+                const briefCostPerCall = (2000 * 0.25 / 1e6) + (800 * 1.25 / 1e6) // Haiku
+                const briefDaily = briefCostPerCall * 5 // ~5 page loads/day
+
+                const synthesisCostPerCall = (3000 * 0.25 / 1e6) + (1500 * 1.25 / 1e6) // Haiku
+                const synthesisDaily = synthesisCostPerCall * 3 // ~3 views/day
+
+                const cerebroCostPerTurn = (4000 * 3 / 1e6) + (800 * 15 / 1e6) // Sonnet
+                const cerebroDaily = cerebroCostPerTurn * 10 // ~10 turns/day estimate
+
+                const dispatchWeekly = (5000 * 3 / 1e6) + (2500 * 15 / 1e6) // Sonnet, 1x/week
+                const dispatchDaily = dispatchWeekly / 7
+
+                const clientAnnotation = 1 * ((1000 * 0.25 / 1e6) + (2000 * 1.25 / 1e6)) * 5 // 1 batch × 5 visits
+                const totalDaily = annotationDaily + briefDaily + synthesisDaily + cerebroDaily + dispatchDaily + clientAnnotation
+
+                const items = [
+                  { label: "Annotation (server ISR)", cost: annotationDaily, model: "Haiku" },
+                  { label: "Annotation (client)", cost: clientAnnotation, model: "Haiku" },
+                  { label: "DCOS Brief", cost: briefDaily, model: "Haiku" },
+                  { label: "Synthesis", cost: synthesisDaily, model: "Haiku" },
+                  { label: "Cerebro (~10 turns)", cost: cerebroDaily, model: "Sonnet" },
+                  { label: "Dispatch (weekly)", cost: dispatchDaily, model: "Sonnet" },
+                ]
+
+                const monthlyEstimate = totalDaily * 30
+                const isHealthy = monthlyEstimate < 40
+                const isWarning = monthlyEstimate >= 40 && monthlyEstimate < 80
+
+                return (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: 20, fontWeight: 600, color: isHealthy ? "var(--live)" : isWarning ? "#D4A05A" : "#ef4444" }}>
+                        ${totalDaily.toFixed(2)}/day
+                      </span>
+                      <span style={{ ...TYPE.sm, color: "var(--text-tertiary)" }}>
+                        ~${monthlyEstimate.toFixed(0)}/mo
+                      </span>
+                      {!isHealthy && (
+                        <span style={{ ...TYPE.xs, color: isWarning ? "#D4A05A" : "#ef4444", fontWeight: 600 }}>
+                          {isWarning ? "WATCH" : "HIGH"}
+                        </span>
+                      )}
+                    </div>
+                    {items.map(item => (
+                      <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 0" }}>
+                        <span style={{ flex: 1, ...TYPE.sm, fontFamily: MONO, color: "var(--text-secondary)" }}>
+                          {item.label}
+                        </span>
+                        <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", width: 44 }}>
+                          {item.model}
+                        </span>
+                        <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-tertiary)", width: 50, textAlign: "right" }}>
+                          ${item.cost.toFixed(3)}
+                        </span>
+                      </div>
+                    ))}
+                    <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
+                    <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
+                      Estimates based on typical usage (5 visits, 10 Cerebro turns/day). Actual costs depend on usage patterns. Annotation is the largest fixed cost.
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          </div>
+
           {/* ── Stub Fallback ── */}
           {feedHealth?.stubCategories && feedHealth.stubCategories.length > 0 && (
             <div style={{
