@@ -285,17 +285,6 @@ export function Cerebro({ articles, pendingPrompt }: {
           Cerebro
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {messages.length > 0 && (
-            <button
-              onClick={handleCopyThread}
-              title="Copy entire conversation"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 24, height: 24, background: "transparent", border: "none", color: threadCopied ? "var(--accent-secondary)" : "var(--text-tertiary)", cursor: "pointer", transition: "color 0.15s", padding: 0 }}
-              onMouseEnter={e => { if (!threadCopied) e.currentTarget.style.color = "var(--text-secondary)" }}
-              onMouseLeave={e => { if (!threadCopied) e.currentTarget.style.color = "var(--text-tertiary)" }}
-            >
-              {threadCopied ? <Check size={13} strokeWidth={1.5} /> : <Copy size={13} strokeWidth={1.5} />}
-            </button>
-          )}
           {memory && (
             <span
               title="Conversation memory active — Cerebro remembers previous sessions"
@@ -552,6 +541,18 @@ export function Cerebro({ articles, pendingPrompt }: {
                 >
                   <Paperclip size={16} strokeWidth={1.5} />
                 </button>
+                {messages.length > 0 && (
+                  <button
+                    onClick={handleCopyThread}
+                    aria-label="Copy conversation"
+                    title="Copy entire conversation"
+                    style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, border: "none", background: "transparent", color: "var(--text-tertiary)", cursor: "pointer", transition: "all 0.15s", padding: 0 }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+                  >
+                    {threadCopied ? <Check size={15} strokeWidth={1.5} /> : <Copy size={15} strokeWidth={1.5} />}
+                  </button>
+                )}
                 {speechSupported && (
                   <button
                     onClick={() => {
