@@ -227,44 +227,85 @@ Score generously for genuine relevance; score 0-2 for layers where relevance is 
 
 Return only valid JSON array. No prose.`
 
-async function annotateArticles(articles: Article[]): Promise<Article[]> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey || articles.length === 0) return articles
-
-  const toAnnotate = articles.slice(0, 20)
-  const items = toAnnotate.map((a, i) => `${i + 1}. [${a.category}] ${a.title}`).join("\n")
-
+// Annotate a single batch of articles via Claude Haiku
+async function annotateBatch(
+  client: Anthropic,
+  batch: Article[],
+): Promise<{ synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[]> {
+  const items = batch.map((a, i) => `${i + 1}. [${a.category}] ${a.title}`).join("\n")
   try {
-    const client = new Anthropic({ apiKey })
     const response = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 6000,
       system: ANNOTATE_PROMPT,
       messages: [{ role: "user", content: items + "\n\nReturn JSON array." }],
     })
-
     const text = response.content[0]?.type === "text" ? response.content[0].text : ""
     const match = text.match(/\[[\s\S]*\]/)
-    if (!match) return articles
-
-    const raw: { synopsis?: string; hook?: string; type?: string; lens?: string; scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] =
-      JSON.parse(match[0])
-
-    // Merge annotations into the first N articles
-    return articles.map((a, i) => {
-      if (i >= toAnnotate.length || !raw[i]) return a
-      return {
-        ...a,
-        synopsis:     raw[i].synopsis || "",
-        relevance:    raw[i].hook || "",
-        signalType:   raw[i].type || "",
-        signalLens:   raw[i].lens || "",
-        signalScores: raw[i].scores,
-      }
-    })
+    if (!match) return []
+    return JSON.parse(match[0])
   } catch {
-    return articles // graceful fallback — never break the feed
+    return []
   }
+}
+
+// Annotate articles in parallel batches — 5 concurrent Haiku calls × 20 articles each
+// Cost: ~$0.01–0.02 per ISR cycle. Runs every 30 minutes.
+async function annotateArticles(articles: Article[]): Promise<Article[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey || articles.length === 0) return articles
+
+  const BATCH_SIZE = 20
+  const MAX_BATCHES = 5 // 5 × 20 = 100 articles per cycle
+  const client = new Anthropic({ apiKey })
+
+  // Only annotate articles that don't already have annotations
+  const unannotated = articles.filter(a => !a.synopsis && !a.relevance && a.url !== "#")
+  const toAnnotate = unannotated.slice(0, BATCH_SIZE * MAX_BATCHES)
+
+  if (toAnnotate.length === 0) return articles
+
+  // Split into batches
+  const batches: Article[][] = []
+  for (let i = 0; i < toAnnotate.length; i += BATCH_SIZE) {
+    batches.push(toAnnotate.slice(i, i + BATCH_SIZE))
+  }
+
+  // Run all batches in parallel
+  const results = await Promise.allSettled(
+    batches.map(batch => annotateBatch(client, batch))
+  )
+
+  // Build annotation map from all batch results
+  const annotationMap = new Map<string, {
+    synopsis: string; relevance: string; signalType: string; signalLens: string;
+    signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
+  }>()
+
+  let batchIdx = 0
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value.length > 0) {
+      const batch = batches[batchIdx]
+      result.value.forEach((raw, i) => {
+        if (i < batch.length && raw) {
+          annotationMap.set(batch[i].id, {
+            synopsis:     raw.synopsis || "",
+            relevance:    raw.hook || "",
+            signalType:   raw.type || "",
+            signalLens:   raw.lens || "",
+            signalScores: raw.scores,
+          })
+        }
+      })
+    }
+    batchIdx++
+  }
+
+  // Merge annotations back into articles
+  return articles.map(a => {
+    const ann = annotationMap.get(a.id)
+    return ann ? { ...a, ...ann } : a
+  })
 }
 
 // ─── GET Handler ──────────────────────────────────────────────────────────────

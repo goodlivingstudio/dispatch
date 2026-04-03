@@ -107,25 +107,45 @@ function mergeAnnotations(articles: Article[], annotations: AnnotationEntry[]): 
   })
 }
 
+async function fetchAnnotationBatch(articles: { id: string; title: string; category: string }[]): Promise<AnnotationEntry[]> {
+  try {
+    const res = await fetch("/api/annotate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articles }),
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    return data.annotations || []
+  } catch { return [] }
+}
+
 async function fetchAnnotations(articles: Article[]): Promise<AnnotationEntry[] | null> {
   // Return cached if still fresh
   const cached = loadAnnotationCache()
   if (cached) return cached
 
-  try {
-    const res = await fetch("/api/annotate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        articles: articles.slice(0, 15).map(a => ({ id: a.id, title: a.title, category: a.category })),
-      }),
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    const annotations: AnnotationEntry[] = data.annotations || []
-    if (annotations.length > 0) saveAnnotationCache(annotations)
-    return annotations
-  } catch { return null }
+  // Find unannotated articles (server may have annotated some already)
+  const unannotated = articles.filter(a => !a.synopsis && !a.relevance && a.url !== "#")
+  if (unannotated.length === 0) return null
+
+  // Annotate in batches of 20, up to 3 concurrent batches (60 articles client-side)
+  const BATCH_SIZE = 20
+  const MAX_BATCHES = 3
+  const toAnnotate = unannotated.slice(0, BATCH_SIZE * MAX_BATCHES)
+  const batches: { id: string; title: string; category: string }[][] = []
+  for (let i = 0; i < toAnnotate.length; i += BATCH_SIZE) {
+    batches.push(toAnnotate.slice(i, i + BATCH_SIZE).map(a => ({ id: a.id, title: a.title, category: a.category })))
+  }
+
+  const results = await Promise.allSettled(batches.map(b => fetchAnnotationBatch(b)))
+  const allAnnotations: AnnotationEntry[] = []
+  for (const result of results) {
+    if (result.status === "fulfilled") allAnnotations.push(...result.value)
+  }
+
+  if (allAnnotations.length > 0) saveAnnotationCache(allAnnotations)
+  return allAnnotations.length > 0 ? allAnnotations : null
 }
 
 // Cerebro extracted to components/cerebro.tsx
