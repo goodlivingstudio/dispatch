@@ -79,7 +79,6 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
         src={image.url}
         alt={image.title || ""}
         referrerPolicy="no-referrer"
-        crossOrigin="anonymous"
         onClick={e => e.stopPropagation()}
         style={{
           maxWidth: "90vw", maxHeight: "85vh",
@@ -88,7 +87,7 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
         }}
       />
 
-      {/* Caption */}
+      {/* Caption with source link */}
       <div style={{
         position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)",
         display: "flex", alignItems: "center", gap: 12,
@@ -96,7 +95,25 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
       }}>
         {image.title && <span>{image.title}</span>}
         {image.title && image.source && <span style={{ opacity: 0.4 }}>·</span>}
-        <span style={{ fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em" }}>{image.source}</span>
+        {image.linkUrl ? (
+          <a
+            href={image.linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            style={{
+              fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em",
+              color: "rgba(255,255,255,0.5)", textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "rgba(255,255,255,0.9)" }}
+            onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.5)" }}
+          >
+            {image.source} ↗
+          </a>
+        ) : (
+          <span style={{ fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em" }}>{image.source}</span>
+        )}
       </div>
     </div>
   )
@@ -232,7 +249,9 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
             No images available.
           </div>
         ) : (() => {
-          // Distribute images round-robin into 3 columns
+          // Build index lookup and distribute round-robin into 3 columns
+          const idxMap = new Map<string, number>()
+          images.forEach((img, i) => idxMap.set(img.id, i))
           const cols: typeof images[] = [[], [], []]
           images.forEach((img, i) => cols[i % 3].push(img))
 
@@ -241,7 +260,7 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
               {cols.map((col, colIdx) => (
                 <div key={colIdx} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
                   {col.map((img) => {
-                    const globalIdx = images.indexOf(img)
+                    const globalIdx = idxMap.get(img.id) ?? 0
                     return (
                       <div
                         key={img.id}
