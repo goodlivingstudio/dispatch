@@ -333,3 +333,5 @@ Priority ordered by strategic impact, not technical sequencing.
 8. **Braintrust integration** — Prompt quality evaluation when system is stable.
 
 9. **Gallery expansion** — More image sources, validate URL extraction pipeline.
+
+10. **Integration tier advancement** — Push high-value sources up the integration hierarchy. See `docs/INTEGRATION-DOCTRINE.md` for the full framework: Tier 1 (in-platform), Tier 2 (bidirectional API), Tier 3 (unidirectional pull), Tier 4 (manual bridge). Priority targets: Figma (4→1), Atlas (4→2), LinkedIn (→2).
