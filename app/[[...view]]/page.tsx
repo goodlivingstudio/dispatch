@@ -479,8 +479,8 @@ export default function Page() {
       {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} defaultExpanded={sortBy === "urgency"} />}
       {/* Section header */}
       <div style={{
-        flexShrink: 0, height: 48, display: "flex", alignItems: "center",
-        padding: "0 20px", marginTop: 4,
+        flexShrink: 0, height: 36, display: "flex", alignItems: "center",
+        padding: "0 20px",
       }}>
         <span style={{ ...TYPE.sm, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 500, letterSpacing: "0.04em" }}>
           News Sources
