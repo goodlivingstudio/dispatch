@@ -217,7 +217,7 @@ Your task: annotate the following articles for the Dispatch intelligence system.
 For each numbered headline, return a JSON array. One object per article, same order:
 {
   "synopsis": "1-2 sentence synopsis — what this article is about, stated plainly",
-  "hook": "1 sentence — why this article is relevant to Jeremy Grant's mandate. Be precise — name the specific connection.",
+  "hook": "1 sentence — why this article is relevant to the mandate. Be precise — name the specific connection.",
   "type": "DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL",
   "lens": "OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE",
   "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }

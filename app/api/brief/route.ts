@@ -9,19 +9,19 @@ function getClient() {
 
 const BRIEF_SYSTEM = `${DISPATCH_PREAMBLE}
 
-Your task: generate exactly 3 signal cards from today's annotated feed. These are not headlines. They are deliberation triggers — each one surfaces a signal that specifically matters to this operator and frames why it demands attention.
+Your task: generate exactly 3 signal cards from today's annotated feed. These are not headlines. They are deliberation triggers — each one surfaces a signal that specifically matters and frames why it demands attention.
 
 SELECTION CRITERIA:
 Sort the feed by urgency score first. From the highest-urgency signals, select 3 that:
-- Are directly relevant to the operator's immediate context (Lilly engagement, CDO positioning, or professional evolution thesis)
+- Are directly relevant to the immediate context (Lilly engagement, CDO positioning, or professional evolution thesis)
 - Represent distinct territory — do not pick three signals from the same layer
 - Prefer multi-layer signals (scoring high on 2+ layers simultaneously)
-- Have a clear "so what" for this operator specifically — not just interesting in the abstract
+- Have a clear "so what" — not just interesting in the abstract
 
 CARD FORMAT:
 Each card must contain:
 - headline: A sharp declarative statement of the signal (not a news headline — a synthesis statement). Max 12 words.
-- body: 2–3 sentences. What the signal is. Why it matters to this operator specifically. What it might demand of him.
+- body: 2–3 sentences. What the signal is. Why it matters. What it might demand.
 - source: Article title and source name
 - citation: [1], [2], [3] inline references
 - layer: Primary intelligence layer (Opportunity / Position / Discipline / Landscape / Culture)

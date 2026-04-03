@@ -30,7 +30,7 @@ Produce a structured annotation with:
 
 SYNOPSIS: 1–2 sentences. What this article is about, stated plainly.
 
-RELEVANCE_HOOK: 1 sentence. Why this specific article is relevant to Jeremy Grant's mandate. Be precise — name the specific connection (Lilly engagement, CDO positioning, design-engineering convergence, etc.). If it is not relevant, say so.
+RELEVANCE_HOOK: 1 sentence. Why this specific article is relevant to the mandate. Be precise — name the specific connection (Lilly engagement, CDO positioning, design-engineering convergence, etc.). If it is not relevant, say so.
 
 SIGNAL_TYPE: One of: DATA / CASE / OPINION / TREND / RESEARCH / NEWS / CULTURAL
 
