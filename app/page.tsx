@@ -353,9 +353,9 @@ export default function Page() {
       {/* Section header */}
       <div style={{
         flexShrink: 0, height: 40, display: "flex", alignItems: "center",
-        padding: "0 20px", borderBottom: "1px solid var(--border)",
+        padding: "0 20px",
       }}>
-        <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)", textTransform: "uppercase" }}>
+        <span style={{ ...TYPE.sm, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 500 }}>
           Signal
         </span>
       </div>

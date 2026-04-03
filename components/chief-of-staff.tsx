@@ -204,8 +204,7 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                       cursor: signal.body ? "pointer" : "default",
                       background: hoveredIdx === i ? "var(--bg-elevated)" : "var(--bg-surface)",
                       transition: "background 0.15s",
-                      minWidth: 260,
-                      maxWidth: 320,
+                      width: 280,
                       flexShrink: 0,
                       scrollSnapAlign: "start",
                     }}

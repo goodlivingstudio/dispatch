@@ -41,8 +41,9 @@ After every response, append a follow-up block in exactly this format (no except
 
 ---follow-up---
 question: [A natural follow-up question that pushes thinking forward — strategic, not generic]
-alt: [A short alternative direction, 4-8 words]
-alt: [Another alternative direction, 4-8 words]`
+alt: [A short conversation starter, 4-8 words — a different direction]
+alt: [Another conversation starter, 4-8 words]
+alt: [A third conversation starter, 4-8 words]`
 
 // ─── Follow-up parser ─────────────────────────────────────────────────────────
 
@@ -72,7 +73,7 @@ function parseFollowUp(text: string): {
 
   if (!question) return { cleanText: text.trim(), followUp: null }
 
-  return { cleanText, followUp: { question, alternatives: alternatives.slice(0, 2) } }
+  return { cleanText, followUp: { question, alternatives: alternatives.slice(0, 3) } }
 }
 
 // ─── Web Search Tool (Anthropic tool_use format) ────────────────────────────
