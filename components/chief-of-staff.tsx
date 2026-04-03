@@ -184,11 +184,11 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
 
           {/* ── Expanded: horizontal scrollable carousel ── */}
           <div style={{
-            maxHeight: expanded ? 300 : 0,
+            maxHeight: expanded ? 600 : 0,
             overflow: "hidden",
             transition: "max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           }}>
-            <div style={{ display: "flex", gap: 8, padding: "8px 16px", overflowX: "auto", scrollSnapType: "x mandatory" }}>
+            <div style={{ display: "flex", gap: 8, padding: "8px 16px 16px", overflowX: "auto", scrollSnapType: "x mandatory" }}>
               {signals.map((signal, i) => (
                   <div
                     key={i}
