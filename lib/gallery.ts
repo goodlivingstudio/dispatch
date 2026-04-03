@@ -15,7 +15,12 @@ export const GALLERY_SOURCES: GallerySource[] = [
   // RSS image feeds — architecture, design, photography
   { url: "https://www.dezeen.com/architecture/feed/", name: "Dezeen Architecture", type: "rss" },
   { url: "https://www.dezeen.com/design/feed/", name: "Dezeen Design", type: "rss" },
+  { url: "https://www.dezeen.com/interiors/feed/", name: "Dezeen Interiors", type: "rss" },
   { url: "https://www.architectural-review.com/rss", name: "Architectural Review", type: "rss" },
+  { url: "https://www.archdaily.com/feed", name: "ArchDaily", type: "rss" },
+  { url: "https://www.designboom.com/feed/", name: "Designboom", type: "rss" },
+  { url: "https://www.wallpaper.com/rss", name: "Wallpaper*", type: "rss" },
+  { url: "https://www.ignant.com/feed/", name: "IGNANT", type: "rss" },
 ]
 
 export interface GalleryImage {

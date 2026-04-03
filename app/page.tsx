@@ -440,7 +440,7 @@ export default function Page() {
             {mobileTab === "audio"     && <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} />}
             {mobileTab === "dispatch"  && <DispatchView onDeliberate={handleSynthesisDeliberate} />}
             {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
-            {mobileTab === "config"    && <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} />}
+            {mobileTab === "config"    && <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} articles={articles} />}
           </div>
         </div>
 
@@ -675,7 +675,7 @@ export default function Page() {
         </div>
         <Divider onMouseDown={e => startResize("left", e)} />
         {viewMode === "config"
-          ? <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} />
+          ? <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} feedHealth={feedHealth} articles={articles} />
           : viewMode === "dispatch"
           ? <DispatchView onDeliberate={handleSynthesisDeliberate} />
           : viewMode === "synthesis"

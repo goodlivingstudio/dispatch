@@ -659,7 +659,30 @@ export function LeftRail({
             <FileDown size={18} strokeWidth={1.5} />
           </button>
         )}
-        <SourcePulse articles={articles} feedHealth={feedHealth || null} />
+        <button
+          onClick={() => onViewChange("config")}
+          title="Source Pulse — Diagnostics"
+          aria-label="Source Pulse"
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36, borderRadius: 8,
+            border: "none", background: "transparent",
+            color: feedHealth && feedHealth.sourcesFailed > 0 ? "#D4A05A" : "var(--text-tertiary)",
+            cursor: "pointer", transition: "all 0.15s", padding: 0,
+            position: "relative",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = feedHealth && feedHealth.sourcesFailed > 0 ? "#D4A05A" : "var(--text-tertiary)" }}
+        >
+          <Activity size={18} strokeWidth={1.5} />
+          {feedHealth && feedHealth.sourcesFailed > 0 && (
+            <span style={{
+              position: "absolute", top: 4, right: 4,
+              width: 6, height: 6, borderRadius: "50%",
+              background: "#ef4444",
+            }} />
+          )}
+        </button>
       </div>
     </aside>
   )

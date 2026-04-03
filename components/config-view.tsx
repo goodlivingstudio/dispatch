@@ -15,6 +15,7 @@ interface ConfigViewProps {
   excludedSources: Set<string>
   onToggleSource: (source: string) => void
   feedHealth: FeedHealth | null
+  articles?: import("@/lib/types").Article[]
 }
 
 const LAYERS = ["opportunity", "position", "discipline", "landscape", "culture"] as const
@@ -442,7 +443,7 @@ function SourceGrid({ sources, type, excludedSources, onToggleSource }: {
 
 // ─── ConfigView ─────────────────────────────────────────────────────────────
 
-export function ConfigView({ excludedSources, onToggleSource, feedHealth }: ConfigViewProps) {
+export function ConfigView({ excludedSources, onToggleSource, feedHealth, articles = [] }: ConfigViewProps) {
   const [health, setHealth] = useState<Record<string, unknown> | null>(null)
   const [healthLoading, setHealthLoading] = useState(false)
 
@@ -607,19 +608,67 @@ export function ConfigView({ excludedSources, onToggleSource, feedHealth }: Conf
             {" "}Connection: {health?.anthropic ? String(health.anthropic) : "checking..."}
           </div>
 
-          {/* Feed Health */}
+          {/* Feed Health — Source Pulse */}
           {feedHealth && (
             <>
               <div style={{ color: "var(--text-tertiary)", marginTop: 12, marginBottom: 4 }}>FEED HEALTH</div>
-              <div>{feedHealth.sourcesLive}/{feedHealth.sourcesTotal} sources live</div>
+              <div>
+                <span style={{ color: feedHealth.sourcesLive / feedHealth.sourcesTotal >= 0.8 ? "var(--live)" : feedHealth.sourcesLive / feedHealth.sourcesTotal >= 0.5 ? "#D4A05A" : "#ef4444" }}>●</span>
+                {" "}{feedHealth.sourcesLive}/{feedHealth.sourcesTotal} sources live ({Math.round(feedHealth.sourcesLive / feedHealth.sourcesTotal * 100)}%)
+              </div>
               {feedHealth.sourcesFailed > 0 && (
-                <div style={{ color: "#ef4444" }}>{feedHealth.sourcesFailed} sources failed</div>
+                <div style={{ color: "#ef4444" }}>
+                  <span>●</span> {feedHealth.sourcesFailed} sources failed
+                </div>
               )}
               {feedHealth.stubCategories?.length > 0 && (
                 <div>Stub fallback: {feedHealth.stubCategories.join(", ")}</div>
               )}
             </>
           )}
+
+          {/* Per-source breakdown */}
+          {articles && articles.length > 0 && (() => {
+            const sourceMap: Record<string, { count: number; annotated: number; live: boolean; tag: string }> = {}
+            articles.forEach(a => {
+              if (!sourceMap[a.source]) sourceMap[a.source] = { count: 0, annotated: 0, live: a.url !== "#", tag: a.tag }
+              sourceMap[a.source].count++
+              if (a.synopsis || a.relevance) sourceMap[a.source].annotated++
+            })
+            const sources = Object.entries(sourceMap).sort((a, b) => b[1].count - a[1].count)
+            const totalAnnotated = articles.filter(a => a.synopsis || a.relevance).length
+
+            return (
+              <>
+                <div style={{ color: "var(--text-tertiary)", marginTop: 12, marginBottom: 4 }}>SOURCE PULSE ({sources.length} sources, {totalAnnotated}/{articles.length} annotated)</div>
+                <div style={{ maxHeight: 240, overflowY: "auto", margin: "0 -4px", padding: "0 4px" }}>
+                  {sources.map(([name, stats]) => (
+                    <div key={name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+                      <span style={{
+                        width: 5, height: 5, borderRadius: "50%", flexShrink: 0,
+                        background: stats.live ? "var(--live)" : "#ef4444",
+                      }} />
+                      <span style={{
+                        flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        color: stats.live ? "var(--text-secondary)" : "var(--text-tertiary)",
+                        opacity: stats.live ? 1 : 0.6,
+                      }}>
+                        {name}
+                      </span>
+                      <span style={{ color: "var(--text-tertiary)", fontVariantNumeric: "tabular-nums", minWidth: 20, textAlign: "right" }}>
+                        {stats.count}
+                      </span>
+                      {stats.annotated > 0 && (
+                        <span style={{ color: "var(--accent-muted)", fontVariantNumeric: "tabular-nums", minWidth: 28, textAlign: "right" }}>
+                          ✓{stats.annotated}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )
+          })()}
 
           {/* Cache */}
           <div style={{ color: "var(--text-tertiary)", marginTop: 12, marginBottom: 4 }}>CACHE</div>
