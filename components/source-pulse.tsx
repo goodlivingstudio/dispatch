@@ -95,7 +95,13 @@ function LayerBar({ layer, health, maxArticles }: { layer: LayerHealth; health: 
           {LAYER_LABELS[layer.layer] || layer.layer}
         </div>
       </div>
-      <div style={{ flex: 1, position: "relative", height: 20, background: "var(--bg-surface)", borderRadius: 4, overflow: "hidden" }}>
+      {/* Count — left of bar */}
+      <div style={{ width: 28, flexShrink: 0, textAlign: "right" }}>
+        <span style={{ ...TYPE.sm, fontVariantNumeric: "tabular-nums", color: "var(--text-secondary)", fontWeight: 500 }}>
+          {layer.articleCount}
+        </span>
+      </div>
+      <div style={{ flex: 1, position: "relative", height: 16, background: "var(--bg-surface)", borderRadius: 4, overflow: "hidden" }}>
         {/* Article volume bar */}
         <div style={{
           position: "absolute", top: 0, left: 0, height: "100%",
@@ -114,14 +120,6 @@ function LayerBar({ layer, health, maxArticles }: { layer: LayerHealth; health: 
           borderRadius: 4,
           transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
         }} />
-        {/* Count label inside bar */}
-        <div style={{
-          position: "absolute", top: 0, left: 8, height: "100%",
-          display: "flex", alignItems: "center",
-          ...TYPE.xs, fontFamily: MONO, color: "var(--text-secondary)",
-        }}>
-          {layer.articleCount}
-        </div>
       </div>
       <div style={{ width: 50, flexShrink: 0, textAlign: "right" }}>
         <span style={{ ...TYPE.xs, fontFamily: MONO, color: annotationPct === 100 ? "var(--live)" : annotationPct > 50 ? "var(--text-tertiary)" : "#ef4444" }}>
@@ -416,7 +414,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
               </div>
               <div style={{ display: "flex", gap: 12 }}>
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO }}>layer</span>
-                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>n</span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>qty</span>
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 28, textAlign: "right" }}>ann</span>
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>urg</span>
               </div>
