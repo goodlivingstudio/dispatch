@@ -72,7 +72,7 @@ function MetricCard({ label, value, sub, color, width }: {
       <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
         {label}
       </div>
-      <div style={{ fontSize: 22, fontWeight: 600, fontFamily: MONO, color: color || "var(--text-primary)", lineHeight: 1 }}>
+      <div style={{ fontSize: 22, fontWeight: 600, color: color || "var(--text-primary)", lineHeight: 1 }}>
         {value}
       </div>
       {sub && (
@@ -416,7 +416,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>urg</span>
               </div>
             </div>
-            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px", maxHeight: 320, overflowY: "auto" }}>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px" }}>
               {sourceStats.map(source => (
                 <SourceRow key={source.name} source={source} />
               ))}
