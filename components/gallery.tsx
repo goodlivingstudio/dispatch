@@ -218,10 +218,12 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* Image grid — vertical scroll, stacked rows */}
+      {/* Masonry grid — true vertical packing, no row gaps */}
       <div style={{
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: 32,
+        columns: "3 240px",
+        columnGap: 14,
       }}>
         {loading ? (
           <div style={{ ...TYPE.body, color: "var(--text-tertiary)", padding: 32 }}>
@@ -232,41 +234,37 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
             No images available.
           </div>
         ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 14,
-          }}>
-            {images.map((img, i) => (
-              <div
-                key={img.id}
-                onClick={() => setLightboxIdx(i)}
+          images.map((img, i) => (
+            <div
+              key={img.id}
+              onClick={() => setLightboxIdx(i)}
+              style={{
+                breakInside: "avoid",
+                marginBottom: 14,
+                borderRadius: 8,
+                overflow: "hidden",
+                cursor: "zoom-in",
+                transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                animation: `signal-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(i * 30, 600)}ms both`,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.015)" }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
+            >
+              <img
+                src={img.url}
+                alt={img.title || ""}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
                 style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
                   borderRadius: 8,
-                  overflow: "hidden",
-                  cursor: "zoom-in",
-                  transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                  animation: `signal-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(i * 30, 600)}ms both`,
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.015)" }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
-              >
-                <img
-                  src={img.url}
-                  alt={img.title || ""}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                    borderRadius: 8,
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+              />
+            </div>
+          ))
         )}
       </div>
 
