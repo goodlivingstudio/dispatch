@@ -75,26 +75,25 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
         <ChevronRight size={32} strokeWidth={1} />
       </button>
 
+      {/* Image — try loading, hide alt text on error */}
       <img
         src={image.url}
-        alt={image.title || ""}
+        alt=""
         referrerPolicy="no-referrer"
         onClick={e => e.stopPropagation()}
+        onError={e => { e.currentTarget.style.display = "none" }}
         style={{
-          maxWidth: "90vw", maxHeight: "85vh",
+          maxWidth: "90vw", maxHeight: "80vh",
           objectFit: "contain", cursor: "default",
           borderRadius: 4,
         }}
       />
 
-      {/* Caption with source link */}
+      {/* Caption — entire block is clickable to source */}
       <div style={{
         position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)",
-        display: "flex", alignItems: "center", gap: 12,
-        ...TYPE.sm, color: "rgba(255,255,255,0.5)",
+        maxWidth: "80vw", textAlign: "center",
       }}>
-        {image.title && <span>{image.title}</span>}
-        {image.title && image.source && <span style={{ opacity: 0.4 }}>·</span>}
         {image.linkUrl ? (
           <a
             href={image.linkUrl}
@@ -102,17 +101,26 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
             style={{
-              fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em",
-              color: "rgba(255,255,255,0.5)", textDecoration: "none",
-              transition: "color 0.15s",
+              display: "inline-flex", alignItems: "center", gap: 10,
+              ...TYPE.sm, color: "rgba(255,255,255,0.5)",
+              textDecoration: "none", transition: "color 0.15s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = "rgba(255,255,255,0.9)" }}
-            onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.5)" }}
+            onMouseEnter={e => { e.currentTarget.style.color = "rgba(255,255,255,0.9)"; e.currentTarget.style.textDecoration = "underline" }}
+            onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; e.currentTarget.style.textDecoration = "none" }}
           >
-            {image.source} ↗
+            {image.title && <span>{image.title}</span>}
+            {image.title && image.source && <span style={{ opacity: 0.4 }}>·</span>}
+            <span style={{ fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em" }}>{image.source}</span>
           </a>
         ) : (
-          <span style={{ fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em" }}>{image.source}</span>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 10,
+            ...TYPE.sm, color: "rgba(255,255,255,0.5)",
+          }}>
+            {image.title && <span>{image.title}</span>}
+            {image.title && image.source && <span style={{ opacity: 0.4 }}>·</span>}
+            <span style={{ fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.04em" }}>{image.source}</span>
+          </div>
         )}
       </div>
     </div>
