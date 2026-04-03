@@ -343,7 +343,7 @@ export function LeftRail({
       }}
     >
       {/* ── Identity zone ── */}
-      <div style={{ padding: "24px 16px 16px" }}>
+      <div style={{ padding: "24px 16px 20px" }}>
         <h1
           style={{
             fontSize: 22,
@@ -371,7 +371,7 @@ export function LeftRail({
       <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
 
       {/* ── Operational status zone ── */}
-      <div style={{ padding: "16px 16px 16px" }}>
+      <div style={{ padding: "20px 16px" }}>
         {/* LIVE | date | time */}
         <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
           <span
@@ -405,9 +405,9 @@ export function LeftRail({
       <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
 
       {/* Navigation */}
-      <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+      <nav style={{ flex: 1, overflowY: "auto", padding: "0" }}>
         {/* Signal / Audio / Synthesis — three-state toggle (arrow keys to cycle) */}
-        <div style={{ padding: "8px 16px 4px", marginBottom: 4 }}>
+        <div style={{ padding: "20px 16px 0" }}>
           <div
             style={{
               display: "flex",
@@ -483,7 +483,7 @@ export function LeftRail({
         {/* ── Feed controls — visible in Signal mode only ── */}
         {viewMode === "signal" && (
           <div style={{ padding: "0 16px" }}>
-            <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
+            <div style={{ height: 1, background: "var(--border)", margin: "20px 0" }} />
             {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}
             <div
               style={{
@@ -493,7 +493,7 @@ export function LeftRail({
                 padding: 3,
                 position: "relative",
                 overflow: "hidden",
-                marginBottom: 12,
+                marginBottom: 16,
               }}
             >
               {/* Sliding indicator */}
