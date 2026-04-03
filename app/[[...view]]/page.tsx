@@ -21,7 +21,6 @@ import { TYPE, MONO } from "@/lib/styles"
 
 // ─── Skin + mode system ───────────────────────────────────────────────────────
 
-export type { Skin }
 
 function applyThemeClasses(skin: Skin, day: boolean) {
   const el = document.documentElement
@@ -157,7 +156,7 @@ export default function Page() {
   const [feedHealth,     setFeedHealth]     = useState<FeedHealth | null>(null)
   const [feedLoading,    setFeedLoading]    = useState(true)
   const [fetchedAt,      setFetchedAt]      = useState<string | null>(null)
-  const [viewMode,       setViewMode]       = useState<ViewMode>("signal")
+  const [viewMode,       setViewModeRaw]    = useState<ViewMode>("signal")
   const [cerebroCollapsed, setCerebroCollapsed] = useState(false)
   const [leftRailCollapsed, setLeftRailCollapsed] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
@@ -168,6 +167,75 @@ export default function Page() {
   const [sortBy,         setSortBy]         = useState<"urgency" | "layer">("urgency")
   const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "dispatch" | "cerebro" | "config">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
+
+  // ── URL ↔ State sync ───────────────────────────────────────────────────────
+  const VALID_VIEWS = ["signal", "audio", "synthesis", "dispatch", "config", "pulse"] as const
+  const isInitialized = useRef(false)
+
+  // Wrap setViewMode to also push URL
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeRaw(mode)
+    const path = mode === "signal" ? "/" : `/${mode}`
+    if (typeof window !== "undefined" && window.location.pathname !== path) {
+      window.history.pushState({ view: mode }, "", path)
+    }
+  }, [])
+
+  // Read initial view from URL on mount
+  useEffect(() => {
+    if (isInitialized.current) return
+    isInitialized.current = true
+    const path = window.location.pathname.replace(/^\//, "") || "signal"
+    if ((VALID_VIEWS as readonly string[]).includes(path)) {
+      setViewModeRaw(path as ViewMode)
+    } else if (path === "gallery") {
+      setGalleryOpen(true)
+    } else if (path === "focus") {
+      setFocusMode(true)
+    }
+  }, [])
+
+  // Handle browser back/forward
+  useEffect(() => {
+    const handler = () => {
+      const path = window.location.pathname.replace(/^\//, "") || "signal"
+      if ((VALID_VIEWS as readonly string[]).includes(path)) {
+        setViewModeRaw(path as ViewMode)
+        setFocusMode(false)
+        setGalleryOpen(false)
+      } else if (path === "gallery") {
+        setGalleryOpen(true)
+      } else if (path === "focus") {
+        setFocusMode(true)
+      } else {
+        setViewModeRaw("signal")
+        setFocusMode(false)
+        setGalleryOpen(false)
+      }
+    }
+    window.addEventListener("popstate", handler)
+    return () => window.removeEventListener("popstate", handler)
+  }, [])
+
+  // Gallery URL sync
+  const setGalleryOpenWithUrl = useCallback((open: boolean) => {
+    setGalleryOpen(open)
+    if (open) {
+      window.history.pushState({ overlay: "gallery" }, "", "/gallery")
+    } else if (window.location.pathname === "/gallery") {
+      window.history.back()
+    }
+  }, [])
+
+  // Focus mode URL sync
+  const setFocusModeWithUrl = useCallback((on: boolean) => {
+    setFocusMode(on)
+    if (on) {
+      window.history.pushState({ overlay: "focus" }, "", "/focus")
+    } else if (window.location.pathname === "/focus") {
+      window.history.back()
+    }
+  }, [])
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -203,10 +271,10 @@ export default function Page() {
       else if (e.key === "4") setViewMode("dispatch")
 
       // F — focus mode
-      else if (e.key === "f" || e.key === "F") setFocusMode(v => !v)
+      else if (e.key === "f" || e.key === "F") setFocusModeWithUrl(!focusMode)
 
       // G — gallery
-      else if (e.key === "g" || e.key === "G") setGalleryOpen(true)
+      else if (e.key === "g" || e.key === "G") setGalleryOpenWithUrl(true)
 
       // C or / — focus Cerebro input
       else if (e.key === "c" || e.key === "C" || e.key === "/") {
@@ -218,13 +286,13 @@ export default function Page() {
       // Escape — close overlays
       else if (e.key === "Escape") {
         if (hotkeysOpen) setHotkeysOpen(false)
-        else if (galleryOpen) setGalleryOpen(false)
-        else if (focusMode) setFocusMode(false)
+        else if (galleryOpen) setGalleryOpenWithUrl(false)
+        else if (focusMode) setFocusModeWithUrl(false)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [viewMode, hotkeysOpen, galleryOpen, focusMode])
+  }, [viewMode, hotkeysOpen, galleryOpen, focusMode, setGalleryOpenWithUrl, setFocusModeWithUrl])
 
   const handleToggleSource = useCallback((source: string) => {
     setExcludedSources(prev => {
@@ -248,8 +316,11 @@ export default function Page() {
       const savedSort = localStorage.getItem("dispatch-sort-by")
       if (savedSort === "urgency" || savedSort === "layer") setSortBy(savedSort)
 
-      const savedView = localStorage.getItem("dispatch-view-mode")
-      if (savedView === "signal" || savedView === "audio" || savedView === "synthesis" || savedView === "dispatch" || savedView === "config" || savedView === "pulse") setViewMode(savedView)
+      // View mode now synced via URL — localStorage fallback only when on root path
+      if (window.location.pathname === "/") {
+        const savedView = localStorage.getItem("dispatch-view-mode")
+        if (savedView === "signal" || savedView === "audio" || savedView === "synthesis" || savedView === "dispatch" || savedView === "config" || savedView === "pulse") setViewModeRaw(savedView)
+      }
 
       const savedTab = localStorage.getItem("dispatch-mobile-tab")
       if (savedTab === "signal" || savedTab === "audio" || savedTab === "synthesis" || savedTab === "dispatch" || savedTab === "cerebro" || savedTab === "config") setMobileTab(savedTab)
@@ -558,7 +629,7 @@ export default function Page() {
           }}>
             {/* Exit focus mode button */}
             <button
-              onClick={() => setFocusMode(false)}
+              onClick={() => setFocusModeWithUrl(false)}
               title="Exit focus mode (Esc)"
               style={{
                 flexShrink: 0, width: 48,
@@ -667,9 +738,9 @@ export default function Page() {
                 onViewChange={setViewMode}
                 excludedSources={excludedSources}
                 onToggleSource={handleToggleSource}
-                onGalleryOpen={() => setGalleryOpen(true)}
+                onGalleryOpen={() => setGalleryOpenWithUrl(true)}
                 onHotkeysOpen={() => setHotkeysOpen(true)}
-                onFocusMode={() => setFocusMode(true)}
+                onFocusMode={() => setFocusModeWithUrl(true)}
                 onExportOpen={() => setExportOpen(true)}
                 feedHealth={feedHealth}
               />
@@ -748,7 +819,7 @@ export default function Page() {
       />
 
       {/* Gallery overlay */}
-      {galleryOpen && <GalleryOverlay onClose={() => setGalleryOpen(false)} />}
+      {galleryOpen && <GalleryOverlay onClose={() => setGalleryOpenWithUrl(false)} />}
 
       {/* Hotkeys overlay */}
       {hotkeysOpen && <HotkeysOverlay onClose={() => setHotkeysOpen(false)} />}

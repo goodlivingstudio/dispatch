@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { SunMedium, MoonStar } from "lucide-react"
-import type { Skin } from "@/app/page"
+import type { Skin } from "@/lib/types"
 import { TYPE } from "@/lib/styles"
 
 // ─── Skin dot colours (fixed identifiers, not theme-relative) ──────────────
