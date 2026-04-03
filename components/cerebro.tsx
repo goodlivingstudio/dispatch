@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Paperclip, Mic, MicOff, ExternalLink, ArrowUpRight, Copy, Check, Flag } from "lucide-react"
+import { Paperclip, Mic, MicOff, ExternalLink, ArrowUpRight, Copy, Check, Flag, BookMarked } from "lucide-react"
 import type { Article, Message } from "@/lib/types"
 import { renderCitedBody, CitationSource } from "@/components/citation"
 
@@ -237,6 +237,15 @@ export function Cerebro({ articles, pendingPrompt }: {
     navigator.clipboard.writeText(thread).then(() => { setThreadCopied(true); setTimeout(() => setThreadCopied(false), 2000) })
   }, [messages])
 
+  const [atlasCopied, setAtlasCopied] = useState(false)
+  const handleAtlasExport = useCallback(() => {
+    const userMsgs = messages.filter(m => m.role === "user")
+    const topic = userMsgs[0]?.content.slice(0, 80) || "Untitled deliberation"
+    const thread = messages.filter(m => m.role !== "search").map(m => `**${m.role === "user" ? "Jeremy" : "Cerebro"}:** ${m.content}`).join("\n\n")
+    const atlas = `---\ntype: cerebro-deliberation\ndate: ${new Date().toISOString().slice(0, 10)}\ntopic: "${topic.replace(/"/g, "'")}"\nmessages: ${messages.filter(m => m.role !== "search").length}\n---\n\n# Deliberation: ${topic}\n\n${thread}\n\n---\n\n**Decision / Takeaway:** [what changed as a result of this deliberation]\n\n**Next action:** [what this demands]`
+    navigator.clipboard.writeText(atlas).then(() => { setAtlasCopied(true); setTimeout(() => setAtlasCopied(false), 2500) })
+  }, [messages])
+
   const handleCopyMessage = (idx: number) => {
     const m = messages[idx]
     if (!m) return
@@ -396,23 +405,45 @@ export function Cerebro({ articles, pendingPrompt }: {
           </div>
         ))}
 
-        {/* Follow-up prompts */}
+        {/* Follow-up directions — provocations, not quiz answers */}
         {followUps && !loading && (
-          <div style={{ margin: "8px 16px 16px", animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
-            <div style={{ fontSize: 12, fontFamily: "var(--font-geist-mono), monospace", color: "var(--accent-muted)", lineHeight: 1.65, marginBottom: followUps.alternatives.length > 0 ? 12 : 0 }}>
-              {followUps.question}
-            </div>
+          <div style={{ margin: "8px 12px 16px", animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
+            {/* Primary question — the station chief's next move */}
+            <button
+              onClick={() => send(followUps.question)}
+              style={{
+                display: "block", width: "100%", textAlign: "left",
+                background: "var(--bg-surface)", border: "1px solid var(--border)",
+                borderRadius: 10, padding: "10px 14px", marginBottom: 8,
+                cursor: "pointer", transition: "all 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.borderColor = "var(--accent-muted)" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.borderColor = "var(--border)" }}
+            >
+              <div style={{ fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", color: "var(--accent-muted)", lineHeight: 1.6 }}>
+                {followUps.question}
+              </div>
+            </button>
+            {/* Alternative directions — shorter, open-ended */}
             {followUps.alternatives.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {followUps.alternatives.map((alt, i) => (
                   <button
                     key={i}
                     onClick={() => send(alt)}
-                    style={{ background: "transparent", border: "none", padding: "4px 0", fontSize: 12, color: "var(--text-tertiary)", cursor: "pointer", transition: "color 0.15s", textAlign: "left", lineHeight: 1.4 }}
-                    onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
-                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
+                    style={{
+                      display: "flex", alignItems: "baseline", gap: 8,
+                      background: "transparent", border: "none",
+                      padding: "6px 14px", borderRadius: 8,
+                      fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
+                      color: "var(--text-tertiary)", cursor: "pointer",
+                      transition: "all 0.15s", textAlign: "left", lineHeight: 1.5,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.background = "transparent" }}
                   >
-                    → {alt}
+                    <span style={{ color: "var(--accent-muted)", flexShrink: 0 }}>→</span>
+                    <span>{alt}</span>
                   </button>
                 ))}
               </div>
@@ -525,16 +556,28 @@ export function Cerebro({ articles, pendingPrompt }: {
                   <Paperclip size={16} strokeWidth={1.5} />
                 </button>
                 {messages.length > 0 && (
-                  <button
-                    onClick={handleCopyThread}
-                    aria-label="Copy conversation"
-                    title="Copy entire conversation"
-                    style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, border: "none", background: "transparent", color: "var(--text-tertiary)", cursor: "pointer", transition: "all 0.15s", padding: 0 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = "var(--text-secondary)" }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
-                  >
-                    {threadCopied ? <Check size={15} strokeWidth={1.5} /> : <Copy size={15} strokeWidth={1.5} />}
-                  </button>
+                  <>
+                    <button
+                      onClick={handleCopyThread}
+                      aria-label="Copy conversation"
+                      title="Copy entire conversation"
+                      style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, border: "none", background: "transparent", color: "var(--text-tertiary)", cursor: "pointer", transition: "all 0.15s", padding: 0 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+                    >
+                      {threadCopied ? <Check size={15} strokeWidth={1.5} /> : <Copy size={15} strokeWidth={1.5} />}
+                    </button>
+                    <button
+                      onClick={handleAtlasExport}
+                      aria-label="Export to Atlas"
+                      title="Export deliberation for Atlas"
+                      style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, border: "none", background: "transparent", color: atlasCopied ? "var(--accent-secondary)" : "var(--text-tertiary)", cursor: "pointer", transition: "all 0.15s", padding: 0 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)"; if (!atlasCopied) e.currentTarget.style.color = "var(--text-secondary)" }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; if (!atlasCopied) e.currentTarget.style.color = "var(--text-tertiary)" }}
+                    >
+                      {atlasCopied ? <Check size={15} strokeWidth={1.5} /> : <BookMarked size={15} strokeWidth={1.5} />}
+                    </button>
+                  </>
                 )}
                 {speechSupported && (
                   <button

@@ -3,7 +3,7 @@
 // Decoupled from /api/news to avoid Vercel function timeout during ISR
 
 import Anthropic from "@anthropic-ai/sdk"
-import { DISPATCH_PREAMBLE } from "@/lib/prompts"
+import { OPERATOR, FIVE_LAYERS } from "@/lib/prompts"
 
 interface ArticleInput {
   id: string
@@ -20,28 +20,45 @@ interface Annotation {
   signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
-const SYSTEM_PROMPT = `You annotate news articles for DISPATCH.
+const SYSTEM_PROMPT = `${OPERATOR}
 
-${DISPATCH_PREAMBLE}
+${FIVE_LAYERS}
+
+Your task: annotate the following article for the Dispatch intelligence system.
+
+Produce a structured annotation with:
+
+SYNOPSIS: 1–2 sentences. What this article is about, stated plainly.
+
+RELEVANCE_HOOK: 1 sentence. Why this specific article is relevant to Jeremy Grant's mandate. Be precise — name the specific connection (Lilly engagement, CDO positioning, design-engineering convergence, etc.). If it is not relevant, say so.
+
+SIGNAL_TYPE: One of: DATA / CASE / OPINION / TREND / RESEARCH / NEWS / CULTURAL
+
+PRIMARY_LAYER: The single most relevant intelligence layer: Opportunity / Position / Discipline / Landscape / Culture
+
+SCORES: JSON object with integer scores 0–10 for each layer:
+{
+  "opportunity": 0,
+  "position": 0,
+  "discipline": 0,
+  "landscape": 0,
+  "culture": 0,
+  "urgency": 0
+}
+
+SCORING GUIDANCE:
+- Score generously for genuine relevance; score 0–2 for layers where relevance is a stretch
+- Urgency reflects time-sensitivity: today's breaking news scores higher than evergreen analysis
+- Multi-layer signals (2+ layers above 6) are the most valuable — flag these in the relevance hook
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
-  "synopsis": "one plain sentence — what this article actually covers, framed for someone tracking design leadership and strategic positioning across technology, culture, and healthcare",
-  "hook": "one sharp sentence — why this signal matters to the DISPATCH mandate. What it reveals, what it implies, what connection it makes. Never say 'not relevant' — find the signal, even if indirect.",
-  "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
-  "lens": the PRIMARY layer this maps to — one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "synopsis": "1-2 sentence synopsis",
+  "hook": "1 sentence relevance hook",
+  "type": "DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL",
+  "lens": "OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE",
   "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
 }
-
-Score definitions (0 = no relevance to this layer, 10 = essential):
-opportunity — strengthens healthcare/pharma positioning
-position — directly advances the career trajectory
-discipline — reveals how design leadership is evolving
-landscape — illuminates the broader operating environment
-culture — enriches creative authority and taste
-urgency — time-sensitivity (0 = evergreen, 10 = act now)
-
-Multi-layer signals (scoring high on 2+ layers) are the most valuable. Flag them.
 
 Return only valid JSON array. No prose.`
 

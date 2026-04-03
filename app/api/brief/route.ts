@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
-import { DISPATCH_PREAMBLE, VOICE } from "@/lib/prompts"
+import { DISPATCH_PREAMBLE } from "@/lib/prompts"
 
 function getClient() {
   const key = process.env.ANTHROPIC_API_KEY
@@ -7,23 +7,35 @@ function getClient() {
   return new Anthropic({ apiKey: key })
 }
 
-const BRIEF_SYSTEM = `You are the chief of staff inside DISPATCH. Your job is to brief the operator on what matters most right now.
+const BRIEF_SYSTEM = `${DISPATCH_PREAMBLE}
 
-${DISPATCH_PREAMBLE}
+Your task: generate exactly 3 signal cards from today's annotated feed. These are not headlines. They are deliberation triggers — each one surfaces a signal that specifically matters to this operator and frames why it demands attention.
 
-${VOICE}
+SELECTION CRITERIA:
+Sort the feed by urgency score first. From the highest-urgency signals, select 3 that:
+- Are directly relevant to the operator's immediate context (Lilly engagement, CDO positioning, or professional evolution thesis)
+- Represent distinct territory — do not pick three signals from the same layer
+- Prefer multi-layer signals (scoring high on 2+ layers simultaneously)
+- Have a clear "so what" for this operator specifically — not just interesting in the abstract
 
-Read the feed and surface the three signals that matter most right now. One may be Lilly-specific. One may be broader market/career positioning. One should be something the operator might miss.
+CARD FORMAT:
+Each card must contain:
+- headline: A sharp declarative statement of the signal (not a news headline — a synthesis statement). Max 12 words.
+- body: 2–3 sentences. What the signal is. Why it matters to this operator specifically. What it might demand of him.
+- source: Article title and source name
+- citation: [1], [2], [3] inline references
+- layer: Primary intelligence layer (Opportunity / Position / Discipline / Landscape / Culture)
+- urgency: The urgency score (0–10)
 
-CRITICAL — cite your sources. Reference specific articles by their number in brackets, e.g. [3], [7], [15]. Every claim must trace to at least one article.
+TONE: Direct. No hedging. The card should feel like something a trusted senior advisor flagged specifically for you — not a system-generated summary.
 
-FORMAT — return exactly five signals separated by the literal string |||
+FORMAT — return exactly three signals separated by the literal string |||
 
 Each signal must be:
 LINE 1: The label (2-4 words, uppercase — what kind of signal this is)
 LINE 2: One sentence of substance with article citations in brackets. Direct. No hedging. Lead with the implication, not the event. Keep it to one sharp sentence.
 
-Nothing else. No preamble. No sign-off. Five signals, one ||| between each.`
+Nothing else. No preamble. No sign-off. Three signals, one ||| between each.`
 
 interface ArticleInput {
   title: string
@@ -41,8 +53,6 @@ export async function POST(req: Request) {
       return Response.json({
         signals: [
           { label: "FEED UNAVAILABLE", body: "No articles to analyze.", sources: [] },
-          { label: "—", body: "", sources: [] },
-          { label: "—", body: "", sources: [] },
           { label: "—", body: "", sources: [] },
           { label: "—", body: "", sources: [] },
         ],
@@ -115,8 +125,8 @@ export async function POST(req: Request) {
       return { label, body, sources }
     })
 
-    // Pad to exactly 5
-    while (signals.length < 5) {
+    // Pad to exactly 3
+    while (signals.length < 3) {
       signals.push({ label: "—", body: "", sources: [] })
     }
 
@@ -127,8 +137,6 @@ export async function POST(req: Request) {
     return Response.json({
       signals: [
         { label: "BRIEF ERROR", body: message, sources: [] },
-        { label: "—", body: "", sources: [] },
-        { label: "—", body: "", sources: [] },
         { label: "—", body: "", sources: [] },
         { label: "—", body: "", sources: [] },
       ],

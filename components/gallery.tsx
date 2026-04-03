@@ -78,6 +78,8 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
       <img
         src={image.url}
         alt={image.title || ""}
+        referrerPolicy="no-referrer"
+        crossOrigin="anonymous"
         onClick={e => e.stopPropagation()}
         style={{
           maxWidth: "90vw", maxHeight: "85vh",
@@ -103,16 +105,21 @@ function Lightbox({ image, onClose, onPrev, onNext }: {
 // ─── Gallery Overlay ────────────────────────────────────────────────────────
 
 export function GalleryOverlay({ onClose }: { onClose: () => void }) {
-  const [images, setImages] = useState<GalleryImage[]>([])
+  const [allImages, setAllImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
+  const [activeSource, setActiveSource] = useState<string | null>(null) // null = show all
 
   useEffect(() => {
     fetch("/api/gallery")
       .then(r => r.json())
-      .then(data => { setImages(data.images || []); setLoading(false) })
+      .then(data => { setAllImages(data.images || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
+
+  // Derive unique sources for filter chips
+  const sources = [...new Set(allImages.map(img => img.source))].sort()
+  const images = activeSource ? allImages.filter(img => img.source === activeSource) : allImages
 
   // Close on Escape (when lightbox isn't open)
   useEffect(() => {
@@ -151,9 +158,49 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
         }}>
           Gallery
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {/* Source filter chips */}
+          {sources.length > 1 && (
+            <div style={{ display: "flex", gap: 4 }}>
+              <button
+                onClick={() => setActiveSource(null)}
+                style={{
+                  ...TYPE.sm, padding: "3px 10px", borderRadius: 9999, border: "none",
+                  background: activeSource === null ? "var(--accent-primary)" : "transparent",
+                  color: activeSource === null ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                  fontWeight: activeSource === null ? 600 : 400,
+                  cursor: "pointer", transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { if (activeSource !== null) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                onMouseLeave={e => { if (activeSource !== null) e.currentTarget.style.background = "transparent" }}
+              >
+                All
+              </button>
+              {sources.map(src => {
+                const isActive = activeSource === src
+                const count = allImages.filter(img => img.source === src).length
+                return (
+                  <button
+                    key={src}
+                    onClick={() => setActiveSource(isActive ? null : src)}
+                    style={{
+                      ...TYPE.sm, padding: "3px 10px", borderRadius: 9999, border: "none",
+                      background: isActive ? "var(--accent-primary)" : "transparent",
+                      color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                      fontWeight: isActive ? 600 : 400,
+                      cursor: "pointer", transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
+                  >
+                    {src} ({count})
+                  </button>
+                )
+              })}
+            </div>
+          )}
           <span style={{ ...TYPE.sm, color: "var(--text-tertiary)" }}>
-            {images.length} images
+            {images.length}{activeSource ? `/${allImages.length}` : ""} images
           </span>
           <button
             onClick={onClose}
@@ -207,6 +254,7 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
                 src={img.url}
                 alt={img.title || ""}
                 loading="lazy"
+                referrerPolicy="no-referrer"
                 onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = "none" }}
                 style={{
                   width: "100%",

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Radio, AudioLines, Blend, Send, Brain, Settings, ChevronRight, ChevronLeft } from "lucide-react"
+import { Radio, AudioLines, Blend, Send, Brain, Settings, ChevronRight, ChevronLeft, Minimize2 } from "lucide-react"
 import { Ticker } from "@/components/ticker"
 import { LeftRail } from "@/components/left-rail"
 import { useChiefOfStaff, ChiefOfStaffBand } from "@/components/chief-of-staff"
@@ -13,6 +13,7 @@ import { ConfigView } from "@/components/config-view"
 import { DispatchView } from "@/components/dispatch-view"
 import { GalleryOverlay } from "@/components/gallery"
 import { HotkeysOverlay } from "@/components/hotkeys"
+import { ExportPanel } from "@/components/export-panel"
 import { Divider } from "@/components/divider"
 import type { Article, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
 import { TYPE, MONO } from "@/lib/styles"
@@ -159,7 +160,10 @@ export default function Page() {
   const [leftRailCollapsed, setLeftRailCollapsed] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [hotkeysOpen, setHotkeysOpen] = useState(false)
-  const [active,         setActive]         = useState("all")
+  const [focusMode, setFocusMode] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [activeLayers,   setActiveLayers]   = useState<Set<string>>(new Set())
+  const [sortBy,         setSortBy]         = useState<"urgency" | "layer">("urgency")
   const [mobileTab,      setMobileTab]      = useState<"signal" | "audio" | "synthesis" | "dispatch" | "cerebro" | "config">("signal")
   const [excludedSources, setExcludedSources] = useState<Set<string>>(new Set())
 
@@ -196,6 +200,9 @@ export default function Page() {
       else if (e.key === "3") setViewMode("synthesis")
       else if (e.key === "4") setViewMode("dispatch")
 
+      // F — focus mode
+      else if (e.key === "f" || e.key === "F") setFocusMode(v => !v)
+
       // G — gallery
       else if (e.key === "g" || e.key === "G") setGalleryOpen(true)
 
@@ -210,11 +217,12 @@ export default function Page() {
       else if (e.key === "Escape") {
         if (hotkeysOpen) setHotkeysOpen(false)
         else if (galleryOpen) setGalleryOpen(false)
+        else if (focusMode) setFocusMode(false)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [viewMode, hotkeysOpen, galleryOpen])
+  }, [viewMode, hotkeysOpen, galleryOpen, focusMode])
 
   const handleToggleSource = useCallback((source: string) => {
     setExcludedSources(prev => {
@@ -229,8 +237,14 @@ export default function Page() {
   // Restore persisted state on mount
   useEffect(() => {
     try {
-      const savedCategory = localStorage.getItem("dispatch-category")
-      if (savedCategory) setActive(savedCategory)
+      const savedLayers = localStorage.getItem("dispatch-active-layers")
+      if (savedLayers) {
+        const parsed = JSON.parse(savedLayers)
+        if (Array.isArray(parsed)) setActiveLayers(new Set(parsed))
+      }
+
+      const savedSort = localStorage.getItem("dispatch-sort-by")
+      if (savedSort === "urgency" || savedSort === "layer") setSortBy(savedSort)
 
       const savedView = localStorage.getItem("dispatch-view-mode")
       if (savedView === "signal" || savedView === "audio" || savedView === "synthesis" || savedView === "dispatch" || savedView === "config") setViewMode(savedView)
@@ -243,10 +257,13 @@ export default function Page() {
     } catch { /* localStorage unavailable — use defaults */ }
   }, [])
 
-  // Persist active category
+  // Persist active layers and sort
   useEffect(() => {
-    try { localStorage.setItem("dispatch-category", active) } catch {}
-  }, [active])
+    try { localStorage.setItem("dispatch-active-layers", JSON.stringify([...activeLayers])) } catch {}
+  }, [activeLayers])
+  useEffect(() => {
+    try { localStorage.setItem("dispatch-sort-by", sortBy) } catch {}
+  }, [sortBy])
 
   // Persist view mode
   useEffect(() => {
@@ -336,8 +353,18 @@ export default function Page() {
   const sourceFiltered = excludedSources.size > 0
     ? articles.filter(a => !excludedSources.has(a.source))
     : articles
-  const filtered =
-    active === "all" ? sourceFiltered : sourceFiltered.filter(a => a.tag === active)
+  const layerFiltered =
+    activeLayers.size === 0 ? sourceFiltered : sourceFiltered.filter(a => activeLayers.has(a.tag))
+  const filtered = [...layerFiltered].sort((a, b) => {
+    if (sortBy === "urgency") {
+      const ua = a.signalScores?.urgency ?? 0
+      const ub = b.signalScores?.urgency ?? 0
+      if (ub !== ua) return ub - ua
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    }
+    // layer sort: original order from API
+    return 0
+  })
 
   const feedContent = (
     <main
@@ -518,8 +545,61 @@ export default function Page() {
       {/* Signal ticker — full width, pinned top */}
       <Ticker isDay={isDay} onToggle={toggleMode} skin={skin} onSkinChange={setSkin} />
 
-      {/* Three-column workspace */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      {/* Focus Mode — DCOS strip + full-width Cerebro */}
+      {focusMode && !isMobile && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {/* Compact DCOS strip */}
+          <div style={{
+            flexShrink: 0, borderBottom: "1px solid var(--border)",
+            display: "flex", alignItems: "stretch", gap: 0,
+          }}>
+            {/* Exit focus mode button */}
+            <button
+              onClick={() => setFocusMode(false)}
+              title="Exit focus mode (Esc)"
+              style={{
+                flexShrink: 0, width: 48,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: "var(--bg-surface)", border: "none", borderRight: "1px solid var(--border)",
+                cursor: "pointer", transition: "background 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+            >
+              <Minimize2 size={16} strokeWidth={1.5} style={{ color: "var(--accent-secondary)" }} />
+            </button>
+            {/* DCOS cards as compact clickable strips */}
+            {signals.filter(s => s.body).map((signal, i) => (
+              <button
+                key={i}
+                onClick={() => handleDeliberate(signal)}
+                style={{
+                  flex: 1, display: "flex", flexDirection: "column", gap: 2,
+                  padding: "10px 16px", background: "transparent",
+                  border: "none", borderRight: i < signals.filter(s => s.body).length - 1 ? "1px solid var(--border)" : "none",
+                  cursor: "pointer", textAlign: "left", transition: "background 0.15s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+              >
+                <span style={{ ...TYPE.xs, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.04em" }}>
+                  {signal.label}
+                </span>
+                <span style={{ ...TYPE.sm, color: "var(--text-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {signal.body.replace(/\[\d+\]/g, "").slice(0, 80)}
+                </span>
+              </button>
+            ))}
+          </div>
+          {/* Full-width Cerebro */}
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <Cerebro articles={articles} pendingPrompt={cerebroPrompt} />
+          </div>
+        </div>
+      )}
+
+      {/* Three-column workspace — hidden in focus mode */}
+      <div style={{ flex: 1, display: focusMode ? "none" : "flex", overflow: "hidden" }}>
         <div
           style={{
             width: leftRailCollapsed ? 42 : leftWidth,
@@ -568,8 +648,15 @@ export default function Page() {
               </button>
               <LeftRail
                 articles={articles}
-                active={active}
-                onSelect={setActive}
+                activeLayers={activeLayers}
+                onToggleLayer={(layer: string) => setActiveLayers(prev => {
+                  const next = new Set(prev)
+                  if (next.has(layer)) next.delete(layer)
+                  else next.add(layer)
+                  return next
+                })}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
                 isLive={isLive}
                 feedLoading={feedLoading}
                 width={leftRailCollapsed ? 42 : leftWidth}
@@ -579,6 +666,9 @@ export default function Page() {
                 onToggleSource={handleToggleSource}
                 onGalleryOpen={() => setGalleryOpen(true)}
                 onHotkeysOpen={() => setHotkeysOpen(true)}
+                onFocusMode={() => setFocusMode(true)}
+                onExportOpen={() => setExportOpen(true)}
+                feedHealth={feedHealth}
               />
             </>
           )}
@@ -657,6 +747,9 @@ export default function Page() {
 
       {/* Hotkeys overlay */}
       {hotkeysOpen && <HotkeysOverlay onClose={() => setHotkeysOpen(false)} />}
+
+      {/* Export panel */}
+      {exportOpen && <ExportPanel onClose={() => setExportOpen(false)} signals={signals} articles={articles} />}
     </div>
   )
 }

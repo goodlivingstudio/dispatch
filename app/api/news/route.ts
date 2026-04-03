@@ -4,7 +4,7 @@ export const revalidate = 1800 // 30 min cache
 import Anthropic from "@anthropic-ai/sdk"
 import { FEEDS, type FeedDef } from "@/lib/feeds"
 import { storeArticles } from "@/lib/article-store"
-import { DISPATCH_PREAMBLE } from "@/lib/prompts"
+import { OPERATOR, FIVE_LAYERS } from "@/lib/prompts"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -208,18 +208,22 @@ function interleave(items: Article[]): Article[] {
 // Annotates top articles via Claude Haiku during ISR. If it fails or times out,
 // articles are returned unannotated — the client can still call /api/annotate.
 
-const ANNOTATE_PROMPT = `You annotate news articles for DISPATCH.
+const ANNOTATE_PROMPT = `${OPERATOR}
 
-${DISPATCH_PREAMBLE}
+${FIVE_LAYERS}
+
+Your task: annotate the following articles for the Dispatch intelligence system.
 
 For each numbered headline, return a JSON array. One object per article, same order:
 {
-  "synopsis": "one plain sentence — what this article covers, framed for the mandate",
-  "hook": "one sharp sentence — why this signal matters. Never say 'not relevant' — find the signal.",
-  "type": one of: DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL,
-  "lens": one of: OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE,
+  "synopsis": "1-2 sentence synopsis — what this article is about, stated plainly",
+  "hook": "1 sentence — why this article is relevant to Jeremy Grant's mandate. Be precise — name the specific connection.",
+  "type": "DATA | CASE | OPINION | TREND | RESEARCH | NEWS | CULTURAL",
+  "lens": "OPPORTUNITY | POSITION | DISCIPLINE | LANDSCAPE | CULTURE",
   "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 }
 }
+
+Score generously for genuine relevance; score 0-2 for layers where relevance is a stretch. Multi-layer signals (2+ layers above 6) are the most valuable.
 
 Return only valid JSON array. No prose.`
 
@@ -295,10 +299,33 @@ export async function GET() {
   // Layers with no live source — on stub fallback
   const stubCategories = ALL_LAYERS.filter(layer => !coveredTags.has(layer))
 
+  // ── Deduplicate — remove near-identical articles across feeds ────────────
+  // Normalize: lowercase, strip punctuation, take first 8 significant words
+  function titleKey(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter(w => w.length > 3)
+      .slice(0, 8)
+      .join(" ")
+  }
+
+  const seen = new Map<string, number>()
+  const deduped = allArticles.filter((a, i) => {
+    if (a.url === "#") return true // keep stubs
+    const key = titleKey(a.title)
+    if (!key) return true
+    const existing = seen.get(key)
+    if (existing !== undefined) return false // skip duplicate
+    seen.set(key, i)
+    return true
+  })
+
   const LAYER_ORDER = ALL_LAYERS
 
   const sorted = interleave(
-    allArticles.sort((a, b) =>
+    deduped.sort((a, b) =>
       LAYER_ORDER.indexOf(a.tag) - LAYER_ORDER.indexOf(b.tag)
     )
   )

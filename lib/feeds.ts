@@ -26,6 +26,10 @@ export const FEEDS: FeedDef[] = [
   { url: "https://eyeondesign.aiga.org/feed/",                   source: "Eye on Design",     category: "Design Leadership",    tag: "position",     layer: "position" },
   { url: "https://www.fastcompany.com/co-design/rss",            source: "Fast Company",      category: "Design & Business",    tag: "position",     layer: "position" },
   { url: "https://www.core77.com/feed",                          source: "Core77",            category: "Design Industry",      tag: "position",     layer: "position" },
+  { url: "https://designobserver.com/feed/",                     source: "Design Observer",   category: "Design Criticism",     tag: "position",     layer: "position" },
+  { url: "https://www.nngroup.com/feed/rss/",                    source: "NNGroup",           category: "UX Research & Org",    tag: "position",     layer: "position" },
+  { url: "https://www.svpg.com/feed/",                           source: "SVPG",              category: "Product & Design Org", tag: "position",     layer: "position" },
+  { url: "https://www.mobihealthnews.com/feed",                  source: "MobiHealthNews",    category: "Healthcare Digital",   tag: "opportunity",  layer: "opportunity" },
 
   // ── DISCIPLINE — How design leadership is evolving as a function ──────────
   { url: "https://vercel.com/atom",                              source: "Vercel",            category: "Platform & Tooling",   tag: "discipline",   layer: "discipline" },
@@ -81,4 +85,10 @@ export const FEEDS: FeedDef[] = [
   { url: "https://medium.com/feed/google-design",                  source: "Google Design",     category: "Design Practice",      tag: "discipline",   layer: "discipline", type: "social" },
   { url: "https://medium.com/feed/ux-collective",                  source: "UX Collective",     category: "Design Discourse",     tag: "discipline",   layer: "discipline", type: "social" },
   { url: "https://medium.com/feed/mule-design",                    source: "Mule Design",       category: "Design Ethics",        tag: "discipline",   layer: "discipline", type: "social" },
+
+  // Positioning — Senior design leadership voices
+  { url: "https://www.subtraction.com/feed/",                      source: "Khoi Vinh",         category: "Design Authority",     tag: "position",     layer: "position",   type: "social" },
+  { url: "https://medium.com/feed/@khoi",                          source: "Khoi Vinh (Medium)", category: "Design Leadership",  tag: "position",     layer: "position",   type: "social" },
+  { url: "https://maeda.pm/feed/",                                 source: "John Maeda",        category: "Design & Technology",  tag: "position",     layer: "position",   type: "social" },
+  { url: "https://frankchimero.com/feed.xml",                      source: "Frank Chimero",     category: "Design Philosophy",    tag: "position",     layer: "position",   type: "social" },
 ]

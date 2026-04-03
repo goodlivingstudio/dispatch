@@ -10,51 +10,78 @@ async function fetchArena(url: string, sourceName: string): Promise<GalleryImage
     const data = await res.json()
     const contents = data.contents || []
     return contents
-      .filter((c: { class: string; image?: { display?: { url: string } } }) =>
-        c.class === "Image" && c.image?.display?.url
-      )
-      .map((c: { id: number; title?: string; image: { display: { url: string } }; source?: { url?: string } }) => ({
+      .filter((c: { class?: string; image?: { display?: { url?: string }; original?: { url?: string } } }) => {
+        // Accept Image blocks, or any block with an image attachment
+        if (c.image?.display?.url) return true
+        if (c.image?.original?.url) return true
+        return false
+      })
+      .map((c: { id: number; title?: string; class?: string; image?: { display?: { url?: string }; original?: { url?: string } }; source?: { url?: string } }) => ({
         id: `arena-${c.id}`,
-        url: c.image.display.url,
+        url: c.image?.display?.url || c.image?.original?.url || "",
         title: c.title || undefined,
         source: sourceName,
         linkUrl: c.source?.url || undefined,
       }))
+      .filter((img: GalleryImage) => img.url.length > 0)
   } catch {
     return []
   }
 }
 
 function extractImageFromRSS(item: string): string | null {
-  // First try: img in description/content — usually full-size
-  const img = item.match(/<img[^>]+src=["']([^"']{20,})["']/i)
-  if (img?.[1]?.startsWith("http")) {
-    // Upgrade Dezeen thumbnails to full size (remove dimension suffix)
-    let url = img[1]
-    url = url.replace(/-\d+x\d+\./, ".")
-    return url
+  // Decode CDATA sections first so we can find img tags inside content:encoded
+  const decoded = item.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+
+  // Upgrade Dezeen square thumbnails to column (natural aspect ratio)
+  // Tested patterns against static.dezeen.com CDN:
+  //   _sq_N.jpg  → _col_N.jpg   (e.g. _sq_1.jpg → _col_1.jpg)
+  //   _sqN.jpg   → _col_N.jpg   (e.g. _sq2.jpg → _col_2.jpg)
+  //   _sq.jpg    → _col_0.jpg   (no number = default to _col_0)
+  //   _sq-N.jpg  → _col_0.jpg   (variant suffix, fall back to _col_0)
+  function upgradeDezeenUrl(url: string): string {
+    if (url.includes("dezeen.com")) {
+      // _sq_N.jpg → _col_N.jpg (underscore-separated number)
+      url = url.replace(/_sq_(\d+)\./, "_col_$1.")
+      // _sqN.jpg → _col_N.jpg (number directly after sq, no separator)
+      url = url.replace(/_sq(\d+)\./, "_col_$1.")
+      // _sq-N.jpg → _col_0.jpg (dash variant, fall back)
+      url = url.replace(/_sq-\d+\./, "_col_0.")
+      // _sq.jpg → _col_0.jpg (bare square, no number)
+      url = url.replace(/_sq\./, "_col_0.")
+    }
+    // Strip WordPress dimension suffixes
+    return url.replace(/-\d+x\d+\./, ".")
   }
 
-  // media:content url
+  // First try: img in description/content/content:encoded — usually full-size
+  const imgMatches = decoded.matchAll(/<img[^>]+src=["']([^"']{20,})["']/gi)
+  for (const m of imgMatches) {
+    if (m[1]?.startsWith("http")) {
+      return upgradeDezeenUrl(m[1])
+    }
+  }
+
+  // media:content url (may have medium="image" attr)
   const mc = item.match(/<media:content[^>]+url=["']([^"']+)["'][^>]*/i)
   if (mc?.[1]) {
-    let url = mc[1]
-    url = url.replace(/-\d+x\d+\./, ".")
-    return url
+    return upgradeDezeenUrl(mc[1])
   }
 
-  // enclosure
+  // enclosure with image type
   const enc = item.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']image[^"']*["']/i)
     || item.match(/<enclosure[^>]+type=["']image[^"']*["'][^>]+url=["']([^"']+)["']/i)
-  if (enc?.[1]) return enc[1]
+  if (enc?.[1]) return upgradeDezeenUrl(enc[1])
 
   // media:thumbnail as last resort
   const mt = item.match(/<media:thumbnail[^>]+url=["']([^"']+)["'][^>]*/i)
   if (mt?.[1]) {
-    let url = mt[1]
-    url = url.replace(/-\d+x\d+\./, ".")
-    return url
+    return upgradeDezeenUrl(mt[1])
   }
+
+  // og:image or similar in content
+  const og = decoded.match(/(?:og:image|twitter:image)[^>]*content=["']([^"']+)["']/i)
+  if (og?.[1]?.startsWith("http")) return og[1]
 
   return null
 }

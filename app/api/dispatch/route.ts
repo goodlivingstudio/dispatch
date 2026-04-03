@@ -2,24 +2,43 @@
 // Analyzes 7 days of article history and generates publishable content briefs
 import Anthropic from "@anthropic-ai/sdk"
 import { loadArticleHistory, ARTICLE_STORE_AVAILABLE } from "@/lib/article-store"
-import { DISPATCH_PREAMBLE, VOICE } from "@/lib/prompts"
+import { DISPATCH_PREAMBLE } from "@/lib/prompts"
+import { kv } from "@vercel/kv"
 
-const SYSTEM_PROMPT = `You are the Dispatch engine — the action layer of DISPATCH. You turn intelligence into output.
+const KV_AVAILABLE = !!(
+  process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
+)
 
-${DISPATCH_PREAMBLE}
+function getWeekKey(): string {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 0, 1)
+  const diff = now.getTime() - start.getTime()
+  const weekNum = Math.ceil((diff / 86400000 + start.getDay() + 1) / 7)
+  return `dispatch:weekly:${now.getFullYear()}-w${weekNum}`
+}
 
-${VOICE}
+const WEEK_TTL = 7 * 24 * 60 * 60 // 7 days
 
-You receive a week's worth of scored and annotated intelligence signals. Your job is to identify the 4-5 strongest publishable angles and produce comprehensive content briefs.
+const SYSTEM_PROMPT = `${DISPATCH_PREAMBLE}
 
-The operator publishes across two modes:
-1. THOUGHT LEADERSHIP — LinkedIn, Medium, Substack. Analytical, strategic, positioned. Establishes authority.
-2. CREATIVE EXPRESSION — Instagram, Lummi. Visual, atmospheric, cultural. Establishes taste.
+You are the action intelligence layer of Dispatch. Your job is to translate the week's signal into content the operator can produce and publish — thought leadership that advances his positioning, demonstrates his expertise, and builds toward his five-year target.
 
-For each pitch, return:
+CONTEXT: The operator is a senior design leader positioning for CDO/Head of Design roles at the intersection of AI, healthcare, and human experience. His content should establish him as someone who thinks at the level where design, technology, healthcare, and strategy converge — not as a design craftsperson or tool commentator.
+
+PRODUCE: 4–5 content pitches. Each pitch must be grounded in at least one specific signal from this week's feed — not generic trend commentary, but intelligence-driven argument.
+
+TWO MODES — distribute pitches across both:
+
+STRATEGIC POSITIONING (LinkedIn / Medium / Substack):
+Long-form argument or perspective. 600–1200 words when developed. The voice of someone with hard-won expertise and a clear point of view. Not listicles. Not "here's what I learned." Thesis-driven essays, analysis, or provocations.
+
+CREATIVE EXPRESSION (Instagram / Lummi):
+Visual/editorial. A concept, an image direction, a short statement. The aesthetic intelligence layer of the operator's public presence.
+
+PITCH FORMAT (for each):
 {
-  "title": "Working title (compelling, not clickbait)",
-  "thesis": "One clear sentence — the argument or perspective.",
+  "title": "The content title or opening line",
+  "thesis": "The central argument or claim (1-2 sentences). This must be a specific, arguable claim — not a topic description.",
   "mode": "thought_leadership" or "creative",
   "layers": ["which intelligence layers this draws from"],
   "brief": "3-4 sentences: what the piece covers, the structure, the hook, and the payoff.",
@@ -27,8 +46,10 @@ For each pitch, return:
     "primary": "Best platform for this piece",
     "adaptations": ["How to adapt for other platforms — 1 sentence each"]
   },
-  "evidence": ["2-3 specific signals from the week that support this angle"],
-  "urgency": "Why now? What makes this timely?"
+  "evidence": ["2-3 specific signals from the week that support this thesis, with source citations [1][2]"],
+  "angle": "What makes this piece worth reading from this author specifically — what only Jeremy Grant can say here",
+  "urgency": "Why publish now vs. later (1 sentence)",
+  "wordCount": 800
 }
 
 Return a JSON object:
@@ -55,6 +76,25 @@ export async function GET() {
   }
 
   try {
+    // Check KV cache first — avoid 10-20s Sonnet call on repeat visits
+    if (KV_AVAILABLE) {
+      try {
+        const cached = await kv.get<{ weekSummary: string | null; pitches: unknown[]; articleCount: number; generatedAt: string }>(getWeekKey())
+        if (cached && cached.pitches && cached.pitches.length > 0) {
+          return Response.json({
+            available: true,
+            weekSummary: cached.weekSummary,
+            pitches: cached.pitches,
+            articleCount: cached.articleCount,
+            generatedAt: cached.generatedAt,
+            cached: true,
+          })
+        }
+      } catch {
+        // KV read failed — fall through to generation
+      }
+    }
+
     const articles = await loadArticleHistory(7)
 
     if (articles.length === 0) {
@@ -91,12 +131,21 @@ export async function GET() {
     }
 
     const result = JSON.parse(match[0])
-    return Response.json({
-      available: true,
+    const responseData = {
       weekSummary: result.weekSummary || null,
       pitches: result.pitches || [],
       articleCount: articles.length,
       generatedAt: new Date().toISOString(),
+    }
+
+    // Cache in KV for fast subsequent loads
+    if (KV_AVAILABLE) {
+      kv.set(getWeekKey(), responseData, { ex: WEEK_TTL }).catch(() => {})
+    }
+
+    return Response.json({
+      available: true,
+      ...responseData,
     })
   } catch (err) {
     return Response.json(

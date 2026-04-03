@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Radio, AudioLines, Blend, Send, Settings, Aperture, Keyboard } from "lucide-react"
+import { Radio, AudioLines, Blend, Send, Settings, Aperture, Keyboard, Minimize2, FileDown, Activity } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 import { TYPE, metaStyle } from "@/lib/styles"
@@ -156,12 +156,136 @@ function SourceFilter({ articles, excludedSources, onToggleSource }: {
   )
 }
 
+// ─── Source Pulse Flyout ────────────────────────────────────────────────────
+
+function SourcePulse({ articles, feedHealth }: {
+  articles: Article[]
+  feedHealth: FeedHealth | null
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [open])
+
+  // Derive per-source health from articles
+  const sourceStats = useMemo(() => {
+    const map: Record<string, { count: number; annotated: number; live: boolean; tag: string }> = {}
+    articles.forEach(a => {
+      if (!map[a.source]) map[a.source] = { count: 0, annotated: 0, live: a.url !== "#", tag: a.tag }
+      map[a.source].count++
+      if (a.synopsis || a.relevance) map[a.source].annotated++
+    })
+    return Object.entries(map)
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([name, stats]) => ({ name, ...stats }))
+  }, [articles])
+
+  const liveCount = feedHealth?.sourcesLive ?? 0
+  const totalCount = feedHealth?.sourcesTotal ?? 0
+  const failedCount = feedHealth?.sourcesFailed ?? 0
+  const healthPct = totalCount > 0 ? Math.round((liveCount / totalCount) * 100) : 0
+  const healthColor = healthPct >= 80 ? "var(--live)" : healthPct >= 50 ? "#D4A05A" : "#ef4444"
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        title="Source Pulse"
+        aria-label="Source Pulse"
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 36, height: 36, borderRadius: 8,
+          border: "none", background: open ? "var(--bg-elevated)" : "transparent",
+          color: open ? "var(--accent-secondary)" : "var(--text-tertiary)",
+          cursor: "pointer", transition: "all 0.15s", padding: 0,
+        }}
+        onMouseEnter={e => { if (!open) { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" } }}
+        onMouseLeave={e => { if (!open) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" } }}
+      >
+        <Activity size={18} strokeWidth={1.5} />
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", bottom: "calc(100% + 8px)", left: 0, zIndex: 2000,
+          width: 280, maxHeight: 400, overflowY: "auto",
+          background: "var(--bg-elevated)", border: "1px solid var(--border)",
+          borderRadius: 12, padding: "12px 0",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+        }}>
+          {/* Header */}
+          <div style={{ padding: "4px 16px 12px", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span style={{ ...TYPE.sm, fontWeight: 600, color: "var(--text-primary)" }}>Source Pulse</span>
+              <span style={{
+                ...TYPE.xs, padding: "1px 8px", borderRadius: 9999,
+                background: `${healthColor}22`, color: healthColor, fontWeight: 600,
+              }}>
+                {healthPct}%
+              </span>
+            </div>
+            <div style={{ ...TYPE.sm, color: "var(--text-tertiary)", lineHeight: 1.5 }}>
+              {liveCount} live · {failedCount} failed · {articles.length} articles
+              {feedHealth?.stubCategories && feedHealth.stubCategories.length > 0 && (
+                <span> · Stubs: {feedHealth.stubCategories.join(", ")}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Per-source list */}
+          <div style={{ padding: "8px 0" }}>
+            {sourceStats.map(src => (
+              <div
+                key={src.name}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "5px 16px",
+                }}
+              >
+                <span style={{
+                  width: 5, height: 5, borderRadius: "50%", flexShrink: 0,
+                  background: src.live ? "var(--live)" : "#ef4444",
+                }} />
+                <span style={{
+                  flex: 1, ...TYPE.sm,
+                  color: src.live ? "var(--text-secondary)" : "var(--text-tertiary)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  opacity: src.live ? 1 : 0.6,
+                }}>
+                  {src.name}
+                </span>
+                <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontVariantNumeric: "tabular-nums" }}>
+                  {src.count}
+                </span>
+                {src.annotated > 0 && (
+                  <span style={{ ...TYPE.xs, color: "var(--accent-muted)", fontVariantNumeric: "tabular-nums" }}>
+                    ✓{src.annotated}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Left Rail ───────────────────────────────────────────────────────────────
 
 export function LeftRail({
   articles,
-  active,
-  onSelect,
+  activeLayers,
+  onToggleLayer,
+  sortBy,
+  onSortChange,
   isLive,
   feedLoading,
   width,
@@ -171,10 +295,15 @@ export function LeftRail({
   onToggleSource,
   onGalleryOpen,
   onHotkeysOpen,
+  onFocusMode,
+  onExportOpen,
+  feedHealth,
 }: {
   articles: Article[]
-  active: string
-  onSelect: (id: string) => void
+  activeLayers: Set<string>
+  onToggleLayer: (layer: string) => void
+  sortBy: "urgency" | "layer"
+  onSortChange: (sort: "urgency" | "layer") => void
   isLive: boolean
   feedHealth?: FeedHealth | null
   feedLoading: boolean
@@ -185,6 +314,8 @@ export function LeftRail({
   onToggleSource: (source: string) => void
   onGalleryOpen?: () => void
   onHotkeysOpen?: () => void
+  onFocusMode?: () => void
+  onExportOpen?: () => void
 }) {
   const time = useClock()
   const now  = new Date()
@@ -349,57 +480,89 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* Category pills — visible in Signal mode only */}
+        {/* Sort toggle + layer filter chips — visible in Signal mode only */}
         {viewMode === "signal" && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "8px 16px" }}>
-            {CATEGORY_CONFIG.map(cat => {
-              const n = countFor(cat.id)
-              if (cat.id !== "all" && n === 0 && !feedLoading) return null
-              const isActive = active === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => onSelect(cat.id)}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    padding: "4px 12px",
-                    borderRadius: 9999,
-                    border: "none",
-                    background: isActive ? "var(--accent-primary)" : "transparent",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
-                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
-                >
-                  <span
+          <div style={{ padding: "8px 16px" }}>
+            {/* Sort toggle */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ ...TYPE.sm, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Sort</span>
+              {(["urgency", "layer"] as const).map(s => {
+                const isActive = sortBy === s
+                return (
+                  <button
+                    key={s}
+                    onClick={() => onSortChange(s)}
                     style={{
-                      ...TYPE.body,
+                      ...TYPE.sm,
+                      padding: "3px 10px",
+                      borderRadius: 9999,
+                      border: "none",
+                      background: isActive ? "var(--accent-primary)" : "transparent",
                       color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
                       fontWeight: isActive ? 600 : 400,
-                      transition: "color 0.15s",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      textTransform: "capitalize",
                     }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
                   >
-                    {cat.label}
-                  </span>
-                  {n > 0 && (
+                    {s}
+                  </button>
+                )
+              })}
+            </div>
+            {/* Layer filter chips — multi-select, empty = show all */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
+                const n = countFor(cat.id)
+                if (n === 0 && !feedLoading) return null
+                const isActive = activeLayers.has(cat.id)
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => onToggleLayer(cat.id)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "4px 12px",
+                      borderRadius: 9999,
+                      border: "none",
+                      background: isActive ? "var(--accent-primary)" : "transparent",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
+                  >
                     <span
                       style={{
-                        ...TYPE.sm,
-                        fontVariantNumeric: "tabular-nums",
-                        color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
-                        opacity: 0.7,
+                        ...TYPE.body,
+                        color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                        fontWeight: isActive ? 600 : 400,
                         transition: "color 0.15s",
                       }}
                     >
-                      {n}
+                      {cat.label}
                     </span>
-                  )}
-                </button>
-              )
-            })}
+                    {n > 0 && (
+                      <span
+                        style={{
+                          ...TYPE.sm,
+                          fontVariantNumeric: "tabular-nums",
+                          color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
+                          opacity: 0.7,
+                          transition: "color 0.15s",
+                        }}
+                      >
+                        {n}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
 
@@ -460,6 +623,43 @@ export function LeftRail({
             <Keyboard size={18} strokeWidth={1.5} />
           </button>
         )}
+        {onFocusMode && (
+          <button
+            onClick={onFocusMode}
+            title="Focus mode (F)"
+            aria-label="Focus mode"
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 36, height: 36, borderRadius: 8,
+              border: "none", background: "transparent",
+              color: "var(--text-tertiary)",
+              cursor: "pointer", transition: "all 0.15s", padding: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+          >
+            <Minimize2 size={18} strokeWidth={1.5} />
+          </button>
+        )}
+        {onExportOpen && (
+          <button
+            onClick={onExportOpen}
+            title="Quick Export"
+            aria-label="Quick Export"
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 36, height: 36, borderRadius: 8,
+              border: "none", background: "transparent",
+              color: "var(--text-tertiary)",
+              cursor: "pointer", transition: "all 0.15s", padding: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
+          >
+            <FileDown size={18} strokeWidth={1.5} />
+          </button>
+        )}
+        <SourcePulse articles={articles} feedHealth={feedHealth || null} />
       </div>
     </aside>
   )

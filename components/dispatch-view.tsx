@@ -17,7 +17,9 @@ interface Pitch {
     adaptations: string[]
   }
   evidence: string[]
+  angle?: string
   urgency: string
+  wordCount?: number
 }
 
 interface DispatchData {
@@ -141,6 +143,13 @@ function PitchOverlay({ pitch, onClose, onDeliberate }: { pitch: Pitch; onClose:
           ))}
         </div>
 
+        {pitch.angle && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ ...metaStyle, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8 }}>Author Angle</div>
+            <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>{pitch.angle}</div>
+          </div>
+        )}
+
         <div style={{ marginBottom: 28 }}>
           <div style={{ ...metaStyle, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8 }}>Why Now</div>
           <div style={{ ...TYPE.body, color: "var(--accent-muted)", lineHeight: 1.7 }}>{pitch.urgency}</div>
@@ -148,6 +157,10 @@ function PitchOverlay({ pitch, onClose, onDeliberate }: { pitch: Pitch; onClose:
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <CopyButton text={pitchMarkdown} label="Copy brief" />
+          <CopyButton
+            text={`---\ntype: dispatch-pitch\ndate: ${new Date().toISOString().slice(0, 10)}\nmode: ${pitch.mode}\nlayers: [${pitch.layers.join(", ")}]\nplatform: ${pitch.platforms.primary}\n---\n\n# ${pitch.title}\n\n**Thesis:** ${pitch.thesis}\n\n**Brief:** ${pitch.brief}\n\n${pitch.angle ? `**Angle:** ${pitch.angle}\n\n` : ""}**Evidence:**\n${pitch.evidence.map(e => `- ${e}`).join("\n")}\n\n**Urgency:** ${pitch.urgency}\n\n**Adaptations:**\n${pitch.platforms.adaptations.map(a => `- ${a}`).join("\n")}\n\n${pitch.wordCount ? `**Target:** ~${pitch.wordCount} words` : ""}`}
+            label="Copy for Atlas"
+          />
           <button
             onClick={() => { onDeliberate(`I want to develop this content pitch:\n\n"${pitch.title}"\n\nThesis: ${pitch.thesis}\n\nHelp me think through the argument structure, key points, and how to make it distinctive.`); onClose() }}
             style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", color: "var(--text-secondary)", ...TYPE.sm, cursor: "pointer", transition: "all 0.15s" }}
