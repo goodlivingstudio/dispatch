@@ -60,6 +60,11 @@ export const FEEDS: FeedDef[] = [
   { url: "https://www.fastcompany.com/latest/rss",               source: "Fast Company",      category: "Innovation & Culture", tag: "culture",      layer: "culture" },
   { url: "https://news.google.com/rss/search?q=site:criterion.com&hl=en-US&gl=US", source: "Criterion", category: "Film & Cinema", tag: "culture", layer: "culture" },
 
+  // ── SHOPIFY — Engineering, design, and product culture ─────────────────────
+  { url: "https://medium.com/feed/shopify-ux",                                source: "Shopify UX",                category: "Product Design",        tag: "discipline",   layer: "discipline", type: "social" },
+  { url: "https://news.google.com/rss/search?q=site:shopify.engineering&hl=en-US&gl=US", source: "Shopify Engineering", category: "Design Engineering", tag: "discipline",   layer: "discipline" },
+  { url: "https://news.google.com/rss/search?q=%22shopify+editions%22&hl=en-US&gl=US", source: "Shopify Editions",    category: "Product Platform",      tag: "discipline",   layer: "discipline" },
+
   // ── GOOGLE NEWS PROXY — Sources without native RSS ────────────────────────
   { url: "https://news.google.com/rss/search?q=site:hbr.org&hl=en-US&gl=US", source: "Harvard Business Review", category: "Business & Leadership", tag: "position", layer: "position" },
   { url: "https://news.google.com/rss/search?q=site:figma.com/blog&hl=en-US&gl=US", source: "Figma Blog", category: "Design Tooling", tag: "discipline", layer: "discipline" },
