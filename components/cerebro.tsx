@@ -230,6 +230,7 @@ export function Cerebro({ articles, pendingPrompt }: {
 
   const [threadCopied, setThreadCopied] = useState(false)
   const [copiedMsgIdx, setCopiedMsgIdx] = useState<number | null>(null)
+  const [flaggedMsgIdx, setFlaggedMsgIdx] = useState<number | null>(null)
 
   const handleCopyThread = useCallback(() => {
     const thread = messages.filter(m => m.role !== "search").map(m => `${m.role === "user" ? "Jeremy" : "Cerebro"}: ${m.content}`).join("\n\n")
@@ -247,7 +248,7 @@ export function Cerebro({ articles, pendingPrompt }: {
     if (!m) return
     const context = messages.slice(Math.max(0, idx - 2), idx + 1).map(msg => `${msg.role}: ${msg.content}`).join("\n\n")
     const report = `# Cerebro Response Flag\n\nFlagged message:\n${m.content}\n\n---\n\nContext:\n${context}\n\n---\n\nIssue: [describe the problem — hallucination, wrong source, bad reasoning, etc.]`
-    navigator.clipboard.writeText(report)
+    navigator.clipboard.writeText(report).then(() => { setFlaggedMsgIdx(idx); setTimeout(() => setFlaggedMsgIdx(null), 2000) })
   }
 
   return (
@@ -274,42 +275,24 @@ export function Cerebro({ articles, pendingPrompt }: {
           borderBottom: "1px solid var(--border)",
         }}
       >
-        <span
-          style={{
-            fontSize: 11,
-            fontFamily: "var(--font-geist-mono), monospace",
-            textTransform: "uppercase",
-            color: "var(--accent-muted)",
-          }}
-        >
-          Cerebro
-        </span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {memory && (
-            <span
-              title="Conversation memory active — Cerebro remembers previous sessions"
-              style={{
-                fontSize: 10,
-                fontFamily: "var(--font-geist-mono), monospace",
-                color: "var(--accent-muted)",
-                opacity: 0.7,
-              }}
-            >
-              ◈ mem
-            </span>
-          )}
+          <span
+            style={{
+              fontSize: 11,
+              fontFamily: "var(--font-geist-mono), monospace",
+              textTransform: "uppercase",
+              color: "var(--accent-muted)",
+            }}
+          >
+            Cerebro
+          </span>
           {tokens > 0 && (
-            <span
-              style={{
-                fontSize: 11,
-                fontFamily: "var(--font-geist-mono), monospace",
-                fontVariantNumeric: "tabular-nums",
-                color: "var(--text-tertiary)",
-              }}
-            >
-              {tokens.toLocaleString()}t
+            <span style={{ fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", fontVariantNumeric: "tabular-nums", color: "var(--text-primary)" }}>
+              {tokens.toLocaleString()}
             </span>
           )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {showEscalate && (
             <button
               onClick={handleEscalate}
@@ -385,11 +368,11 @@ export function Cerebro({ articles, pendingPrompt }: {
                   <button
                     onClick={() => handleFlagMessage(i)}
                     title="Flag this response — copies report to clipboard"
-                    style={{ width: 22, height: 22, borderRadius: 4, border: "none", background: "var(--bg-elevated)", color: "var(--text-tertiary)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, transition: "color 0.15s" }}
-                    onMouseEnter={e => { e.currentTarget.style.color = "#ef4444" }}
-                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)" }}
+                    style={{ width: 22, height: 22, borderRadius: 4, border: "none", background: "var(--bg-elevated)", color: flaggedMsgIdx === i ? "var(--accent-secondary)" : "var(--text-tertiary)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, transition: "color 0.15s" }}
+                    onMouseEnter={e => { if (flaggedMsgIdx !== i) e.currentTarget.style.color = "#ef4444" }}
+                    onMouseLeave={e => { if (flaggedMsgIdx !== i) e.currentTarget.style.color = "var(--text-tertiary)" }}
                   >
-                    <Flag size={11} />
+                    {flaggedMsgIdx === i ? <Check size={11} /> : <Flag size={11} />}
                   </button>
                 )}
               </div>
