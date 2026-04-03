@@ -15,7 +15,7 @@ import { GalleryOverlay } from "@/components/gallery"
 import { HotkeysOverlay } from "@/components/hotkeys"
 import { Divider } from "@/components/divider"
 import type { Article, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
-import { TYPE } from "@/lib/styles"
+import { TYPE, MONO } from "@/lib/styles"
 
 // ─── Skin + mode system ───────────────────────────────────────────────────────
 
@@ -350,6 +350,15 @@ export default function Page() {
       }}
     >
       {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} />}
+      {/* Section header */}
+      <div style={{
+        flexShrink: 0, height: 40, display: "flex", alignItems: "center",
+        padding: "0 20px", borderBottom: "1px solid var(--border)",
+      }}>
+        <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)", textTransform: "uppercase" }}>
+          Signal
+        </span>
+      </div>
       <div id="main-feed" role="feed" aria-label="Intelligence feed" tabIndex={-1} style={{ flex: 1, overflowY: "auto", padding: "8px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
         {feedLoading ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

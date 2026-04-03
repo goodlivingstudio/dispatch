@@ -43,6 +43,8 @@ export function useChiefOfStaff(articles: Article[]) {
     { label: "ANALYZING FEED", body: "" },
     { label: "—", body: "" },
     { label: "—", body: "" },
+    { label: "—", body: "" },
+    { label: "—", body: "" },
   ]
 
   return {
@@ -180,13 +182,13 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
             />
           </button>
 
-          {/* ── Expanded: 3-column signal cards ── */}
+          {/* ── Expanded: horizontal scrollable carousel ── */}
           <div style={{
-            maxHeight: expanded ? 400 : 0,
+            maxHeight: expanded ? 300 : 0,
             overflow: "hidden",
             transition: "max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "8px 16px" }}>
+            <div style={{ display: "flex", gap: 8, padding: "8px 16px", overflowX: "auto", scrollSnapType: "x mandatory" }}>
               {signals.map((signal, i) => (
                   <div
                     key={i}
@@ -194,14 +196,18 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
                     onMouseEnter={() => setHoveredIdx(i)}
                     onMouseLeave={() => setHoveredIdx(null)}
                     style={{
-                      padding: "18px 20px",
+                      padding: "16px 18px",
                       borderRadius: 12,
-                      animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 160}ms both`,
+                      animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 120}ms both`,
                       display: "flex",
                       flexDirection: "column",
                       cursor: signal.body ? "pointer" : "default",
                       background: hoveredIdx === i ? "var(--bg-elevated)" : "var(--bg-surface)",
                       transition: "background 0.15s",
+                      minWidth: 260,
+                      maxWidth: 320,
+                      flexShrink: 0,
+                      scrollSnapAlign: "start",
                     }}
                   >
                     <div style={{
@@ -227,7 +233,6 @@ export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDelibera
           </div>
         </>
       )}
-      <div style={{ height: 1, background: "var(--border)", margin: "0 16px" }} />
     </div>
   )
 }

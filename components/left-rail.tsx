@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Radio, AudioLines, Blend, Send, Settings, Image } from "lucide-react"
+import { Radio, AudioLines, Blend, Send, Settings, Image, Keyboard } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 import { TYPE, metaStyle } from "@/lib/styles"
@@ -453,12 +453,11 @@ export function LeftRail({
               border: "none", background: "transparent",
               color: "var(--text-tertiary)",
               cursor: "pointer", transition: "all 0.15s", padding: 0,
-              ...TYPE.sm, fontWeight: 500,
             }}
             onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.color = "var(--text-secondary)" }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
           >
-            ?
+            <Keyboard size={18} strokeWidth={1.5} />
           </button>
         )}
       </div>

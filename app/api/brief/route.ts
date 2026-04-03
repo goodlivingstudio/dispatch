@@ -17,13 +17,13 @@ Read the feed and surface the three signals that matter most right now. One may 
 
 CRITICAL — cite your sources. Reference specific articles by their number in brackets, e.g. [3], [7], [15]. Every claim must trace to at least one article.
 
-FORMAT — return exactly three signals separated by the literal string |||
+FORMAT — return exactly five signals separated by the literal string |||
 
 Each signal must be:
 LINE 1: The label (2-4 words, uppercase — what kind of signal this is)
-LINE 2: One to two sentences of substance with article citations in brackets. Direct. No hedging. Lead with the implication, not the event.
+LINE 2: One sentence of substance with article citations in brackets. Direct. No hedging. Lead with the implication, not the event. Keep it to one sharp sentence.
 
-Nothing else. No preamble. No sign-off. Three signals, one ||| between each.`
+Nothing else. No preamble. No sign-off. Five signals, one ||| between each.`
 
 interface ArticleInput {
   title: string
@@ -43,6 +43,8 @@ export async function POST(req: Request) {
           { label: "FEED UNAVAILABLE", body: "No articles to analyze.", sources: [] },
           { label: "—", body: "", sources: [] },
           { label: "—", body: "", sources: [] },
+          { label: "—", body: "", sources: [] },
+          { label: "—", body: "", sources: [] },
         ],
       })
     }
@@ -55,7 +57,7 @@ export async function POST(req: Request) {
 
     const response = await getClient().messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 600,
+      max_tokens: 900,
       system: BRIEF_SYSTEM,
       messages: [
         {
@@ -113,8 +115,8 @@ export async function POST(req: Request) {
       return { label, body, sources }
     })
 
-    // Pad to exactly 3
-    while (signals.length < 3) {
+    // Pad to exactly 5
+    while (signals.length < 5) {
       signals.push({ label: "—", body: "", sources: [] })
     }
 
@@ -125,6 +127,8 @@ export async function POST(req: Request) {
     return Response.json({
       signals: [
         { label: "BRIEF ERROR", body: message, sources: [] },
+        { label: "—", body: "", sources: [] },
+        { label: "—", body: "", sources: [] },
         { label: "—", body: "", sources: [] },
         { label: "—", body: "", sources: [] },
       ],
