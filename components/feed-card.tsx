@@ -134,9 +134,6 @@ export const FeedCard = memo(function FeedCard({ article, index, onSignalEnter, 
         display: "flex",
         padding: "16px 20px",
         borderRadius: 12,
-        borderLeft: `2px solid ${
-          article.signalLens === "OPPORTUNITY" ? "var(--accent-secondary)" : "transparent"
-        }`,
         background: hovered ? "var(--bg-elevated)" : "var(--bg-surface)",
         cursor: isExternal ? "pointer" : "default",
         transition: "background 0.15s",
@@ -159,6 +156,9 @@ export const FeedCard = memo(function FeedCard({ article, index, onSignalEnter, 
             transition: "opacity 0.3s ease",
           }}
         >
+          {article.signalLens && (
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: LENS_COLOR[article.signalLens] || "var(--text-tertiary)", flexShrink: 0 }} />
+          )}
           {article.source}
           <span style={{ opacity: 0.4 }}>&middot;</span>
           {article.category}
