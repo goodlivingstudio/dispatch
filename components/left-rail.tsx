@@ -482,7 +482,8 @@ export function LeftRail({
 
         {/* ── Feed controls — visible in Signal mode only ── */}
         {viewMode === "signal" && (
-          <div style={{ padding: "8px 16px" }}>
+          <div style={{ padding: "0 16px" }}>
+            <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
             {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}
             <div
               style={{
