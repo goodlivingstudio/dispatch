@@ -64,17 +64,21 @@ export const SCAN_STATUSES = [
   "▸ composing brief",
 ]
 
-export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDeliberate }: {
+export function ChiefOfStaffBand({ signals, briefLoading, briefError, onDeliberate, defaultExpanded = true }: {
   signals: Signal[]
   briefLoading: boolean
   briefError?: boolean
   onDeliberate?: (signal: Signal) => void
+  defaultExpanded?: boolean
 }) {
   const [statusIdx,  setStatusIdx]  = useState(0)
   const [revealed,   setRevealed]   = useState(false)
-  const [expanded,   setExpanded]   = useState(true)
+  const [expanded,   setExpanded]   = useState(defaultExpanded)
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const wasLoading = useRef(true)
+
+  // Sync expanded state when mode changes (Triage → open, Explore → close)
+  useEffect(() => { setExpanded(defaultExpanded) }, [defaultExpanded])
 
   // Advance status text while fetching
   useEffect(() => {

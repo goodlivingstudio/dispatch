@@ -449,7 +449,13 @@ export default function Page() {
     : articles
   const layerFiltered =
     activeLayers.size === 0 ? sourceFiltered : sourceFiltered.filter(a => activeLayers.has(a.tag))
-  const filtered = [...layerFiltered].sort((a, b) => {
+  // Triage: filter to urgency 6+ only, sorted by urgency descending
+  // Explore: show everything, original layer interleave order
+  const TRIAGE_THRESHOLD = 6
+  const triageFiltered = sortBy === "urgency"
+    ? layerFiltered.filter(a => (a.signalScores?.urgency ?? 0) >= TRIAGE_THRESHOLD)
+    : layerFiltered
+  const filtered = [...triageFiltered].sort((a, b) => {
     if (sortBy === "urgency") {
       const ua = a.signalScores?.urgency ?? 0
       const ub = b.signalScores?.urgency ?? 0
@@ -470,7 +476,7 @@ export default function Page() {
         minWidth: 0,
       }}
     >
-      {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} />}
+      {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} defaultExpanded={sortBy === "urgency"} />}
       {/* Section header */}
       <div style={{
         flexShrink: 0, height: 48, display: "flex", alignItems: "center",
