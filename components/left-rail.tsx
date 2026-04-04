@@ -478,8 +478,8 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* ── Feed controls — visible in Signal mode only ── */}
-        {viewMode === "signal" && (
+        {/* Feed controls (Triage/Explore + layer pills) moved to Signal feed area */}
+        {viewMode === "signal" && false && (
           <div style={{ padding: "0 16px" }}>
             <div style={{ height: 1, background: "var(--border)", margin: "20px 0" }} />
             {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}

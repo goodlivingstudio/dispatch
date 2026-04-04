@@ -17,6 +17,7 @@ import { HotkeysOverlay } from "@/components/hotkeys"
 import { ExportPanel } from "@/components/export-panel"
 import { Divider } from "@/components/divider"
 import type { Article, Signal, FeedHealth, Skin, ViewMode } from "@/lib/types"
+import { CATEGORY_CONFIG } from "@/lib/types"
 import { TYPE, MONO } from "@/lib/styles"
 
 // ─── Skin + mode system ───────────────────────────────────────────────────────
@@ -477,17 +478,70 @@ export default function Page() {
       }}
     >
       {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} defaultExpanded={sortBy === "urgency"} />}
-      {/* Section header */}
-      <div style={{
-        flexShrink: 0, height: 36, display: "flex", alignItems: "center",
-        padding: "0 20px",
-      }}>
-        <span style={{ ...TYPE.sm, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 500, letterSpacing: "0.04em" }}>
-          News Sources
-        </span>
-        <span style={{ ...TYPE.sm, color: "var(--text-primary)", marginLeft: 8, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-          {filtered.length}/{articles.length} Active
-        </span>
+      {/* Triage/Explore + layer filters — inline with feed */}
+      <div style={{ flexShrink: 0, padding: "12px 16px 0" }}>
+        {/* Triage / Explore toggle */}
+        <div style={{
+          display: "flex", background: "var(--bg-elevated)", borderRadius: 8,
+          padding: 3, marginBottom: 12, width: "fit-content",
+        }}>
+          {(["urgency", "layer"] as const).map(mode => {
+            const isActive = sortBy === mode
+            return (
+              <button
+                key={mode}
+                onClick={() => setSortBy(mode)}
+                style={{
+                  padding: "8px 20px", borderRadius: 8, border: "none",
+                  background: isActive ? "var(--bg-surface)" : "transparent",
+                  ...TYPE.sm, fontWeight: isActive ? 600 : 400, textTransform: "uppercase", letterSpacing: "0.04em",
+                  color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
+                  cursor: "pointer", transition: "all 0.3s ease", position: "relative", zIndex: 1,
+                }}
+              >
+                {mode === "urgency" ? "Triage" : "Explore"}
+              </button>
+            )
+          })}
+        </div>
+        {/* Layer pills */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+          {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
+            const n = cat.id === "all" ? articles.length : articles.filter(a => a.tag === cat.id).length
+            if (n === 0 && !feedLoading) return null
+            const isActive = activeLayers.has(cat.id)
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveLayers(prev => {
+                  const next = new Set(prev)
+                  if (next.has(cat.id)) next.delete(cat.id)
+                  else next.add(cat.id)
+                  return next
+                })}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 12px", borderRadius: 9999, border: "none",
+                  background: isActive ? "var(--accent-primary)" : "transparent",
+                  cursor: "pointer", transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
+              >
+                <span style={{ ...TYPE.sm, color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)", fontWeight: isActive ? 600 : 400 }}>
+                  {cat.label}
+                </span>
+                <span style={{ ...TYPE.xs, fontVariantNumeric: "tabular-nums", color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)", opacity: 0.5 }}>
+                  {n}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        {/* Active count */}
+        <div style={{ ...TYPE.sm, color: "var(--text-tertiary)", marginBottom: 4 }}>
+          {filtered.length} {sortBy === "urgency" ? "urgent" : "total"}
+        </div>
       </div>
       <div id="main-feed" role="feed" aria-label="Intelligence feed" tabIndex={-1} style={{ flex: 1, overflowY: "auto", padding: "8px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
         {feedLoading ? (

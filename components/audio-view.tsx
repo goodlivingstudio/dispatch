@@ -1,8 +1,99 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ExternalLink, ArrowUpRight } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { ExternalLink, ArrowUpRight, ChevronUp } from "lucide-react"
 import { TYPE, MONO, metaStyle } from "@/lib/styles"
+
+// ─── Audio DCOS Band ────────────────────────────────────────────────────────
+
+interface AudioSignal {
+  label: string
+  body: string
+}
+
+function AudioBriefBand({ episodes, visible }: { episodes: Episode[]; visible: boolean }) {
+  const [signals, setSignals] = useState<AudioSignal[]>([])
+  const [loading, setLoading] = useState(false)
+  const [expanded, setExpanded] = useState(true)
+  const fetched = useRef(false)
+
+  useEffect(() => {
+    if (episodes.length === 0 || fetched.current || !visible) return
+    fetched.current = true
+    setLoading(true)
+
+    fetch("/api/audio-brief", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        episodes: episodes.slice(0, 20).map(e => ({
+          title: e.title, showName: e.showName, category: e.category, summary: e.summary,
+        })),
+      }),
+    })
+      .then(r => r.json())
+      .then(data => { setSignals(data.signals || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [episodes, visible])
+
+  if (!visible) return null
+
+  const realSignals = signals.filter(s => s.body)
+
+  return (
+    <div style={{ flexShrink: 0 }}>
+      <button
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          width: "100%", padding: "0 20px", height: 36,
+          background: "none", border: "none", borderBottom: "1px solid var(--border)",
+          cursor: "pointer", transition: "background 0.15s",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+        onMouseLeave={e => { e.currentTarget.style.background = "none" }}
+      >
+        <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-secondary)", textTransform: "uppercase" }}>
+          Audio Brief
+        </span>
+        <ChevronUp size={14} strokeWidth={1.5} style={{
+          color: "var(--text-tertiary)",
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          transform: expanded ? "rotate(0)" : "rotate(180deg)",
+        }} />
+      </button>
+
+      <div style={{
+        maxHeight: expanded ? 400 : 0, overflow: "hidden",
+        transition: "max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+      }}>
+        {loading ? (
+          <div style={{ padding: "12px 20px" }}>
+            <span className="loading-pulse" style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)" }}>
+              Analyzing episodes...
+            </span>
+          </div>
+        ) : realSignals.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${realSignals.length}, 1fr)`, gap: 8, padding: "8px 16px 16px" }}>
+            {realSignals.map((signal, i) => (
+              <div key={i} style={{
+                padding: "14px 16px", borderRadius: 12, background: "var(--bg-surface)",
+                animation: `signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 120}ms both`,
+              }}>
+                <div style={{ ...TYPE.sm, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 500, letterSpacing: "0.04em", marginBottom: 8 }}>
+                  {signal.label}
+                </div>
+                <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                  {signal.body}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -356,6 +447,9 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
           </span>
         )}
       </div>
+
+      {/* Audio DCOS Band — visible in Triage only */}
+      <AudioBriefBand episodes={episodes} visible={sortBy === "urgency" && !loading} />
 
       <div className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
 
