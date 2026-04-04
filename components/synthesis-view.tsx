@@ -161,7 +161,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {sentences.map((s, i) => (
                       <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                        <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--accent-muted)", flexShrink: 0, marginTop: 8 }} />
+                        <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--text-tertiary)", flexShrink: 0, marginTop: 8 }} />
                         <span style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>{s}</span>
                       </div>
                     ))}
@@ -202,13 +202,12 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                       onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
                       onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
                     >
-                      {/* Layer indicators — minimal, color-only */}
-                      <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
+                      {/* Layer labels — text only, no colored dots */}
+                      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                         {pattern.layers.map(l => (
-                          <span key={l} style={{
-                            width: 6, height: 6, borderRadius: "50%",
-                            background: LAYER_COLORS[l as LayerKey] || "var(--text-tertiary)",
-                          }} />
+                          <span key={l} style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                            {LAYER_LABELS[l as LayerKey] || l}
+                          </span>
                         ))}
                       </div>
                       {/* Title — the headline */}
@@ -234,20 +233,22 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               </div>
             )}
 
-            {/* ─ BOTTOM ROW — blind spot + provocation side by side ─ */}
+            {/* ─ BOTTOM ROW — blind spots + provocation side by side ─ */}
             <div style={{
               display: "flex",
+              borderTop: "1px solid var(--border)",
               animation: "signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 500ms both",
+              minHeight: 120,
             }}>
-              {/* Blind Spot */}
+              {/* Blind Spots */}
               {data.blindSpotNote && (
                 <div style={{
                   flex: 1,
                   padding: "28px 32px",
                   borderRight: data.cerebroProvocation ? "1px solid var(--border)" : "none",
                 }}>
-                  <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-                    Blind Spot
+                  <div style={{ ...TYPE.xs, color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10, fontWeight: 500 }}>
+                    Blind Spots
                   </div>
                   <div style={{ ...TYPE.body, color: "var(--text-tertiary)", lineHeight: 1.7 }}>
                     {data.blindSpotNote}
