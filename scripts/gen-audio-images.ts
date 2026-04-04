@@ -11,31 +11,20 @@
 // Requires: REPLICATE_API_TOKEN + KV env vars
 
 import { PODCAST_FEEDS } from "@/lib/podcasts"
-
-const REPLICATE_API = "https://api.replicate.com/v1"
-const MODEL = "black-forest-labs/flux-schnell"
-
-const STYLE = `Painterly abstract watercolor. Wet-on-wet technique, pigment bleeding into damp paper. Organic washes with precise edges where color meets white space. Paper texture visible through translucent layers. No text, no people, no logos, no icons, no objects. Horizontal 16:9 format. Warm and intimate. Deep indigo, burnt umber, and muted gold. Rich pigment density — less white paper showing. Darker atmospheric washes suggesting depth and resonance. The visual equivalent of a voice in a quiet room. Soft pooling, no sharp edges.`
-
-const LAYER_HINTS: Record<string, string> = {
-  opportunity: "Lean cooler — soft clinical blues and teals.",
-  position: "Lean warmer — amber and ochre tones.",
-  discipline: "Lean greener — muted sage and deep indigo.",
-  landscape: "Stay neutral — silver grays with atmospheric depth.",
-  culture: "Lean earthier — raw umber, oxide, burnt sienna.",
-}
+import { REPLICATE_API, REPLICATE_MODEL, GLOBAL_STYLE, SURFACE_STYLES, LAYER_PALETTES } from "@/lib/image-gen"
+import { downloadAsDataUri } from "@/lib/image-utils"
 
 async function generateImage(showName: string, layer: string): Promise<string | undefined> {
   const token = process.env.REPLICATE_API_TOKEN
   if (!token) return undefined
 
-  const hint = LAYER_HINTS[layer] || ""
-  const prompt = `${STYLE} Evoking: "${showName}". ${hint}`
+  const hint = LAYER_PALETTES[layer] || ""
+  const prompt = `${GLOBAL_STYLE} ${SURFACE_STYLES.audio} Evoking: "${showName}". ${hint}`
 
   try {
     let submitRes: Response | null = null
     for (let retry = 0; retry < 3; retry++) {
-      submitRes = await fetch(`${REPLICATE_API}/models/${MODEL}/predictions`, {
+      submitRes = await fetch(`${REPLICATE_API}/models/${REPLICATE_MODEL}/predictions`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -70,16 +59,6 @@ async function generateImage(showName: string, layer: string): Promise<string | 
       if (result.status === "failed" || result.status === "canceled") return undefined
     }
     return undefined
-  } catch { return undefined }
-}
-
-async function downloadAsDataUri(url: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
-    if (!res.ok) return undefined
-    const buf = Buffer.from(await res.arrayBuffer())
-    const contentType = res.headers.get("content-type") || "image/webp"
-    return `data:${contentType};base64,${buf.toString("base64")}`
   } catch { return undefined }
 }
 

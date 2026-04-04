@@ -131,7 +131,14 @@ export async function GET() {
       return Response.json({ available: true, weekSummary: null, pitches: [], message: "Synthesis failed to parse." })
     }
 
-    const result = JSON.parse(match[0])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any
+    try {
+      result = JSON.parse(match[0])
+    } catch {
+      console.error("[dispatch] Failed to parse Claude response as JSON")
+      return Response.json({ available: true, weekSummary: null, pitches: [], message: "Parse failed." })
+    }
 
     // Generate images: header + each pitch
     let pitches = result.pitches || []
@@ -152,8 +159,9 @@ export async function GET() {
           ...p,
           imageUrl: pitchImageUrls[i] || undefined,
         }))
-      } catch {
-        // Image generation failure shouldn't break dispatch
+      } catch (err) {
+        // Image generation failure shouldn't break dispatch — log and continue
+        console.error("[dispatch] Image generation failed:", err instanceof Error ? err.message : err)
       }
     }
 

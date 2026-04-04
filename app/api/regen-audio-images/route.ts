@@ -1,31 +1,20 @@
-// Regenerate Dispatch-style podcast artwork — replaces expired Replicate URLs
-// Accepts ?batch=N to process shows in groups (default 4 per call to stay under 60s timeout)
-// Source Pulse UI calls this in rounds until all shows are done.
+// Regenerate Dispatch-style podcast artwork — replaces expired images
+// Accepts ?batch=N to process shows in groups (4 per call to stay under 60s timeout)
 import { PODCAST_FEEDS } from "@/lib/podcasts"
 import { kv } from "@vercel/kv"
-
-const REPLICATE_API = "https://api.replicate.com/v1"
-const MODEL = "black-forest-labs/flux-schnell"
-
-const STYLE = `Painterly abstract watercolor. Wet-on-wet technique, pigment bleeding into damp paper. Organic washes with precise edges where color meets white space. Paper texture visible through translucent layers. No text, no people, no logos, no icons, no objects. Horizontal 16:9 format. Warm and intimate. Deep indigo, burnt umber, and muted gold. Rich pigment density — less white paper showing. Darker atmospheric washes suggesting depth and resonance. The visual equivalent of a voice in a quiet room. Soft pooling, no sharp edges.`
-
-const LAYER_HINTS: Record<string, string> = {
-  opportunity: "Lean cooler — soft clinical blues and teals.",
-  position: "Lean warmer — amber and ochre tones.",
-  discipline: "Lean greener — muted sage and deep indigo.",
-  landscape: "Stay neutral — silver grays with atmospheric depth.",
-  culture: "Lean earthier — raw umber, oxide, burnt sienna.",
-}
+import { downloadAsDataUri } from "@/lib/image-utils"
+import { REPLICATE_API, REPLICATE_MODEL, GLOBAL_STYLE, LAYER_PALETTES } from "@/lib/image-gen"
+import { SURFACE_STYLES } from "@/lib/image-gen"
 
 const KV_TTL = 60 * 60 * 24 * 14 // 14 days
-const BATCH_SIZE = 4 // ~12s per image (generate + poll), 4 fits in 60s
+const BATCH_SIZE = 4
 
 async function generateImage(showName: string, layer: string, token: string): Promise<string | undefined> {
-  const hint = LAYER_HINTS[layer] || ""
-  const prompt = `${STYLE} Evoking: "${showName}". ${hint}`
+  const hint = LAYER_PALETTES[layer] || ""
+  const prompt = `${GLOBAL_STYLE} ${SURFACE_STYLES.audio} Evoking: "${showName}". ${hint}`
 
   for (let retry = 0; retry < 3; retry++) {
-    const submitRes = await fetch(`${REPLICATE_API}/models/${MODEL}/predictions`, {
+    const submitRes = await fetch(`${REPLICATE_API}/models/${REPLICATE_MODEL}/predictions`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ input: { prompt, num_outputs: 1, aspect_ratio: "16:9", output_format: "webp", output_quality: 85 } }),
@@ -51,17 +40,6 @@ async function generateImage(showName: string, layer: string, token: string): Pr
     }
   }
   return undefined
-}
-
-async function downloadAsDataUri(url: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
-    if (!res.ok) return undefined
-    const buffer = await res.arrayBuffer()
-    const base64 = Buffer.from(buffer).toString("base64")
-    const contentType = res.headers.get("content-type") || "image/webp"
-    return `data:${contentType};base64,${base64}`
-  } catch { return undefined }
 }
 
 export const maxDuration = 60

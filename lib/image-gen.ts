@@ -3,19 +3,21 @@
 // Global style + surface-specific substyles.
 // Cost: ~$0.003 per image.
 
-const REPLICATE_API = "https://api.replicate.com/v1"
-const MODEL = "black-forest-labs/flux-schnell"
+import { downloadAsDataUri } from "@/lib/image-utils"
+
+export const REPLICATE_API = "https://api.replicate.com/v1"
+export const REPLICATE_MODEL = "black-forest-labs/flux-schnell"
 
 // ─── Global Art Direction ───────────────────────────────────────────────────
 // The unified visual language across all Dispatch surfaces.
 // Every generated image inherits this foundation.
 
-const GLOBAL_STYLE = `Painterly abstract. Wet-on-wet watercolor technique with visible paper texture. Pigment bleeding organically across damp surface. Translucent layered washes. Precise edges where color meets untouched paper. No text, no people, no logos, no icons, no UI elements, no objects, no literal depictions. Purely abstract — evocative, not illustrative. Horizontal 16:9 format.`
+export const GLOBAL_STYLE = `Painterly abstract. Wet-on-wet watercolor technique with visible paper texture. Pigment bleeding organically across damp surface. Translucent layered washes. Precise edges where color meets untouched paper. No text, no people, no logos, no icons, no UI elements, no objects, no literal depictions. Purely abstract — evocative, not illustrative. Horizontal 16:9 format.`
 
 // ─── Surface Substyles ──────────────────────────────────────────────────────
 // Each surface has a distinct character within the global language.
 
-const SURFACE_STYLES: Record<string, string> = {
+export const SURFACE_STYLES: Record<string, string> = {
   // AUDIO — warm, intimate, resonant. The feeling of sound as texture.
   // Darker, richer tones. Deep pools of color. Vibration implied through
   // organic bleeding patterns. Like listening in a quiet room.
@@ -36,7 +38,7 @@ const SURFACE_STYLES: Record<string, string> = {
 // Subtle color shifts based on which intelligence layer dominates.
 // Applied as a secondary modifier after the surface style.
 
-const LAYER_PALETTES: Record<string, string> = {
+export const LAYER_PALETTES: Record<string, string> = {
   opportunity: "Lean cooler — soft clinical blues and teals suggesting healthcare precision.",
   position: "Lean warmer — amber and ochre suggesting professional authority.",
   discipline: "Lean greener — muted sage and deep indigo suggesting structural evolution.",
@@ -75,7 +77,7 @@ export async function generateCardImage(
     // Submit prediction with retry on rate limit
     let submitRes: Response | null = null
     for (let retry = 0; retry < 3; retry++) {
-      submitRes = await fetch(`${REPLICATE_API}/models/${MODEL}/predictions`, {
+      submitRes = await fetch(`${REPLICATE_API}/models/${REPLICATE_MODEL}/predictions`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -129,19 +131,6 @@ export async function generateCardImage(
   }
 }
 
-// Download image from temporary Replicate URL and return as permanent data URI
-async function downloadAsDataUri(url: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
-    if (!res.ok) return undefined
-    const buffer = await res.arrayBuffer()
-    const base64 = Buffer.from(buffer).toString("base64")
-    const contentType = res.headers.get("content-type") || "image/webp"
-    return `data:${contentType};base64,${base64}`
-  } catch {
-    return undefined
-  }
-}
 
 // Generate images sequentially with rate limit handling
 export async function generateCardImages(

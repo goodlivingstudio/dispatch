@@ -15,14 +15,6 @@ interface SynthesisViewProps {
 
 type LayerKey = "opportunity" | "position" | "discipline" | "landscape" | "culture"
 
-const LAYER_COLORS: Record<LayerKey, string> = {
-  opportunity: "#D4A05A",
-  position: "#5A9EB0",
-  discipline: "#7BAF6A",
-  landscape: "#9A85B8",
-  culture: "#C87A6A",
-}
-
 const LAYER_LABELS: Record<LayerKey, string> = {
   opportunity: "Opportunity",
   position: "Position",

@@ -127,7 +127,14 @@ export async function POST(req: Request) {
     const match = text.match(/\{[\s\S]*\}/)
     if (!match) return Response.json({ briefing: null, patterns: [], blindSpotNote: null })
 
-    const result = JSON.parse(match[0])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any
+    try {
+      result = JSON.parse(match[0])
+    } catch {
+      console.error("[synthesis] Failed to parse Claude response as JSON")
+      return Response.json({ briefing: null, patterns: [], blindSpotNote: null })
+    }
 
     // Generate images: header + each convergence pattern
     if (process.env.REPLICATE_API_TOKEN) {
@@ -146,8 +153,9 @@ export async function POST(req: Request) {
           ...p,
           imageUrl: patternImageUrls[i] || undefined,
         }))
-      } catch {
-        // Image generation failure shouldn't break synthesis
+      } catch (err) {
+        // Image generation failure shouldn't break synthesis — log and continue
+        console.error("[synthesis] Image generation failed:", err instanceof Error ? err.message : err)
       }
     }
 
