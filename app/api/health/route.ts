@@ -57,7 +57,7 @@ async function probeKV(): Promise<string> {
 
 async function probeArena(token: string): Promise<string> {
   try {
-    const res = await fetch("https://api.are.na/v2/channels/dispatch-visual-feed/contents?per=1&page=1", {
+    const res = await fetch("https://api.are.na/v2/channels/dispatch-zen/contents?per=1&page=1", {
       headers: { "Authorization": `Bearer ${token}` },
       signal: AbortSignal.timeout(TIMEOUT),
     })
