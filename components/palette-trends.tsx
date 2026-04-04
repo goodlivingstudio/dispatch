@@ -242,27 +242,48 @@ function PaletteDisplay({ palette, index }: { palette: GeneratedPalette; index: 
   }
 
   const handlePushToFigma = async () => {
+    // Get Figma file key from localStorage or prompt
+    const fileKey = localStorage.getItem("dispatch-figma-file-key")
+    if (!fileKey) {
+      const key = prompt("Enter your Figma file key (from the URL: figma.com/design/FILE_KEY/...)")
+      if (!key) return
+      localStorage.setItem("dispatch-figma-file-key", key)
+    }
+
     setPushing(true)
     try {
-      const tokens = activeColors.map((hex, i) => ({
-        name: `${palette.name.toLowerCase()}/${i + 1}`,
-        resolvedType: "COLOR" as const,
-        values: {
-          [isDark ? "Dark" : "Light"]: hex,
-          [isDark ? "Light" : "Dark"]: isDark ? palette.colors[i] : deriveDarkColor(hex),
-        },
+      const colors = palette.colors.map((hex, i) => ({
+        light: hex,
+        dark: deriveDarkColor(hex),
       }))
-      // Use the figma-console MCP tool via a fetch to our own API
-      // For now, copy as Figma-ready JSON
-      const figmaJson = JSON.stringify({
-        collectionName: `Dispatch — ${palette.name}`,
-        modes: ["Light", "Dark"],
-        tokens,
-      }, null, 2)
+
+      const res = await fetch("/api/figma-push", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileKey: localStorage.getItem("dispatch-figma-file-key"),
+          paletteName: palette.name,
+          colors,
+        }),
+      })
+
+      if (res.ok) {
+        setPushed(true)
+        setTimeout(() => setPushed(false), 3000)
+      } else {
+        const err = await res.json()
+        console.error("Figma push failed:", err.error)
+        // Fallback: copy as JSON
+        const figmaJson = JSON.stringify({ palette: palette.name, colors }, null, 2)
+        await navigator.clipboard.writeText(figmaJson)
+        setPushed(true)
+        setTimeout(() => setPushed(false), 3000)
+      }
+    } catch {
+      // Fallback: copy
+      const figmaJson = JSON.stringify({ palette: palette.name, colors: palette.colors }, null, 2)
       await navigator.clipboard.writeText(figmaJson)
-      setPushed(true)
-      setTimeout(() => setPushed(false), 3000)
-    } catch { /* */ }
+    }
     setPushing(false)
   }
 
