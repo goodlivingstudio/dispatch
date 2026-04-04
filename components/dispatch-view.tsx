@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Copy, Check, ArrowUpRight, X } from "lucide-react"
+import { Copy, Check, ArrowUpRight, X, RefreshCw } from "lucide-react"
 import { TYPE, MONO, labelStyle, bodyStyle, metaStyle } from "@/lib/styles"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -164,6 +164,28 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
   const [loading, setLoading] = useState(!_cachedDispatch)
   const [statusIdx, setStatusIdx] = useState(0)
   const [activePitch, setActivePitch] = useState<Pitch | null>(null)
+  const [regenerating, setRegenerating] = useState(false)
+
+  const handleRegenerate = async () => {
+    setRegenerating(true)
+    try {
+      await fetch("/api/dispatch-purge", { method: "POST" })
+      _cachedDispatch = null
+      setData(null)
+      setLoading(true)
+      setStatusIdx(0)
+      const t = setInterval(() => setStatusIdx(i => Math.min(i + 1, DISPATCH_STATUSES.length - 1)), 1800)
+      const res = await fetch("/api/dispatch")
+      const d = await res.json()
+      setData(d)
+      _cachedDispatch = d
+      setLoading(false)
+      clearInterval(t)
+    } catch {
+      setLoading(false)
+    }
+    setRegenerating(false)
+  }
 
   useEffect(() => {
     if (_cachedDispatch) return
@@ -186,6 +208,25 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
         <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)", textTransform: "uppercase" }}>
           Dispatch
         </span>
+        {data && !loading && (
+          <button
+            onClick={handleRegenerate}
+            disabled={regenerating}
+            title="Regenerate weekly brief"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "4px 10px", borderRadius: 6, marginLeft: "auto",
+              border: "1px solid var(--border)", background: "transparent",
+              ...TYPE.xs, color: "var(--text-tertiary)",
+              cursor: regenerating ? "default" : "pointer", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { if (!regenerating) e.currentTarget.style.background = "var(--bg-elevated)" }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+          >
+            <RefreshCw size={11} style={{ animation: regenerating ? "spin 1s linear infinite" : "none" }} />
+            {regenerating ? "Generating..." : "Regenerate"}
+          </button>
+        )}
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
