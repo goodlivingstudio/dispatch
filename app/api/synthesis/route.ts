@@ -3,6 +3,10 @@ import Anthropic from "@anthropic-ai/sdk"
 import { DISPATCH_PREAMBLE } from "@/lib/prompts"
 import { loadArticleHistory } from "@/lib/article-store"
 import { generateCardImages } from "@/lib/image-gen"
+import { kv } from "@vercel/kv"
+
+const KV_KEY = "synthesis:weekly"
+const CACHE_TTL = 60 * 60 * 12 // 12 hours
 
 const SYSTEM_PROMPT = `${DISPATCH_PREAMBLE}
 
@@ -60,6 +64,14 @@ export async function POST(req: Request) {
     const { articles } = await req.json()
     if (!articles?.length) {
       return Response.json({ briefing: null, patterns: [], blindSpotNote: null })
+    }
+
+    // Check KV cache first — avoid re-generating images on every visit
+    if (process.env.KV_REST_API_URL) {
+      try {
+        const cached = await kv.get<Record<string, unknown>>(KV_KEY)
+        if (cached && cached.briefing) return Response.json(cached)
+      } catch { /* KV unavailable — proceed with fresh generation */ }
     }
 
     // Build context from today's annotated articles
@@ -136,6 +148,14 @@ export async function POST(req: Request) {
         }))
       } catch {
         // Image generation failure shouldn't break synthesis
+      }
+    }
+
+    // Cache to KV if images loaded — avoid re-generating on every visit
+    if (process.env.KV_REST_API_URL) {
+      const hasImages = result.headerImageUrl || result.patterns?.some((p: { imageUrl?: string }) => p.imageUrl)
+      if (hasImages) {
+        try { await kv.set(KV_KEY, result, { ex: CACHE_TTL }) } catch { /* KV write failure */ }
       }
     }
 

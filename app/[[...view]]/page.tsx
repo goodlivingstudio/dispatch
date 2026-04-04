@@ -347,8 +347,7 @@ export default function Page() {
         if (Array.isArray(parsed)) setActiveLayers(new Set(parsed))
       }
 
-      const savedSort = localStorage.getItem("dispatch-sort-by")
-      if (savedSort === "urgency" || savedSort === "layer") setSortBy(savedSort)
+      // sortBy always starts on "urgency" (Triage) — no persistence
 
       // View mode now synced via URL — localStorage fallback only when on root path
       if (window.location.pathname === "/") {
@@ -368,9 +367,7 @@ export default function Page() {
   useEffect(() => {
     try { localStorage.setItem("dispatch-active-layers", JSON.stringify([...activeLayers])) } catch {}
   }, [activeLayers])
-  useEffect(() => {
-    try { localStorage.setItem("dispatch-sort-by", sortBy) } catch {}
-  }, [sortBy])
+  // sortBy not persisted — always land on Triage
 
   // Persist view mode
   useEffect(() => {
@@ -593,7 +590,7 @@ export default function Page() {
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <div key={mobileTab} className="mobile-tab-content" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {mobileTab === "signal" && feedContent}
-            {mobileTab === "synthesis" && <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />}
+            {mobileTab === "synthesis" && <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} sortBy={sortBy} />}
             {mobileTab === "audio"     && <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} sortBy={sortBy} />}
             {mobileTab === "dispatch"  && <DispatchView onDeliberate={handleSynthesisDeliberate} />}
             {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
@@ -837,7 +834,7 @@ export default function Page() {
           : viewMode === "dispatch"
           ? <DispatchView onDeliberate={handleSynthesisDeliberate} />
           : viewMode === "synthesis"
-          ? <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />
+          ? <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} sortBy={sortBy} />
           : viewMode === "audio"
           ? <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} sortBy={sortBy} />
           : feedContent}

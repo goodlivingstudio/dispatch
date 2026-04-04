@@ -106,6 +106,7 @@ interface Episode {
   summary: string
   duration: string
   artworkUrl: string
+  originalArtworkUrl?: string
   category: string
   tag: string
   layer: string
@@ -174,6 +175,14 @@ function EpisodeModal({ episode, onClose, onDeliberate }: { episode: Episode; on
             <img
               src={episode.artworkUrl}
               alt={episode.showName}
+              onError={(e) => {
+                const img = e.currentTarget
+                if (episode.originalArtworkUrl && img.src !== episode.originalArtworkUrl) {
+                  img.src = episode.originalArtworkUrl
+                } else {
+                  img.style.display = "none"
+                }
+              }}
               style={{ width: 96, height: 96, borderRadius: 14, objectFit: "cover", flexShrink: 0, background: "var(--bg-elevated)" }}
             />
           ) : (
@@ -383,6 +392,14 @@ function EpisodeCard({ episode, index, onClick, onSignalEnter, onSignalMove, onS
         <img
           src={episode.artworkUrl}
           alt={episode.showName}
+          onError={(e) => {
+            const img = e.currentTarget
+            if (episode.originalArtworkUrl && img.src !== episode.originalArtworkUrl) {
+              img.src = episode.originalArtworkUrl
+            } else {
+              img.style.display = "none"
+            }
+          }}
           style={{
             width: 64, height: 64, borderRadius: 8,
             objectFit: "cover", flexShrink: 0, background: "var(--bg-elevated)",

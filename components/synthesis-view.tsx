@@ -10,6 +10,7 @@ import { TYPE, MONO, labelStyle, metaStyle } from "@/lib/styles"
 interface SynthesisViewProps {
   articles: Article[]
   onDeliberate: (text: string) => void
+  sortBy?: "urgency" | "layer"
 }
 
 type LayerKey = "opportunity" | "position" | "discipline" | "landscape" | "culture"
@@ -58,12 +59,16 @@ const SYNTHESIS_STATUSES = [
 
 // ─── Synthesis View ────────────────────────────────────────────────────────
 
-export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
+export function SynthesisView({ articles, onDeliberate, sortBy = "layer" }: SynthesisViewProps) {
   const [data, setData] = useState<SynthesisData | null>(null)
   const [loading, setLoading] = useState(false)
   const [statusIdx, setStatusIdx] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+  const [hoveredCerebro, setHoveredCerebro] = useState(false)
   const fetched = useRef(false)
+
+  const isTriage = sortBy === "urgency"
 
   useEffect(() => {
     if (articles.length === 0 || fetched.current) return
@@ -145,7 +150,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
 
         {/* ── Editorial layout ── */}
         {!loading && data && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: "0 20px 48px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 28, padding: "0 20px 48px" }}>
 
             {/* ─ HERO — image + headline + summary + bullets ─ */}
             <div style={{
@@ -155,7 +160,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
             }}>
               {/* Hero image */}
               <div style={{
-                height: 220, overflow: "hidden",
+                height: 280, overflow: "hidden",
                 background: data.headerImageUrl ? "transparent" : "linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)",
               }}>
                 {data.headerImageUrl && (
@@ -164,17 +169,18 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               </div>
 
               {/* Headline + summary + bullets */}
-              <div style={{ padding: "24px 24px 28px" }}>
+              <div style={{ padding: "28px 28px 32px" }}>
                 {/* Headline */}
                 <div style={{
                   fontSize: 19, fontWeight: 500, color: "var(--text-primary)",
-                  lineHeight: 1.45, letterSpacing: "-0.015em", marginBottom: 14,
+                  lineHeight: 1.45, letterSpacing: "-0.015em",
+                  marginBottom: isTriage ? 0 : 14,
                 }}>
                   {data.headline || data.briefing.split(/[.!?]\s/)[0]}
                 </div>
 
-                {/* Summary paragraph */}
-                {(() => {
+                {/* Summary paragraph + bullets — Explore only */}
+                {!isTriage && (() => {
                   const text = data.headline ? data.briefing : data.briefing.split(/(?<=[.!?])\s+/).slice(1).join(" ")
                   const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim())
                   const summary = sentences[0] || ""
@@ -202,7 +208,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               </div>
             </div>
 
-            {/* ─ CONVERGENCES — 4 separate cards in 2x2 grid ─ */}
+            {/* ─ CONVERGENCES — cards ─ */}
             {data.patterns.length > 0 && (
               <div style={{ animation: "signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 150ms both" }}>
                 <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
@@ -210,27 +216,27 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 </div>
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: data.patterns.length === 1 ? "1fr" : "1fr 1fr",
-                  gap: 12,
+                  gridTemplateColumns: isTriage ? "1fr" : (data.patterns.length === 1 ? "1fr" : "1fr 1fr"),
+                  gap: 16,
                 }}>
                   {data.patterns.map((pattern, i) => (
                     <div
                       key={i}
                       onClick={() => onDeliberate(`I want to explore this convergence pattern:\n\n"${pattern.title}"\n\n${pattern.description}\n\nWhat does this mean strategically?`)}
+                      onMouseEnter={() => setHoveredCard(i)}
+                      onMouseLeave={() => setHoveredCard(null)}
                       style={{
-                        background: "var(--bg-surface)",
+                        background: hoveredCard === i ? "var(--bg-elevated)" : "var(--bg-surface)",
                         borderRadius: 12,
                         overflow: "hidden",
                         cursor: "pointer",
-                        transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                        animation: `signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${200 + i * 80}ms both`,
+                        transition: "background 0.15s",
+                        animation: `signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${200 + i * 60}ms both`,
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.01)" }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
                     >
                       {/* Card image */}
                       <div style={{
-                        height: 100, overflow: "hidden",
+                        height: 160, overflow: "hidden",
                         background: pattern.imageUrl ? "transparent" : "linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)",
                       }}>
                         {pattern.imageUrl && (
@@ -238,7 +244,7 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                         )}
                       </div>
                       {/* Card content */}
-                      <div style={{ padding: "16px 18px 20px" }}>
+                      <div style={{ padding: "20px 24px 24px" }}>
                         {/* Layer eyebrow */}
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                           {pattern.layers.map((l, li) => (
@@ -249,29 +255,29 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                           ))}
                         </div>
                         {/* Title */}
-                        <div style={{ ...TYPE.heading, color: "var(--text-primary)", marginBottom: 8 }}>
+                        <div style={{
+                          ...TYPE.heading,
+                          color: hoveredCard === i ? "var(--text-primary)" : "var(--text-secondary)",
+                          transition: "color 0.15s",
+                          marginBottom: (!isTriage && pattern.description) ? 10 : 0,
+                        }}>
                           {pattern.title}
                         </div>
-                        {/* Description bullets */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                          {pattern.description.split(/(?<=[.!?])\s+/).filter(s => s.trim()).map((s, si) => (
-                            <div key={si} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                              <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--text-tertiary)", flexShrink: 0, marginTop: 7 }} />
-                              <span style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>{s}</span>
-                            </div>
-                          ))}
-                        </div>
-                        {/* Sources */}
-                        {pattern.sources && pattern.sources.length > 0 && (
-                          <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid var(--border)" }}>
-                            <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
-                              {pattern.sources.map((src, si) => (
-                                <span key={si}>
-                                  {si > 0 && <span style={{ opacity: 0.4 }}> · </span>}
-                                  {src}
-                                </span>
-                              ))}
-                            </div>
+                        {/* Description bullets — Explore only */}
+                        {!isTriage && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                            {pattern.description.split(/(?<=[.!?])\s+/).filter(s => s.trim()).map((s, si) => (
+                              <div key={si} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--text-tertiary)", flexShrink: 0, marginTop: 7 }} />
+                                <span style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>{s}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {/* Sources — Explore only, quiet attribution */}
+                        {!isTriage && pattern.sources && pattern.sources.length > 0 && (
+                          <div style={{ marginTop: 12, ...TYPE.xs, color: "var(--text-tertiary)", opacity: 0.5, lineHeight: 1.6 }}>
+                            Based on {pattern.sources.join(" · ")}
                           </div>
                         )}
                       </div>
@@ -281,24 +287,50 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               </div>
             )}
 
-            {/* ─ BOTTOM — Blind Spots + Ask Cerebro as separate cards ─ */}
+            {/* ─ BOTTOM — Blind Spots + Ask Cerebro ─ */}
             <div style={{
               display: "grid",
               gridTemplateColumns: data.blindSpotNote && data.cerebroProvocation ? "1fr 1fr" : "1fr",
-              gap: 12,
+              gap: 16,
               animation: "signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 500ms both",
             }}>
-              {/* Blind Spots */}
+              {/* Blind Spots — structured bullets */}
               {data.blindSpotNote && (
                 <div style={{
-                  background: "var(--bg-surface)", borderRadius: 12, padding: "20px 22px",
+                  background: "var(--bg-surface)", borderRadius: 12, padding: "20px 24px",
                 }}>
                   <div style={{ ...TYPE.xs, color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10, fontWeight: 500 }}>
                     Blind Spots
                   </div>
-                  <div style={{ ...TYPE.body, color: "var(--text-tertiary)", lineHeight: 1.7 }}>
-                    {data.blindSpotNote}
-                  </div>
+                  {(() => {
+                    const sentences = data.blindSpotNote.split(/(?<=[.!?])\s+/).filter(s => s.trim())
+                    if (isTriage) {
+                      // Triage: first sentence only
+                      return (
+                        <div style={{ ...TYPE.body, color: "var(--text-tertiary)", lineHeight: 1.7 }}>
+                          {sentences[0]}
+                        </div>
+                      )
+                    }
+                    // Explore: structured bullets
+                    if (sentences.length <= 1) {
+                      return (
+                        <div style={{ ...TYPE.body, color: "var(--text-tertiary)", lineHeight: 1.7 }}>
+                          {data.blindSpotNote}
+                        </div>
+                      )
+                    }
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {sentences.map((s, i) => (
+                          <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                            <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--accent-muted)", flexShrink: 0, marginTop: 7 }} />
+                            <span style={{ ...TYPE.body, color: "var(--text-tertiary)", lineHeight: 1.7 }}>{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
 
@@ -306,12 +338,13 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
               {data.cerebroProvocation && (
                 <div
                   onClick={() => onDeliberate(data.cerebroProvocation!)}
+                  onMouseEnter={() => setHoveredCerebro(true)}
+                  onMouseLeave={() => setHoveredCerebro(false)}
                   style={{
-                    background: "var(--bg-surface)", borderRadius: 12, padding: "20px 22px",
-                    cursor: "pointer", transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                    background: hoveredCerebro ? "var(--bg-elevated)" : "var(--bg-surface)",
+                    borderRadius: 12, padding: "20px 24px",
+                    cursor: "pointer", transition: "background 0.15s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.01)" }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                     <ArrowUpRight size={11} style={{ color: "var(--accent-secondary)" }} />
@@ -319,7 +352,11 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                       Ask Cerebro
                     </span>
                   </div>
-                  <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                  <div style={{
+                    ...TYPE.body,
+                    color: hoveredCerebro ? "var(--text-primary)" : "var(--text-secondary)",
+                    lineHeight: 1.7, transition: "color 0.15s",
+                  }}>
                     {data.cerebroProvocation}
                   </div>
                 </div>

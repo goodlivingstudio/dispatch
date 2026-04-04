@@ -272,6 +272,11 @@ html, body {
 
 /* ─── Film grain — organic surface texture ─────────────────────────── */
 /* Prevents digital flatness. Both Cohere + ElevenLabs use this. */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes grain-drift {
   0%, 100% { transform: translate(0, 0); }
   20%       { transform: translate(-2%, -3%); }

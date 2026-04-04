@@ -478,8 +478,8 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* Triage/Explore toggle — visible for Signal and Audio */}
-        {(viewMode === "signal" || viewMode === "audio") && (
+        {/* Triage/Explore toggle — visible for Signal, Audio, and Synthesis */}
+        {(viewMode === "signal" || viewMode === "audio" || viewMode === "synthesis") && (
           <div style={{ padding: "0 16px" }}>
             <div style={{ height: 1, background: "var(--border)", margin: "20px 0" }} />
             {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}

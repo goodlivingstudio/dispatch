@@ -200,6 +200,114 @@ function SourceRow({ source }: { source: SourceStat }) {
   )
 }
 
+// ─── Cache Management ─────────────────────────────────────────────────────
+
+function CacheManagement() {
+  const [audioStatus, setAudioStatus] = useState<"idle" | "running" | "done" | "error">("idle")
+  const [audioResult, setAudioResult] = useState<string>("")
+  const [synthStatus, setSynthStatus] = useState<"idle" | "running" | "done" | "error">("idle")
+  const [dispatchStatus, setDispatchStatus] = useState<"idle" | "running" | "done" | "error">("idle")
+
+  const purge = async (
+    endpoint: string,
+    setStatus: (s: "idle" | "running" | "done" | "error") => void,
+    label: string,
+  ) => {
+    setStatus("running")
+    try {
+      const res = await fetch(endpoint, { method: "POST" })
+      if (res.ok) setStatus("done")
+      else setStatus("error")
+    } catch { setStatus("error") }
+    setTimeout(() => setStatus("idle"), 3000)
+  }
+
+  const regenAudio = async () => {
+    setAudioStatus("running")
+    setAudioResult("Generating ~30 images — this takes 3-5 minutes...")
+    try {
+      const res = await fetch("/api/regen-audio-images", { method: "POST" })
+      if (res.ok) {
+        const data = await res.json()
+        setAudioStatus("done")
+        setAudioResult(`${data.generated} generated, ${data.failed} failed`)
+      } else {
+        setAudioStatus("error")
+        setAudioResult("Failed")
+      }
+    } catch {
+      setAudioStatus("error")
+      setAudioResult("Failed")
+    }
+  }
+
+  const actions = [
+    {
+      label: "Audio Artwork",
+      desc: "Regenerate podcast watercolors",
+      status: audioStatus,
+      sub: audioResult,
+      action: regenAudio,
+    },
+    {
+      label: "Synthesis",
+      desc: "Clear cache — regenerates on next visit",
+      status: synthStatus,
+      action: () => purge("/api/synthesis-purge", setSynthStatus, "Synthesis"),
+    },
+    {
+      label: "Dispatch",
+      desc: "Clear cache — regenerates on next visit",
+      status: dispatchStatus,
+      action: () => purge("/api/dispatch-purge", setDispatchStatus, "Dispatch"),
+    },
+  ]
+
+  return (
+    <div>
+      <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+        Cache Management
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {actions.map(a => (
+          <button
+            key={a.label}
+            onClick={a.action}
+            disabled={a.status === "running"}
+            style={{
+              flex: 1, background: "var(--bg-surface)", borderRadius: 8, padding: "10px 14px",
+              border: "none", cursor: a.status === "running" ? "wait" : "pointer",
+              display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={e => { if (a.status !== "running") e.currentTarget.style.background = "var(--bg-elevated)" }}
+            onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 6, width: "100%" }}>
+              <RefreshCw
+                size={10}
+                style={{
+                  color: a.status === "done" ? "var(--live)" : a.status === "error" ? "#ef4444" : "var(--text-tertiary)",
+                  animation: a.status === "running" ? "spin 1s linear infinite" : "none",
+                }}
+              />
+              <span style={{
+                ...TYPE.sm, fontFamily: MONO,
+                color: a.status === "done" ? "var(--live)" : a.status === "error" ? "#ef4444" : "var(--text-secondary)",
+              }}>
+                {a.label}
+              </span>
+            </div>
+            <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", textAlign: "left" }}>
+              {a.status === "running" ? (a.sub || "Working...") : a.status === "done" ? (a.sub || "Done") : a.desc}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Source Pulse View ──────────────────────────────────────────────────────
 
 export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
@@ -382,6 +490,9 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
               })}
             </div>
           </div>
+
+          {/* ── Cache Management ── */}
+          <CacheManagement />
 
           {/* ── Layer Coverage ── */}
           <div>

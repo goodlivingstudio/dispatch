@@ -138,7 +138,11 @@ export async function GET() {
 
       for (const ep of episodes) {
         const genUrl = showImages.get(ep.showName)
-        if (genUrl) ep.artworkUrl = genUrl
+        if (genUrl) {
+          // Keep original RSS artwork as fallback in case generated URL expires
+          ;(ep as Episode & { originalArtworkUrl?: string }).originalArtworkUrl = ep.artworkUrl
+          ep.artworkUrl = genUrl
+        }
       }
     } catch { /* KV read failure — keep original artwork */ }
   }

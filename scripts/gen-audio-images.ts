@@ -103,24 +103,27 @@ async function loadFromKV(showName: string): Promise<string | null> {
 async function main() {
   const args = process.argv.slice(2)
   const showFilter = args.find(a => a.startsWith("--show="))?.split("=").slice(1).join("=")
+  const forceAll = args.includes("--force")
 
   const shows = showFilter
     ? PODCAST_FEEDS.filter(f => f.show.toLowerCase().includes(showFilter.toLowerCase()))
     : PODCAST_FEEDS
 
-  console.log(`\n🎧 Audio Image Generator — ${shows.length} shows\n`)
+  console.log(`\n🎧 Audio Image Generator — ${shows.length} shows${forceAll ? " (force regenerate)" : ""}\n`)
 
   let generated = 0
   let skipped = 0
   let failed = 0
 
   for (const feed of shows) {
-    // Check if already in KV
-    const existing = await loadFromKV(feed.show)
-    if (existing) {
-      console.log(`  ✓ ${feed.show} — cached`)
-      skipped++
-      continue
+    // Check if already in KV (skip unless --force)
+    if (!forceAll) {
+      const existing = await loadFromKV(feed.show)
+      if (existing) {
+        console.log(`  ✓ ${feed.show} — cached`)
+        skipped++
+        continue
+      }
     }
 
     console.log(`  Generating: ${feed.show}...`)
