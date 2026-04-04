@@ -436,11 +436,11 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
       {/* Audio DCOS Band — matches Signal's DCOS layout (no separate header) */}
       <AudioBriefBand episodes={episodes} visible={sortBy === "urgency" && !loading} />
 
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 16px" }}>
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
 
       {/* Layer pills */}
       {!loading && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+        <div style={{ padding: "12px 16px 0", display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
           {LAYER_FILTERS.map(layer => {
             const isActive = activeLayer === layer.id
             const count = layer.id === "all" ? episodes.length : episodes.filter(ep => ep.layer === layer.id).length
@@ -481,7 +481,7 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
 
       {/* Loading state */}
       {loading ? (
-        <div className="episode-grid" style={{ gap: 12 }}>
+        <div className="episode-grid" style={{ gap: 8, padding: "0 16px" }}>
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
@@ -504,7 +504,7 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
           No episodes loaded. Check podcast feed configuration.
         </div>
       ) : (
-        <div className="episode-grid" style={{ gap: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 16px" }}>
           {filtered.map((ep, i) => (
             <EpisodeCard key={ep.id} episode={ep} index={i} onClick={() => setActiveEpisode(ep)} />
           ))}
