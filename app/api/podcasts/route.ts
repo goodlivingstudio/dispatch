@@ -127,21 +127,21 @@ export async function GET() {
   // Podcast annotation is lazy — runs client-side when Audio tab is visited
   // Removed from ISR to avoid competing with news annotation on page load
 
-  // Load pre-generated Dispatch-style artwork from KV (created by scripts/gen-audio-images.ts)
+  // Check which shows have generated artwork in KV, serve via /api/audio-image endpoint
   if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
     try {
       const uniqueShows = [...new Set(episodes.map(e => e.showName))]
       const keys = uniqueShows.map(s => `audio-image:${s.replace(/[^a-zA-Z0-9]/g, "_")}`)
-      const values = await Promise.all(keys.map(k => kv.get<string>(k).catch(() => null)))
-      const showImages = new Map<string, string>()
-      uniqueShows.forEach((show, i) => { if (values[i]) showImages.set(show, values[i] as string) })
+      // Just check existence via TTL (cheap — no data transfer)
+      const ttls = await Promise.all(keys.map(k => kv.ttl(k).catch(() => -2)))
+      const showsWithArt = new Set<string>()
+      uniqueShows.forEach((show, i) => { if (ttls[i] > 0 || ttls[i] === -1) showsWithArt.add(show) })
 
       for (const ep of episodes) {
-        const genUrl = showImages.get(ep.showName)
-        if (genUrl) {
-          // Keep original RSS artwork as fallback in case generated URL expires
+        if (showsWithArt.has(ep.showName)) {
+          const slug = ep.showName.replace(/[^a-zA-Z0-9]/g, "_")
           ;(ep as Episode & { originalArtworkUrl?: string }).originalArtworkUrl = ep.artworkUrl
-          ep.artworkUrl = genUrl
+          ep.artworkUrl = `/api/audio-image?show=${encodeURIComponent(slug)}`
         }
       }
     } catch { /* KV read failure — keep original artwork */ }
