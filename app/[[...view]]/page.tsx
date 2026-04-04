@@ -463,6 +463,10 @@ export default function Page() {
   // Triage: filter to urgency 6+ only, sorted by urgency descending
   // Explore: show everything, original layer interleave order
   const TRIAGE_THRESHOLD = 6
+  // Urgency gate applied before layer selection — used for chip counts
+  const triagePool = sortBy === "urgency"
+    ? sourceFiltered.filter(a => (a.signalScores?.urgency ?? 0) >= TRIAGE_THRESHOLD)
+    : sourceFiltered
   const triageFiltered = sortBy === "urgency"
     ? layerFiltered.filter(a => (a.signalScores?.urgency ?? 0) >= TRIAGE_THRESHOLD)
     : layerFiltered
@@ -507,11 +511,11 @@ export default function Page() {
               All
             </span>
             <span style={{ ...TYPE.xs, fontVariantNumeric: "tabular-nums", color: activeLayers.size === 0 ? "var(--accent-muted)" : "var(--text-tertiary)", opacity: 0.5 }}>
-              {articles.length}
+              {triagePool.length}
             </span>
           </button>
           {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
-            const n = cat.id === "all" ? articles.length : articles.filter(a => a.tag === cat.id).length
+            const n = cat.id === "all" ? triagePool.length : triagePool.filter(a => a.tag === cat.id).length
             if (n === 0 && !feedLoading) return null
             const isActive = activeLayers.has(cat.id)
             return (
