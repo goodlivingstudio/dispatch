@@ -470,6 +470,7 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
   const [activeLayer, setActiveLayer] = useState("all")
   const [signal, setSignal] = useState<{ episode: Episode; x: number; y: number } | null>(null)
   const annotated = useRef(false)
+  const [annotating, setAnnotating] = useState(false)
 
   useEffect(() => {
     fetch("/api/podcasts")
@@ -482,6 +483,7 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
         // Client-side annotation (lazy — only when Audio tab is visited)
         if (!annotated.current && data.episodes?.length > 0) {
           annotated.current = true
+          setAnnotating(true)
           fetch("/api/annotate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -500,8 +502,9 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
                   return a ? { ...ep, synopsis: a.synopsis, relevance: a.relevance, urgency: a.signalScores?.urgency } : ep
                 }))
               }
+              setAnnotating(false)
             })
-            .catch(() => {})
+            .catch(() => setAnnotating(false))
         }
       })
       .catch(() => setLoading(false))
@@ -510,12 +513,14 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
   const TRIAGE_THRESHOLD = 6
   const sourceFiltered = excludedSources?.size ? episodes.filter(ep => !excludedSources.has(ep.showName)) : episodes
   const layerFiltered = activeLayer === "all" ? sourceFiltered : sourceFiltered.filter(ep => ep.layer === activeLayer)
-  // Triage: show urgency 6+ if scores exist, otherwise show all (sorted by recency)
   const hasScores = layerFiltered.some(ep => ep.urgency !== undefined && ep.urgency > 0)
+  // Triage: show urgency 6+ once scores exist. While annotating, show nothing (loading state handles it).
+  // If annotation finished with no qualifying scores, fall back to recency.
+  const triageWaiting = sortBy === "urgency" && annotating && !hasScores
   const filtered = sortBy === "urgency"
     ? hasScores
       ? layerFiltered.filter(ep => (ep.urgency ?? 0) >= TRIAGE_THRESHOLD).sort((a, b) => (b.urgency ?? 0) - (a.urgency ?? 0))
-      : [...layerFiltered].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      : annotating ? [] : [...layerFiltered].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     : layerFiltered
 
   return (
@@ -585,6 +590,12 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
               </div>
             </div>
           ))}
+        </div>
+      ) : triageWaiting ? (
+        <div style={{ padding: "32px 20px" }}>
+          <div style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)" }}>
+            ▸ scoring episodes<span className="loading-pulse" style={{ marginLeft: 4, ...TYPE.xs, opacity: 0.6 }}>...</span>
+          </div>
         </div>
       ) : episodes.length === 0 ? (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, ...TYPE.reading, color: "var(--text-tertiary)" }}>
