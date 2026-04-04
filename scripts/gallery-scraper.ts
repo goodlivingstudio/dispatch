@@ -18,9 +18,9 @@ import { chromium } from "playwright"
 
 const ARENA_CHANNEL_SLUG = "dispatch-zen"
 const ARENA_API = "https://api.are.na/v2"
-const MIN_IMAGE_WIDTH = 600 // minimum rendered width — filters out thumbnails
-const MIN_IMAGE_AREA = 400000 // minimum pixel area (e.g. 800×500) — filters out low-res
-const MAX_IMAGES_PER_SITE = 12 // cap per site to avoid flooding
+const MIN_IMAGE_WIDTH = 800 // high bar — only substantial images
+const MIN_IMAGE_AREA = 600000 // minimum pixel area (~1000×600) — no small fry
+const MAX_IMAGES_PER_SITE = 8 // fewer, better — quality over volume
 const SCROLL_PAUSE = 1500 // ms between scrolls
 const MAX_SCROLLS = 5 // how far down to scroll
 
@@ -146,13 +146,18 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
           const ratio = img.width / img.height
           if (ratio > 4 || ratio < 0.2) return false
           // Reject URL patterns
-          const badPatterns = ["favicon", "logo", "icon", "avatar", "sprite", "pixel",
+          const urlLower = img.url.toLowerCase()
+          const badUrlPatterns = ["favicon", "logo", "icon", "avatar", "sprite", "pixel",
             "tracking", "1x1", "placeholder", "blank", "spacer", "data:image",
-            "badge", "client", "partner", "sponsor"]
-          if (badPatterns.some(p => img.url.toLowerCase().includes(p))) return false
-          // Reject alt text patterns (client logos often have descriptive alt)
+            "badge", "client", "partner", "sponsor", "thumbnail", "thumb_",
+            "/thumb/", "svg", ".svg", "emoji", "arrow", "button", "cta",
+            "banner", "ad-", "advert", "promo"]
+          if (badUrlPatterns.some(p => urlLower.includes(p))) return false
+          // Reject alt text patterns
           const altLower = img.alt.toLowerCase()
-          if (altLower.includes("logo") || altLower.includes("client") || altLower.includes("partner")) return false
+          const badAltPatterns = ["logo", "client", "partner", "icon", "arrow",
+            "button", "banner", "advertisement", "sponsor", "badge"]
+          if (badAltPatterns.some(p => altLower.includes(p))) return false
           return true
         })
         .sort((a, b) => (b.width * b.height) - (a.width * a.height))
@@ -179,11 +184,22 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
 
     const all = [...images, ...bgImages]
 
-    // Deduplicate by URL
+    // Deduplicate by normalized URL — strip query params, sizing suffixes, CDN variants
+    const normalizeUrl = (url: string): string => {
+      try {
+        const u = new URL(url)
+        u.search = "" // strip query params
+        let path = u.pathname
+        // Strip common sizing patterns: -800x600, _2364_col_0, @2x, etc.
+        path = path.replace(/-\d+x\d+/, "").replace(/_\d+_(?:col|sq|hero)_?\d*/, "").replace(/@\d+x/, "")
+        return u.origin + path
+      } catch { return url }
+    }
     const seen = new Set<string>()
     const unique = all.filter(img => {
-      if (seen.has(img.url)) return false
-      seen.add(img.url)
+      const key = normalizeUrl(img.url)
+      if (seen.has(key)) return false
+      seen.add(key)
       return true
     })
 
