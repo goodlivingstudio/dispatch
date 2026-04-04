@@ -73,24 +73,26 @@ export async function generateCardImage(
   }
 }
 
-// Generate images for multiple cards with rate limiting and retry
+// Generate images in parallel batches (2 concurrent, then next batch)
 export async function generateCardImages(
   cards: { title: string; layers?: string[] }[],
 ): Promise<(string | undefined)[]> {
-  const results: (string | undefined)[] = []
-  for (let i = 0; i < cards.length; i++) {
-    // First attempt
-    let url = await generateCardImage(cards[i].title, cards[i].layers)
-    // Retry once on failure (rate limit recovery)
-    if (!url && i > 0) {
-      await new Promise(r => setTimeout(r, 8000))
-      url = await generateCardImage(cards[i].title, cards[i].layers)
-    }
-    results.push(url)
-    // Rate limit: longer delay between requests
-    if (i < cards.length - 1) {
-      await new Promise(r => setTimeout(r, 5000))
+  const CONCURRENCY = 2
+  const results: (string | undefined)[] = new Array(cards.length).fill(undefined)
+
+  for (let i = 0; i < cards.length; i += CONCURRENCY) {
+    const batch = cards.slice(i, i + CONCURRENCY)
+    const batchResults = await Promise.allSettled(
+      batch.map(card => generateCardImage(card.title, card.layers))
+    )
+    batchResults.forEach((result, j) => {
+      results[i + j] = result.status === "fulfilled" ? result.value : undefined
+    })
+    // Brief pause between batches
+    if (i + CONCURRENCY < cards.length) {
+      await new Promise(r => setTimeout(r, 2000))
     }
   }
+
   return results
 }
