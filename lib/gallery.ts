@@ -28,7 +28,6 @@ export const GALLERY_SOURCES: GallerySource[] = [
   { url: "https://www.yellowtrace.com.au/feed/", name: "Yellowtrace", type: "rss" },
 
   // Photography (fills Cool, Warm, Earth, Vivid)
-  { url: "https://petapixel.com/feed/", name: "PetaPixel", type: "rss" },
   { url: "https://www.featureshoot.com/feed/", name: "Feature Shoot", type: "rss" },
   { url: "https://www.thisiscolossal.com/category/photography/feed/", name: "Colossal Photography", type: "rss" },
   { url: "https://trendland.com/feed/", name: "Trendland", type: "rss" },
