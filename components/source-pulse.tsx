@@ -202,11 +202,28 @@ function SourceRow({ source }: { source: SourceStat }) {
 
 // ─── Cache Management ─────────────────────────────────────────────────────
 
+function formatCacheAge(iso: string | null): string {
+  if (!iso) return "no cache"
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago`
+}
+
 function CacheManagement() {
   const [audioStatus, setAudioStatus] = useState<"idle" | "running" | "done" | "error">("idle")
   const [audioResult, setAudioResult] = useState<string>("")
   const [synthStatus, setSynthStatus] = useState<"idle" | "running" | "done" | "error">("idle")
   const [dispatchStatus, setDispatchStatus] = useState<"idle" | "running" | "done" | "error">("idle")
+  const [cacheAges, setCacheAges] = useState<{ audio: string | null; synthesis: string | null; dispatch: string | null }>({ audio: null, synthesis: null, dispatch: null })
+
+  useEffect(() => {
+    fetch("/api/cache-status").then(r => r.json()).then(setCacheAges).catch(() => {})
+  }, [audioStatus, synthStatus, dispatchStatus]) // refetch after any action
 
   const purge = async (
     endpoint: string,
@@ -251,18 +268,21 @@ function CacheManagement() {
       status: audioStatus,
       sub: audioResult,
       action: regenAudio,
+      age: cacheAges.audio,
     },
     {
       label: "Synthesis",
       desc: "Clear cache — regenerates on next visit",
       status: synthStatus,
       action: () => purge("/api/synthesis-purge", setSynthStatus, "Synthesis"),
+      age: cacheAges.synthesis,
     },
     {
       label: "Dispatch",
       desc: "Clear cache — regenerates on next visit",
       status: dispatchStatus,
       action: () => purge("/api/dispatch-purge", setDispatchStatus, "Dispatch"),
+      age: cacheAges.dispatch,
     },
   ]
 
@@ -304,6 +324,11 @@ function CacheManagement() {
             <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", textAlign: "left" }}>
               {a.status === "running" ? (a.sub || "Working...") : a.status === "done" ? (a.sub || "Done") : a.desc}
             </span>
+            {a.status === "idle" && (
+              <span style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-tertiary)", opacity: 0.6, marginTop: 2 }}>
+                {formatCacheAge(a.age)}
+              </span>
+            )}
           </button>
         ))}
       </div>
