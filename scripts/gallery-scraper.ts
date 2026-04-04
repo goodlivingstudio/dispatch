@@ -167,6 +167,30 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
   }
 }
 
+// ─── Are.na Dedup — load existing blocks to avoid duplicates ────────────────
+
+async function loadExistingUrls(): Promise<Set<string>> {
+  const token = process.env.ARENA_ACCESS_TOKEN
+  if (!token) return new Set()
+  try {
+    const res = await fetch(`${ARENA_API}/channels/${ARENA_CHANNEL_SLUG}/contents?per=200`, {
+      headers: { "Authorization": `Bearer ${token}` },
+      signal: AbortSignal.timeout(10000),
+    })
+    if (!res.ok) return new Set()
+    const data = await res.json()
+    const urls = new Set<string>()
+    for (const block of (data.contents || [])) {
+      if (block.image?.display?.url) urls.add(block.image.display.url)
+      if (block.source?.url) urls.add(block.source.url)
+    }
+    console.log(`  Loaded ${urls.size} existing URLs from Are.na for dedup\n`)
+    return urls
+  } catch {
+    return new Set()
+  }
+}
+
 // ─── Are.na Push ────────────────────────────────────────────────────────────
 
 async function pushToArena(imageUrl: string, title: string, sourceUrl: string): Promise<boolean> {
@@ -227,8 +251,12 @@ async function main() {
 
   console.log(`\n📷 Gallery Scraper — ${targets.length} sites\n`)
 
+  // Load existing Are.na URLs to avoid duplicates
+  const existingUrls = dryRun ? new Set<string>() : await loadExistingUrls()
+
   let totalFound = 0
   let totalPushed = 0
+  let totalSkipped = 0
 
   for (const target of targets) {
     console.log(`\n── ${target.name} (${target.category}) ──`)
@@ -241,13 +269,21 @@ async function main() {
     }
 
     for (const img of images) {
+      // Skip if already in Are.na
+      if (existingUrls.has(img.url)) {
+        totalSkipped++
+        continue
+      }
+
       const title = img.alt || `${target.name} — visual`
       if (dryRun) {
         console.log(`  [preview] ${img.width}×${img.height} ${img.url.slice(0, 80)}`)
       } else {
         const ok = await pushToArena(img.url, title, target.url)
-        if (ok) totalPushed++
-        // Rate limit: 100ms between pushes
+        if (ok) {
+          totalPushed++
+          existingUrls.add(img.url) // prevent within-run duplicates too
+        }
         await new Promise(r => setTimeout(r, 100))
       }
     }
@@ -256,6 +292,7 @@ async function main() {
   console.log(`\n── Summary ──`)
   console.log(`Sites visited: ${targets.length}`)
   console.log(`Images found: ${totalFound}`)
+  console.log(`Skipped (already in Are.na): ${totalSkipped}`)
   if (!dryRun) console.log(`Images pushed: ${totalPushed}`)
   console.log("")
 }
