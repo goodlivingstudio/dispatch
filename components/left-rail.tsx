@@ -478,8 +478,8 @@ export function LeftRail({
           </div>
         </div>
 
-        {/* Feed controls (Triage/Explore + layer pills) moved to Signal feed area */}
-        {viewMode === "signal" && false && (
+        {/* Triage/Explore toggle — stays in left rail */}
+        {viewMode === "signal" && (
           <div style={{ padding: "0 16px" }}>
             <div style={{ height: 1, background: "var(--border)", margin: "20px 0" }} />
             {/* Mode switch — Triage / Explore — same visual language as the view toggle above */}
@@ -543,54 +543,7 @@ export function LeftRail({
               })}
             </div>
 
-            {/* Layer filters — compact row, same visual weight as metadata */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
-                const n = countFor(cat.id)
-                if (n === 0 && !feedLoading) return null
-                const isActive = activeLayers.has(cat.id)
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => onToggleLayer(cat.id)}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "4px 10px",
-                      borderRadius: 6,
-                      border: isActive ? "1px solid var(--accent-muted)" : "1px solid transparent",
-                      background: isActive ? "var(--accent-primary)" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)" }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? "var(--accent-primary)" : "transparent" }}
-                  >
-                    <span
-                      style={{
-                        ...TYPE.sm,
-                        color: isActive ? "var(--accent-secondary)" : "var(--text-tertiary)",
-                        fontWeight: isActive ? 600 : 400,
-                        transition: "color 0.15s",
-                      }}
-                    >
-                      {cat.label}
-                    </span>
-                    <span
-                      style={{
-                        ...TYPE.xs,
-                        fontVariantNumeric: "tabular-nums",
-                        color: isActive ? "var(--accent-muted)" : "var(--text-tertiary)",
-                        opacity: 0.5,
-                      }}
-                    >
-                      {n}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+            {/* Layer pills moved to Signal feed area */}
           </div>
         )}
 

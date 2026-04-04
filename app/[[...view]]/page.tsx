@@ -478,33 +478,8 @@ export default function Page() {
       }}
     >
       {!isMobile && <ChiefOfStaffBand signals={signals} briefLoading={briefLoading} briefError={briefError} onDeliberate={handleDeliberate} defaultExpanded={sortBy === "urgency"} />}
-      {/* Triage/Explore + layer filters — inline with feed */}
+      {/* Layer pills — inline with feed (Triage/Explore toggle stays in left rail) */}
       <div style={{ flexShrink: 0, padding: "12px 16px 0" }}>
-        {/* Triage / Explore toggle */}
-        <div style={{
-          display: "flex", background: "var(--bg-elevated)", borderRadius: 8,
-          padding: 3, marginBottom: 12, width: "fit-content",
-        }}>
-          {(["urgency", "layer"] as const).map(mode => {
-            const isActive = sortBy === mode
-            return (
-              <button
-                key={mode}
-                onClick={() => setSortBy(mode)}
-                style={{
-                  padding: "8px 20px", borderRadius: 8, border: "none",
-                  background: isActive ? "var(--bg-surface)" : "transparent",
-                  ...TYPE.sm, fontWeight: isActive ? 600 : 400, textTransform: "uppercase", letterSpacing: "0.04em",
-                  color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
-                  cursor: "pointer", transition: "all 0.3s ease", position: "relative", zIndex: 1,
-                }}
-              >
-                {mode === "urgency" ? "Triage" : "Explore"}
-              </button>
-            )
-          })}
-        </div>
-        {/* Layer pills */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
           {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
             const n = cat.id === "all" ? articles.length : articles.filter(a => a.tag === cat.id).length
@@ -538,7 +513,6 @@ export default function Page() {
             )
           })}
         </div>
-        {/* Active count */}
         <div style={{ ...TYPE.sm, color: "var(--text-tertiary)", marginBottom: 4 }}>
           {filtered.length} {sortBy === "urgency" ? "urgent" : "total"}
         </div>
