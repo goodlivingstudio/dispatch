@@ -126,9 +126,9 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                 {i === statusIdx && i === SYNTHESIS_STATUSES.length - 1 && <span className="loading-pulse" style={{ marginLeft: 4, ...TYPE.xs, opacity: 0.6 }}>...</span>}
               </div>
             ))}
-            {elapsed > 0 && (
+            {elapsed > 3 && (
               <div style={{ ...TYPE.xs, fontFamily: MONO, color: "var(--text-tertiary)", marginTop: 12, opacity: 0.6 }}>
-                ~{Math.max(0, 35 - elapsed)}s remaining
+                {elapsed < 10 ? "analyzing patterns" : elapsed < 30 ? "composing images" : "finishing up"} · {elapsed}s
               </div>
             )}
           </div>
