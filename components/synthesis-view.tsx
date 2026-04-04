@@ -38,6 +38,7 @@ interface AIPattern {
 }
 
 interface SynthesisData {
+  headline?: string
   briefing: string
   patterns: AIPattern[]
   blindSpotNote: string
@@ -134,69 +135,32 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
         {!loading && data && (
           <div style={{ padding: "0 0 48px" }}>
 
-            {/* ─ THE BRIEFING — structured header section ─ */}
+            {/* ─ THE BRIEFING — headline + evidence ─ */}
             <div style={{
               padding: "36px 32px 32px",
               borderBottom: "1px solid var(--border)",
               animation: "signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
             }}>
-              {(() => {
-                // Split briefing into sentences for structured display
-                const sentences = data.briefing.split(/(?<=[.!?])\s+/).filter(s => s.trim())
-                const headline = sentences[0] || data.briefing
-                const summary = sentences[1] || ""
-                const rest = sentences.slice(2)
+              {/* Headline — the week's biggest shift */}
+              <div style={{
+                fontSize: 19,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+                lineHeight: 1.45,
+                letterSpacing: "-0.015em",
+                marginBottom: 16,
+              }}>
+                {data.headline || data.briefing.split(/[.!?]\s/)[0]}
+              </div>
 
-                return (
-                  <>
-                    {/* Headline — the lead insight */}
-                    <div style={{
-                      fontSize: 17,
-                      fontWeight: 500,
-                      color: "var(--text-primary)",
-                      lineHeight: 1.5,
-                      letterSpacing: "-0.01em",
-                      marginBottom: summary ? 14 : 0,
-                    }}>
-                      {headline}
-                    </div>
-
-                    {/* Summary line */}
-                    {summary && (
-                      <div style={{
-                        ...TYPE.reading,
-                        color: "var(--text-secondary)",
-                        lineHeight: 1.7,
-                        marginBottom: rest.length > 0 ? 16 : 0,
-                      }}>
-                        {summary}
-                      </div>
-                    )}
-
-                    {/* Supporting points — broken into scannable items */}
-                    {rest.length > 0 && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {rest.map((sentence, i) => (
-                          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                            <span style={{
-                              width: 4, height: 4, borderRadius: "50%",
-                              background: "var(--accent-muted)", flexShrink: 0,
-                              marginTop: 7,
-                            }} />
-                            <span style={{
-                              ...TYPE.body,
-                              color: "var(--text-tertiary)",
-                              lineHeight: 1.7,
-                            }}>
-                              {sentence}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )
-              })()}
+              {/* Briefing — the evidence and context */}
+              <div style={{
+                ...TYPE.reading,
+                color: "var(--text-secondary)",
+                lineHeight: 1.75,
+              }}>
+                {data.headline ? data.briefing : data.briefing.split(/(?<=[.!?])\s+/).slice(1).join(" ")}
+              </div>
             </div>
 
             {/* ─ CONVERGENCES — measured 2-column grid ─ */}
