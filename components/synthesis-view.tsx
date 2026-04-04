@@ -35,6 +35,7 @@ interface AIPattern {
   description: string
   layers: string[]
   signalCount: number
+  imageUrl?: string
 }
 
 interface SynthesisData {
@@ -201,6 +202,19 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                       onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
                       onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
                     >
+                      {/* Card image — generative or placeholder */}
+                      <div style={{
+                        height: 120, marginBottom: 16, borderRadius: 8, overflow: "hidden",
+                        background: pattern.imageUrl ? "transparent" : `linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)`,
+                      }}>
+                        {pattern.imageUrl && (
+                          <img
+                            src={pattern.imageUrl}
+                            alt=""
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        )}
+                      </div>
                       {/* Layer labels with dot separators */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
                         {pattern.layers.map((l, li) => (

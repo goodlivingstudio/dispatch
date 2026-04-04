@@ -20,6 +20,7 @@ interface Pitch {
   angle?: string
   urgency: string
   wordCount?: number
+  imageUrl?: string
 }
 
 interface DispatchData {
@@ -255,30 +256,43 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                     onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
                   >
-                    {/* Mode indicator */}
-                    <div style={{
-                      ...TYPE.xs, textTransform: "uppercase", letterSpacing: "0.06em",
-                      color: pitch.mode === "thought_leadership" ? "#5A9EB0" : "#C87A6A",
-                      fontWeight: 600, marginBottom: 10,
-                    }}>
-                      {pitch.mode === "thought_leadership" ? "Thought Leadership" : "Creative"} · {pitch.platforms.primary}
-                    </div>
-                    {/* Title — the headline */}
-                    <div style={{
-                      ...TYPE.heading,
-                      color: "var(--text-primary)",
-                      marginBottom: 8,
-                    }}>
-                      {pitch.title}
-                    </div>
-                    {/* Thesis */}
-                    <div style={{
-                      ...TYPE.body,
-                      color: "var(--text-secondary)",
-                      lineHeight: 1.7,
-                      maxWidth: 540,
-                    }}>
-                      {pitch.thesis}
+                    <div style={{ display: "flex", gap: 20 }}>
+                      {/* Image thumbnail — left side */}
+                      <div style={{
+                        width: 140, height: 100, borderRadius: 8, overflow: "hidden", flexShrink: 0,
+                        background: pitch.imageUrl ? "transparent" : `linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)`,
+                      }}>
+                        {pitch.imageUrl && (
+                          <img src={pitch.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        )}
+                      </div>
+                      {/* Text content — right side */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {/* Mode indicator */}
+                        <div style={{
+                          ...TYPE.xs, textTransform: "uppercase", letterSpacing: "0.06em",
+                          color: pitch.mode === "thought_leadership" ? "#5A9EB0" : "#C87A6A",
+                          fontWeight: 600, marginBottom: 8,
+                        }}>
+                          {pitch.mode === "thought_leadership" ? "Thought Leadership" : "Creative"} · {pitch.platforms.primary}
+                        </div>
+                        {/* Title */}
+                        <div style={{
+                          ...TYPE.heading,
+                          color: "var(--text-primary)",
+                          marginBottom: 6,
+                        }}>
+                          {pitch.title}
+                        </div>
+                        {/* Thesis */}
+                        <div style={{
+                          ...TYPE.body,
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.7,
+                        }}>
+                          {pitch.thesis}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
