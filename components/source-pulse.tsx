@@ -67,7 +67,7 @@ function MetricCard({ label, value, sub, color, width }: {
 }) {
   return (
     <div style={{
-      background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px",
+      background: "var(--bg-surface)", borderRadius: 12, padding: "14px 16px",
       flex: width || "1", minWidth: 0,
     }}>
       <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
@@ -394,7 +394,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", width: 40, textAlign: "right" }}>urg.</span>
               </div>
             </div>
-            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px" }}>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 12, padding: "8px 14px" }}>
               {layerHealth.map(lh => (
                 <LayerBar key={lh.layer} layer={lh} health={0} maxArticles={maxLayerArticles} />
               ))}
@@ -406,7 +406,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
             <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
               Annotation Pipeline
             </div>
-            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px" }}>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 12, padding: "14px 16px" }}>
               {/* Pipeline bar */}
               <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "var(--bg-elevated)", marginBottom: 10 }}>
                 {pipeline.annotatedServer > 0 && (
@@ -446,7 +446,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
                 <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", fontFamily: MONO, width: 24, textAlign: "right" }}>urg</span>
               </div>
             </div>
-            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "8px 14px" }}>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 12, padding: "8px 14px" }}>
               {sourceStats.map(source => (
                 <SourceRow key={source.name} source={source} />
               ))}
@@ -458,7 +458,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
             <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
               Estimated Daily Cost
             </div>
-            <div style={{ background: "var(--bg-surface)", borderRadius: 10, padding: "14px 16px" }}>
+            <div style={{ background: "var(--bg-surface)", borderRadius: 12, padding: "14px 16px" }}>
               {(() => {
                 // Cost model based on Anthropic pricing (April 2026)
                 // Haiku: $0.25/M input, $1.25/M output
@@ -539,7 +539,7 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
           {/* ── Stub Fallback ── */}
           {feedHealth?.stubCategories && feedHealth.stubCategories.length > 0 && (
             <div style={{
-              background: "rgba(239, 68, 68, 0.08)", borderRadius: 10, padding: "12px 16px",
+              background: "rgba(239, 68, 68, 0.08)", borderRadius: 12, padding: "12px 16px",
               border: "1px solid rgba(239, 68, 68, 0.2)",
             }}>
               <div style={{ ...TYPE.xs, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ExternalLink, ArrowUpRight } from "lucide-react"
-import { TYPE, metaStyle } from "@/lib/styles"
+import { TYPE, MONO, metaStyle } from "@/lib/styles"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -332,14 +332,14 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
   const filtered = activeLayer === "all" ? sourceFiltered : sourceFiltered.filter(ep => ep.layer === activeLayer)
 
   return (
-    <main className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden", background: "var(--bg-primary)" }}>
-      {/* Section header — matches news feed */}
+    <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--bg-primary)" }}>
+      {/* Header bar — matches all other views */}
       <div style={{
-        height: 36, display: "flex", alignItems: "center",
-        marginBottom: 8,
+        flexShrink: 0, height: 40, display: "flex", alignItems: "center",
+        padding: "0 20px", borderBottom: "1px solid var(--border)",
       }}>
-        <span style={{ ...TYPE.sm, color: "var(--accent-secondary)", textTransform: "uppercase", fontWeight: 500, letterSpacing: "0.04em" }}>
-          Audio Sources
+        <span style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)", textTransform: "uppercase" }}>
+          Audio
         </span>
         {!loading && (
           <span style={{ ...TYPE.sm, color: "var(--text-primary)", marginLeft: 8, textTransform: "uppercase", letterSpacing: "0.04em" }}>
@@ -347,6 +347,8 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
           </span>
         )}
       </div>
+
+      <div className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
 
       {/* Layer pills */}
       {!loading && (
@@ -425,6 +427,7 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
       {activeEpisode && (
         <EpisodeModal episode={activeEpisode} onClose={() => setActiveEpisode(null)} onDeliberate={onDeliberate} />
       )}
+      </div>
     </main>
   )
 }
