@@ -636,21 +636,11 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
             <div style={{
               marginLeft: "auto",
               display: "flex",
+              gap: 2,
               background: "var(--bg-elevated)",
-              borderRadius: 6,
-              padding: 2,
-              position: "relative",
-              overflow: "hidden",
+              borderRadius: 8,
+              padding: 3,
             }}>
-              {/* Sliding indicator */}
-              <div style={{
-                position: "absolute",
-                top: 2, left: artworkMode === "generated" ? "2px" : "calc(50% + 1px)",
-                width: "calc(50% - 3px)", height: "calc(100% - 4px)",
-                background: "var(--bg-surface)", borderRadius: 5,
-                transition: "left 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                zIndex: 0,
-              }} />
               {([
                 { id: "generated" as const, label: "Generated" },
                 { id: "source" as const, label: "Source" },
@@ -659,12 +649,13 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
                   key={mode.id}
                   onClick={() => setArtworkMode(mode.id)}
                   style={{
-                    padding: "3px 10px", background: "transparent", border: "none",
-                    borderRadius: 5, cursor: "pointer", position: "relative", zIndex: 1,
+                    padding: "4px 12px", border: "none",
+                    borderRadius: 6, cursor: "pointer",
+                    background: artworkMode === mode.id ? "var(--bg-surface)" : "transparent",
                     ...TYPE.xs,
                     fontWeight: artworkMode === mode.id ? 600 : 400,
                     color: artworkMode === mode.id ? "var(--text-primary)" : "var(--text-tertiary)",
-                    transition: "color 0.2s, font-weight 0.2s",
+                    transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                 >
                   {mode.label}
