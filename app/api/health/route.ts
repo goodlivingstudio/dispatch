@@ -30,13 +30,15 @@ async function probeAnthropic(key: string): Promise<string> {
 
 async function probeExa(key: string): Promise<string> {
   try {
+    // Send a minimal invalid request — a 400 (bad request) means the key is valid
+    // and the API is reachable. Only a 401/403 means auth failure.
     const res = await fetch("https://api.exa.ai/search", {
       method: "POST",
       headers: { "x-api-key": key, "content-type": "application/json" },
-      body: JSON.stringify({ query: "test", numResults: 1 }),
+      body: JSON.stringify({}),
       signal: AbortSignal.timeout(TIMEOUT),
     })
-    if (res.ok) return "ok"
+    if (res.ok || res.status === 400 || res.status === 422) return "ok"
     return `error ${res.status}`
   } catch (err) {
     return `failed: ${err instanceof Error ? err.message : String(err)}`

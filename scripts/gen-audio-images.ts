@@ -64,10 +64,22 @@ async function generateImage(showName: string, layer: string): Promise<string | 
       })
       if (!pollRes.ok) continue
       const result = await pollRes.json()
-      if (result.status === "succeeded" && result.output?.[0]) return result.output[0]
+      if (result.status === "succeeded" && result.output?.[0]) {
+        return await downloadAsDataUri(result.output[0])
+      }
       if (result.status === "failed" || result.status === "canceled") return undefined
     }
     return undefined
+  } catch { return undefined }
+}
+
+async function downloadAsDataUri(url: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
+    if (!res.ok) return undefined
+    const buf = Buffer.from(await res.arrayBuffer())
+    const contentType = res.headers.get("content-type") || "image/webp"
+    return `data:${contentType};base64,${buf.toString("base64")}`
   } catch { return undefined }
 }
 

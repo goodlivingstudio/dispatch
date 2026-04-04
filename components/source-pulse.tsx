@@ -219,11 +219,12 @@ function CacheManagement() {
   const [audioResult, setAudioResult] = useState<string>("")
   const [synthStatus, setSynthStatus] = useState<"idle" | "running" | "done" | "error">("idle")
   const [dispatchStatus, setDispatchStatus] = useState<"idle" | "running" | "done" | "error">("idle")
+  const [purgeStatus, setPurgeStatus] = useState<"idle" | "running" | "done" | "error">("idle")
   const [cacheAges, setCacheAges] = useState<{ audio: string | null; synthesis: string | null; dispatch: string | null }>({ audio: null, synthesis: null, dispatch: null })
 
   useEffect(() => {
     fetch("/api/cache-status").then(r => r.json()).then(setCacheAges).catch(() => {})
-  }, [audioStatus, synthStatus, dispatchStatus]) // refetch after any action
+  }, [audioStatus, synthStatus, dispatchStatus, purgeStatus]) // refetch after any action
 
   const purge = async (
     endpoint: string,
@@ -283,6 +284,13 @@ function CacheManagement() {
       status: dispatchStatus,
       action: () => purge("/api/dispatch-purge", setDispatchStatus, "Dispatch"),
       age: cacheAges.dispatch,
+    },
+    {
+      label: "Purge Images",
+      desc: "Clear all generated artwork",
+      status: purgeStatus,
+      action: () => purge("/api/purge-images", setPurgeStatus, "Purge"),
+      age: null,
     },
   ]
 
