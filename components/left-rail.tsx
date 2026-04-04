@@ -596,8 +596,8 @@ export function LeftRail({
 
       </nav>
 
-      {/* Bottom bar — gallery + settings */}
-      <div style={{ flexShrink: 0, padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Bottom bar — utilities */}
+      <div style={{ flexShrink: 0, padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
         <button
           onClick={() => onViewChange("config")}
           title="Configuration"
