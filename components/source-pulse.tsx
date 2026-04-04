@@ -357,9 +357,10 @@ export function SourcePulseView({ articles, feedHealth, fetchedAt }: {
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               {[
-                { name: "Anthropic", key: "ANTHROPIC_API_KEY", check: () => health?.anthropic === "ok — API responding" },
-                { name: "Exa Search", key: "EXA_API_KEY", check: () => String((health?.env as Record<string, string>)?.EXA_API_KEY || "").startsWith("set") },
-                { name: "KV Memory", key: "KV_REST_API_URL", check: () => String((health?.env as Record<string, string>)?.KV_REST_API_URL || "").startsWith("set") },
+                { name: "Anthropic", check: () => health?.anthropic === "ok — API responding" },
+                { name: "Exa Search", check: () => String((health?.env as Record<string, string>)?.EXA_API_KEY || "").startsWith("set") },
+                { name: "KV Memory", check: () => String((health?.env as Record<string, string>)?.KV_REST_API_URL || "").startsWith("set") },
+                { name: "Are.na", check: () => String((health?.env as Record<string, string>)?.ARENA_ACCESS_TOKEN || "").startsWith("set") },
               ].map(api => {
                 const ok = health ? api.check() : null
                 return (

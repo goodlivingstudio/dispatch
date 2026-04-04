@@ -5,12 +5,14 @@ export async function GET() {
   const anthropicKey = process.env.ANTHROPIC_API_KEY
   const exaKey       = process.env.EXA_API_KEY
   const kvUrl        = process.env.KV_REST_API_URL
+  const arenaToken   = process.env.ARENA_ACCESS_TOKEN
 
   const status: Record<string, unknown> = {
     env: {
-      ANTHROPIC_API_KEY: anthropicKey ? `set (${anthropicKey.length} chars)` : "MISSING",
-      EXA_API_KEY:       exaKey       ? `set (${exaKey.length} chars)`       : "not configured (web search disabled)",
-      KV_REST_API_URL:   kvUrl        ? "set"                                : "not configured (memory disabled)",
+      ANTHROPIC_API_KEY:  anthropicKey ? `set (${anthropicKey.length} chars)` : "MISSING",
+      EXA_API_KEY:        exaKey       ? `set (${exaKey.length} chars)`       : "not configured (web search disabled)",
+      KV_REST_API_URL:    kvUrl        ? "set"                                : "not configured (memory disabled)",
+      ARENA_ACCESS_TOKEN: arenaToken   ? "set"                                : "not configured (gallery scraper disabled)",
     },
     anthropic: "not tested",
     timestamp: new Date().toISOString(),
