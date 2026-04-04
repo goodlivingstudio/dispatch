@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Paperclip, Mic, MicOff, ExternalLink, ArrowUpRight, Copy, Check, Flag, BookMarked, Minimize2 } from "lucide-react"
+import { Paperclip, Mic, MicOff, ExternalLink, ArrowUpRight, Copy, Check, Flag, BookMarked, Maximize2 } from "lucide-react"
 import type { Article, Message } from "@/lib/types"
 import { renderCitedBody, CitationSource } from "@/components/citation"
 
@@ -556,7 +556,7 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode }: {
                     onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = "var(--text-secondary)" }}
                     onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-tertiary)" }}
                   >
-                    <Minimize2 size={16} strokeWidth={1.5} />
+                    <Maximize2 size={16} strokeWidth={1.5} />
                   </button>
                 )}
                 <button
