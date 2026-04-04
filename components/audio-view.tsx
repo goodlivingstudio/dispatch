@@ -403,13 +403,12 @@ const LAYER_FILTERS: { id: string; label: string }[] = [
   { id: "culture", label: "Culture" },
 ]
 
-export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (text: string) => void; excludedSources?: Set<string> }) {
+export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }: { onDeliberate?: (text: string) => void; excludedSources?: Set<string>; sortBy?: "urgency" | "layer" }) {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [loading, setLoading] = useState(true)
   const [showCount, setShowCount] = useState(0)
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null)
   const [activeLayer, setActiveLayer] = useState("all")
-  const [sortBy, setSortBy] = useState<"urgency" | "layer">("urgency")
 
   useEffect(() => {
     fetch("/api/podcasts")
@@ -452,33 +451,6 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
       <AudioBriefBand episodes={episodes} visible={sortBy === "urgency" && !loading} />
 
       <div className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-
-      {/* Triage / Explore toggle */}
-      {!loading && (
-        <div style={{
-          display: "flex", background: "var(--bg-elevated)", borderRadius: 8,
-          padding: 3, marginBottom: 16, width: "fit-content",
-        }}>
-          {(["urgency", "layer"] as const).map(mode => {
-            const isActive = sortBy === mode
-            return (
-              <button
-                key={mode}
-                onClick={() => setSortBy(mode)}
-                style={{
-                  padding: "8px 20px", borderRadius: 8, border: "none",
-                  background: isActive ? "var(--bg-surface)" : "transparent",
-                  ...TYPE.sm, fontWeight: isActive ? 600 : 400, textTransform: "uppercase", letterSpacing: "0.04em",
-                  color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
-                  cursor: "pointer", transition: "all 0.3s ease", position: "relative", zIndex: 1,
-                }}
-              >
-                {mode === "urgency" ? "Triage" : "Explore"}
-              </button>
-            )
-          })}
-        </div>
-      )}
 
       {/* Layer pills */}
       {!loading && (

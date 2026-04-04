@@ -481,6 +481,25 @@ export default function Page() {
       {/* Layer pills — inline with feed (Triage/Explore toggle stays in left rail) */}
       <div style={{ flexShrink: 0, padding: "12px 16px 0" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+          {/* All chip */}
+          <button
+            onClick={() => setActiveLayers(new Set())}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "4px 12px", borderRadius: 9999, border: "none",
+              background: activeLayers.size === 0 ? "var(--accent-primary)" : "transparent",
+              cursor: "pointer", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { if (activeLayers.size > 0) e.currentTarget.style.background = "var(--bg-elevated)" }}
+            onMouseLeave={e => { if (activeLayers.size > 0) e.currentTarget.style.background = "transparent" }}
+          >
+            <span style={{ ...TYPE.sm, color: activeLayers.size === 0 ? "var(--accent-secondary)" : "var(--text-tertiary)", fontWeight: activeLayers.size === 0 ? 600 : 400 }}>
+              All
+            </span>
+            <span style={{ ...TYPE.xs, fontVariantNumeric: "tabular-nums", color: activeLayers.size === 0 ? "var(--accent-muted)" : "var(--text-tertiary)", opacity: 0.5 }}>
+              {articles.length}
+            </span>
+          </button>
           {CATEGORY_CONFIG.filter(cat => cat.id !== "all").map(cat => {
             const n = cat.id === "all" ? articles.length : articles.filter(a => a.tag === cat.id).length
             if (n === 0 && !feedLoading) return null
@@ -512,9 +531,6 @@ export default function Page() {
               </button>
             )
           })}
-        </div>
-        <div style={{ ...TYPE.sm, color: "var(--text-tertiary)", marginBottom: 4 }}>
-          {filtered.length} {sortBy === "urgency" ? "urgent" : "total"}
         </div>
       </div>
       <div id="main-feed" role="feed" aria-label="Intelligence feed" tabIndex={-1} style={{ flex: 1, overflowY: "auto", padding: "8px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
@@ -565,7 +581,7 @@ export default function Page() {
           <div key={mobileTab} className="mobile-tab-content" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {mobileTab === "signal" && feedContent}
             {mobileTab === "synthesis" && <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />}
-            {mobileTab === "audio"     && <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} />}
+            {mobileTab === "audio"     && <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} sortBy={sortBy} />}
             {mobileTab === "dispatch"  && <DispatchView onDeliberate={handleSynthesisDeliberate} />}
             {mobileTab === "cerebro"   && <div style={{ flex: 1, overflow: "hidden" }}><Cerebro articles={articles} pendingPrompt={cerebroPrompt} /></div>}
             {mobileTab === "config"    && <ConfigView excludedSources={excludedSources} onToggleSource={handleToggleSource} />}
@@ -810,7 +826,7 @@ export default function Page() {
           : viewMode === "synthesis"
           ? <SynthesisView articles={articles} onDeliberate={handleSynthesisDeliberate} />
           : viewMode === "audio"
-          ? <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} />
+          ? <AudioView onDeliberate={handleSynthesisDeliberate} excludedSources={excludedSources} sortBy={sortBy} />
           : feedContent}
         <Divider onMouseDown={e => startResize("right", e)} />
         <div
