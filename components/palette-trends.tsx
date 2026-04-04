@@ -340,16 +340,6 @@ export function PaletteTrends({ snapshot, paletteIntel, totalImages, images }: P
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 32, padding: "24px 32px 48px" }}>
 
-      {/* ── Mood Spectrum ── */}
-      {snapshot && (
-        <div style={{ animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
-          <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-            Current Mood
-          </div>
-          <MoodSpectrum moods={snapshot.moods} total={totalImages} />
-        </div>
-      )}
-
       {/* ── Shift Indicators ── */}
       {paletteIntel && paletteIntel.moodShifts.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) 100ms both" }}>
