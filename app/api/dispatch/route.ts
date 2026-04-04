@@ -165,8 +165,9 @@ export async function GET() {
       generatedAt: new Date().toISOString(),
     }
 
-    // Cache in KV for fast subsequent loads
-    if (KV_AVAILABLE) {
+    // Only cache if images loaded — don't cache broken results
+    const hasImages = pitches.some((p: { imageUrl?: string }) => p.imageUrl)
+    if (KV_AVAILABLE && hasImages) {
       kv.set(getWeekKey(), responseData, { ex: WEEK_TTL }).catch(() => {})
     }
 

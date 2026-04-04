@@ -26,25 +26,35 @@ export async function generateCardImage(
   const prompt = `${STYLE_PREFIX} Evoking the concept: "${title}". ${palette}`
 
   try {
-    // Submit prediction
-    const submitRes = await fetch(`${REPLICATE_API}/models/${MODEL}/predictions`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        input: {
-          prompt,
-          num_outputs: 1,
-          aspect_ratio: "16:9",
-          output_format: "webp",
-          output_quality: 85,
+    // Submit prediction with retry on rate limit
+    let submitRes: Response | null = null
+    for (let retry = 0; retry < 3; retry++) {
+      submitRes = await fetch(`${REPLICATE_API}/models/${MODEL}/predictions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      }),
-    })
+        body: JSON.stringify({
+          input: {
+            prompt,
+            num_outputs: 1,
+            aspect_ratio: "16:9",
+            output_format: "webp",
+            output_quality: 85,
+          },
+        }),
+      })
+      if (submitRes.ok) break
+      if (submitRes.status === 429) {
+        // Rate limited — wait and retry
+        await new Promise(r => setTimeout(r, (retry + 1) * 5000))
+        continue
+      }
+      return undefined // non-rate-limit error
+    }
 
-    if (!submitRes.ok) return undefined
+    if (!submitRes?.ok) return undefined
     const prediction = await submitRes.json()
     const predictionId = prediction.id
     if (!predictionId) return undefined
@@ -73,24 +83,19 @@ export async function generateCardImage(
   }
 }
 
-// Generate images in parallel batches (2 concurrent, then next batch)
+// Generate images sequentially with rate limit handling
+// Sequential is more reliable than parallel for Replicate's rate limits
 export async function generateCardImages(
   cards: { title: string; layers?: string[] }[],
 ): Promise<(string | undefined)[]> {
-  const CONCURRENCY = 2
-  const results: (string | undefined)[] = new Array(cards.length).fill(undefined)
+  const results: (string | undefined)[] = []
 
-  for (let i = 0; i < cards.length; i += CONCURRENCY) {
-    const batch = cards.slice(i, i + CONCURRENCY)
-    const batchResults = await Promise.allSettled(
-      batch.map(card => generateCardImage(card.title, card.layers))
-    )
-    batchResults.forEach((result, j) => {
-      results[i + j] = result.status === "fulfilled" ? result.value : undefined
-    })
-    // Brief pause between batches
-    if (i + CONCURRENCY < cards.length) {
-      await new Promise(r => setTimeout(r, 2000))
+  for (let i = 0; i < cards.length; i++) {
+    const url = await generateCardImage(cards[i].title, cards[i].layers)
+    results.push(url)
+    // Pause between requests
+    if (i < cards.length - 1) {
+      await new Promise(r => setTimeout(r, 3000))
     }
   }
 
