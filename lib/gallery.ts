@@ -34,6 +34,15 @@ export const GALLERY_SOURCES: GallerySource[] = [
 
   // Agency portfolios
   { url: "https://www.tendril.ca/feed", name: "Tendril", type: "rss" },
+
+  // Design journalism, visual culture, creative practice
+  { url: "https://www.yellowtrace.com.au/feed/", name: "Yellowtrace", type: "rss" },
+  { url: "https://www.fubiz.net/en/feed/", name: "Fubiz", type: "rss" },
+  { url: "https://plainmagazine.com/feed/", name: "Plain Magazine", type: "rss" },
+  { url: "https://hypebeast.com/feed", name: "Hypebeast", type: "rss" },
+  { url: "https://highsnobiety.com/feed/", name: "Highsnobiety", type: "rss" },
+  { url: "https://www.juxtapoz.com/feed/", name: "Juxtapoz", type: "rss" },
+  { url: "https://leibal.com/feed/", name: "Leibal", type: "rss" },
 ]
 
 export type ColorMood = "warm" | "cool" | "mono" | "earth" | "vivid" | "muted"

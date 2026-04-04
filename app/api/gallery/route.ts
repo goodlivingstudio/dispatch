@@ -99,7 +99,7 @@ async function fetchRSS(url: string, sourceName: string): Promise<GalleryImage[]
     const items = xml.match(/<item[\s\S]*?<\/item>/gi) || xml.match(/<entry[\s\S]*?<\/entry>/gi) || []
     const images: GalleryImage[] = []
 
-    for (let i = 0; i < Math.min(items.length, 20); i++) {
+    for (let i = 0; i < Math.min(items.length, 30); i++) {
       const item = items[i]
       const imageUrl = extractImageFromRSS(item)
       if (!imageUrl) continue
