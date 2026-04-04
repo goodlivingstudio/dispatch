@@ -18,6 +18,8 @@ interface Episode {
   category: string
   tag: string
   layer: string
+  urgency?: number
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -316,6 +318,7 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
   const [showCount, setShowCount] = useState(0)
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null)
   const [activeLayer, setActiveLayer] = useState("all")
+  const [sortBy, setSortBy] = useState<"urgency" | "layer">("urgency")
 
   useEffect(() => {
     fetch("/api/podcasts")
@@ -328,8 +331,14 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
       .catch(() => setLoading(false))
   }, [])
 
+  const TRIAGE_THRESHOLD = 6
   const sourceFiltered = excludedSources?.size ? episodes.filter(ep => !excludedSources.has(ep.showName)) : episodes
-  const filtered = activeLayer === "all" ? sourceFiltered : sourceFiltered.filter(ep => ep.layer === activeLayer)
+  const layerFiltered = activeLayer === "all" ? sourceFiltered : sourceFiltered.filter(ep => ep.layer === activeLayer)
+  const filtered = sortBy === "urgency"
+    ? layerFiltered
+        .filter(ep => (ep.urgency ?? 0) >= TRIAGE_THRESHOLD)
+        .sort((a, b) => (b.urgency ?? 0) - (a.urgency ?? 0))
+    : layerFiltered
 
   return (
     <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--bg-primary)" }}>
@@ -349,6 +358,33 @@ export function AudioView({ onDeliberate, excludedSources }: { onDeliberate?: (t
       </div>
 
       <div className="view-padding" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+
+      {/* Triage / Explore toggle */}
+      {!loading && (
+        <div style={{
+          display: "flex", background: "var(--bg-elevated)", borderRadius: 8,
+          padding: 3, marginBottom: 16, width: "fit-content",
+        }}>
+          {(["urgency", "layer"] as const).map(mode => {
+            const isActive = sortBy === mode
+            return (
+              <button
+                key={mode}
+                onClick={() => setSortBy(mode)}
+                style={{
+                  padding: "8px 20px", borderRadius: 8, border: "none",
+                  background: isActive ? "var(--bg-surface)" : "transparent",
+                  ...TYPE.sm, fontWeight: isActive ? 600 : 400, textTransform: "uppercase", letterSpacing: "0.04em",
+                  color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
+                  cursor: "pointer", transition: "all 0.3s ease", position: "relative", zIndex: 1,
+                }}
+              >
+                {mode === "urgency" ? "Triage" : "Explore"}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Layer pills */}
       {!loading && (

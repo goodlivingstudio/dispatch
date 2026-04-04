@@ -2,6 +2,8 @@ export const revalidate = 1800 // 30 min cache
 
 import { PODCAST_FEEDS, type PodcastFeed } from "@/lib/podcasts"
 import { kv } from "@vercel/kv"
+import Anthropic from "@anthropic-ai/sdk"
+import { OPERATOR, FIVE_LAYERS } from "@/lib/prompts"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -17,6 +19,8 @@ interface Episode {
   category: string
   tag: string
   layer: string
+  urgency?: number
+  signalScores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number }
 }
 
 // ─── RSS Parser ──────────────────────────────────────────────────────────────
@@ -121,6 +125,35 @@ export async function GET() {
 
   // Sort by most recent
   episodes.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+
+  // Annotate top episodes with urgency scores (same approach as news)
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (apiKey && episodes.length > 0) {
+    try {
+      const toAnnotate = episodes.slice(0, 20)
+      const items = toAnnotate.map((e, i) => `${i + 1}. [${e.layer}] ${e.showName}: ${e.title}${e.summary ? ` — ${e.summary.slice(0, 80)}` : ""}`).join("\n")
+
+      const client = new Anthropic({ apiKey })
+      const response = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 3000,
+        system: `${OPERATOR}\n\n${FIVE_LAYERS}\n\nScore each podcast episode for relevance and urgency. Return a JSON array with one object per episode:\n{ "scores": { "opportunity": 0-10, "position": 0-10, "discipline": 0-10, "landscape": 0-10, "culture": 0-10, "urgency": 0-10 } }\n\nReturn only valid JSON array.`,
+        messages: [{ role: "user", content: items + "\n\nReturn JSON array." }],
+      })
+
+      const text = response.content[0]?.type === "text" ? response.content[0].text : ""
+      const match = text.match(/\[[\s\S]*\]/)
+      if (match) {
+        const scores: { scores?: { opportunity: number; position: number; discipline: number; landscape: number; culture: number; urgency: number } }[] = JSON.parse(match[0])
+        for (let i = 0; i < Math.min(scores.length, toAnnotate.length); i++) {
+          if (scores[i]?.scores) {
+            episodes[i].signalScores = scores[i].scores
+            episodes[i].urgency = scores[i].scores?.urgency ?? 0
+          }
+        }
+      }
+    } catch { /* annotation failure shouldn't break the feed */ }
+  }
 
   // Load pre-generated Dispatch-style artwork from KV (created by scripts/gen-audio-images.ts)
   if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
