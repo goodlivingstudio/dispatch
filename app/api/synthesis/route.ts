@@ -127,7 +127,7 @@ export async function POST(req: Request) {
             layers: p.layers,
           }))
         ]
-        const imageUrls = await generateCardImages(allCards)
+        const imageUrls = await generateCardImages(allCards, "synthesis")
         result.headerImageUrl = imageUrls[0] || undefined
         const patternImageUrls = imageUrls.slice(1)
         result.patterns = result.patterns.map((p: Record<string, unknown>, i: number) => ({

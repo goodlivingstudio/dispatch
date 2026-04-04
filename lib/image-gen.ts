@@ -1,29 +1,75 @@
 // ─── Image Generation via Replicate (Flux Schnell) ──────────────────────────
-// Generates painterly abstract watercolor images for synthesis and dispatch cards.
+// Generates painterly abstract images for all Dispatch surfaces.
+// Global style + surface-specific substyles.
 // Cost: ~$0.003 per image.
 
 const REPLICATE_API = "https://api.replicate.com/v1"
 const MODEL = "black-forest-labs/flux-schnell"
 
-const STYLE_PREFIX = `Painterly abstract watercolor. Wet-on-wet technique, pigment bleeding into damp paper. Organic washes with precise edges where color meets white space. Paper texture visible through translucent layers. No text, no people, no logos, no objects. Horizontal format.`
+// ─── Global Art Direction ───────────────────────────────────────────────────
+// The unified visual language across all Dispatch surfaces.
+// Every generated image inherits this foundation.
 
-const PALETTE_HINTS: Record<string, string> = {
-  opportunity: "Cool blues and soft teals. Clinical clarity meeting organic fluidity.",
-  position: "Warm amber and burnt sienna. Gold and ochre over cool gray undertones. Authority through restraint.",
-  discipline: "Muted greens and deep indigo. Precise marks meeting organic washes. Structural intention.",
-  landscape: "Neutral grays and silver with subtle warmth. Atmospheric depth. Expansive negative space.",
-  culture: "Earth pigments — raw umber, oxide green, burnt sienna. Minimal marks, maximum presence.",
+const GLOBAL_STYLE = `Painterly abstract. Wet-on-wet watercolor technique with visible paper texture. Pigment bleeding organically across damp surface. Translucent layered washes. Precise edges where color meets untouched paper. No text, no people, no logos, no icons, no UI elements, no objects, no literal depictions. Purely abstract — evocative, not illustrative. Horizontal 16:9 format.`
+
+// ─── Surface Substyles ──────────────────────────────────────────────────────
+// Each surface has a distinct character within the global language.
+
+const SURFACE_STYLES: Record<string, string> = {
+  // AUDIO — warm, intimate, resonant. The feeling of sound as texture.
+  // Darker, richer tones. Deep pools of color. Vibration implied through
+  // organic bleeding patterns. Like listening in a quiet room.
+  audio: `Warm and intimate. Deep indigo, burnt umber, and muted gold. Rich pigment density — less white paper showing. Darker atmospheric washes suggesting depth and resonance. The visual equivalent of a voice in a quiet room. Soft pooling, no sharp edges.`,
+
+  // SYNTHESIS — analytical, layered, convergent. The feeling of patterns
+  // emerging from data. Cooler palette. Multiple wash layers visible.
+  // Structure implied through overlapping translucent planes.
+  synthesis: `Analytical and layered. Cool grays, soft teals, and muted slate blue. Multiple translucent wash layers visible simultaneously — the feeling of patterns converging. Architectural undertone — structure emerging from fluid washes. More white paper breathing through. Measured, not expressive.`,
+
+  // DISPATCH — directional, decisive, warm confidence. The feeling of
+  // intelligence becoming action. Warm but controlled palette.
+  // Deliberate marks. Forward momentum in the composition.
+  dispatch: `Directional and decisive. Warm amber meeting cool steel. Deliberate brushwork — confident single strokes over atmospheric washes. The feeling of intelligence crystallizing into action. Slight asymmetric tension in the composition. Authority without aggression.`,
 }
+
+// ─── Layer Palette Hints ────────────────────────────────────────────────────
+// Subtle color shifts based on which intelligence layer dominates.
+// Applied as a secondary modifier after the surface style.
+
+const LAYER_PALETTES: Record<string, string> = {
+  opportunity: "Lean cooler — soft clinical blues and teals suggesting healthcare precision.",
+  position: "Lean warmer — amber and ochre suggesting professional authority.",
+  discipline: "Lean greener — muted sage and deep indigo suggesting structural evolution.",
+  landscape: "Stay neutral — silver grays with atmospheric depth.",
+  culture: "Lean earthier — raw umber, oxide, burnt sienna suggesting material honesty.",
+}
+
+// ─── Prompt Assembly ────────────────────────────────────────────────────────
+
+type Surface = "audio" | "synthesis" | "dispatch"
+
+function buildPrompt(
+  surface: Surface,
+  concept: string,
+  layers?: string[],
+): string {
+  const surfaceStyle = SURFACE_STYLES[surface] || SURFACE_STYLES.synthesis
+  const layerHint = layers?.[0] ? LAYER_PALETTES[layers[0]] || "" : ""
+
+  return `${GLOBAL_STYLE} ${surfaceStyle} Evoking: "${concept}". ${layerHint}`.trim()
+}
+
+// ─── Image Generation ───────────────────────────────────────────────────────
 
 export async function generateCardImage(
   title: string,
   layers?: string[],
+  surface: Surface = "synthesis",
 ): Promise<string | undefined> {
   const token = process.env.REPLICATE_API_TOKEN
   if (!token) return undefined
 
-  const palette = layers?.[0] ? PALETTE_HINTS[layers[0]] || "" : ""
-  const prompt = `${STYLE_PREFIX} Evoking the concept: "${title}". ${palette}`
+  const prompt = buildPrompt(surface, title, layers)
 
   try {
     // Submit prediction with retry on rate limit
@@ -47,11 +93,10 @@ export async function generateCardImage(
       })
       if (submitRes.ok) break
       if (submitRes.status === 429) {
-        // Rate limited — wait and retry
         await new Promise(r => setTimeout(r, (retry + 1) * 5000))
         continue
       }
-      return undefined // non-rate-limit error
+      return undefined
     }
 
     if (!submitRes?.ok) return undefined
@@ -84,16 +129,15 @@ export async function generateCardImage(
 }
 
 // Generate images sequentially with rate limit handling
-// Sequential is more reliable than parallel for Replicate's rate limits
 export async function generateCardImages(
   cards: { title: string; layers?: string[] }[],
+  surface: Surface = "synthesis",
 ): Promise<(string | undefined)[]> {
   const results: (string | undefined)[] = []
 
   for (let i = 0; i < cards.length; i++) {
-    const url = await generateCardImage(cards[i].title, cards[i].layers)
+    const url = await generateCardImage(cards[i].title, cards[i].layers, surface)
     results.push(url)
-    // Pause between requests
     if (i < cards.length - 1) {
       await new Promise(r => setTimeout(r, 3000))
     }

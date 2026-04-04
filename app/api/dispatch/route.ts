@@ -145,7 +145,7 @@ export async function GET() {
             layers: p.layers,
           }))
         ]
-        const imageUrls = await generateCardImages(allCards)
+        const imageUrls = await generateCardImages(allCards, "dispatch")
         headerImageUrl = imageUrls[0] || undefined
         const pitchImageUrls = imageUrls.slice(1)
         pitches = pitches.map((p: Record<string, unknown>, i: number) => ({
