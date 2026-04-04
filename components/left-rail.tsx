@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { Radio, AudioLines, Blend, Send, Settings, Aperture, Keyboard, FileDown, Activity } from "lucide-react"
+import { Radio, AudioLines, Blend, Newspaper, Settings, Aperture, Keyboard, FileDown, Activity } from "lucide-react"
 import type { Article, FeedHealth, ViewMode } from "@/lib/types"
 import { CATEGORY_CONFIG } from "@/lib/types"
 import { TYPE, metaStyle } from "@/lib/styles"
@@ -603,7 +603,7 @@ export function LeftRail({
           { id: "pulse" as const,    Icon: Activity,  title: "Source Pulse",          isView: true },
           { id: "shortcuts" as const, Icon: Keyboard, title: "Keyboard shortcuts",   isView: false },
           { id: "export" as const,   Icon: FileDown,  title: "Quick Export",          isView: false },
-          { id: "dispatch" as const, Icon: Send,      title: "Dispatch",             isView: true },
+          { id: "dispatch" as const, Icon: Newspaper,  title: "Dispatch",             isView: true },
         ]).map(item => {
           const isActive = item.isView && viewMode === item.id
           const hasBadge = item.id === "pulse" && feedHealth && feedHealth.sourcesFailed > 0
