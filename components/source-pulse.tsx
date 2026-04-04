@@ -224,17 +224,20 @@ function CacheManagement() {
 
   const regenAudio = async () => {
     setAudioStatus("running")
-    setAudioResult("Generating ~30 images — this takes 3-5 minutes...")
+    let totalGen = 0, totalFail = 0, batch = 0
     try {
-      const res = await fetch("/api/regen-audio-images", { method: "POST" })
-      if (res.ok) {
+      while (true) {
+        setAudioResult(`Batch ${batch + 1} — generating...`)
+        const res = await fetch(`/api/regen-audio-images?batch=${batch}`, { method: "POST" })
+        if (!res.ok) { setAudioStatus("error"); setAudioResult("Failed"); return }
         const data = await res.json()
-        setAudioStatus("done")
-        setAudioResult(`${data.generated} generated, ${data.failed} failed`)
-      } else {
-        setAudioStatus("error")
-        setAudioResult("Failed")
+        totalGen += data.generated
+        totalFail += data.failed
+        if (data.done) break
+        batch++
       }
+      setAudioStatus("done")
+      setAudioResult(`${totalGen} generated${totalFail ? `, ${totalFail} failed` : ""}`)
     } catch {
       setAudioStatus("error")
       setAudioResult("Failed")
