@@ -98,9 +98,26 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
     }
 
     // Extract all images — prefer srcset high-res, filter by real resolution
-    const images = await page.evaluate((minWidth: number, minArea: number) => {
+    const images = await page.evaluate((minWidth: number) => {
+      const minArea = 400000 // minimum pixel area — filters out low-res
+      // Exclude images inside headers, footers, navs
+      const excludeSelectors = "header, footer, nav, [role='banner'], [role='navigation'], [role='contentinfo']"
+      const excludeElements = new Set(
+        Array.from(document.querySelectorAll(excludeSelectors))
+      )
+      const isInsideExcluded = (el: Element): boolean => {
+        let parent: Element | null = el
+        while (parent) {
+          if (excludeElements.has(parent)) return true
+          parent = parent.parentElement
+        }
+        return false
+      }
+
       const imgs = Array.from(document.querySelectorAll("img"))
       return imgs
+        .filter(img => !isInsideExcluded(img))
+        .filter(img => img.complete && img.naturalWidth > 0) // only fully loaded images
         .map(img => {
           // Prefer highest resolution from srcset if available
           let bestUrl = img.src || img.dataset.src || ""
@@ -124,6 +141,7 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
         .filter(img =>
           img.url.startsWith("http") &&
           img.width >= minWidth &&
+          img.width > 0 && img.height > 0 &&
           (img.width * img.height) >= minArea &&
           !img.url.includes("favicon") &&
           !img.url.includes("logo") &&
@@ -133,10 +151,13 @@ async function scrapeImages(url: string, name: string): Promise<ExtractedImage[]
           !img.url.includes("pixel") &&
           !img.url.includes("tracking") &&
           !img.url.includes("1x1") &&
-          !img.url.includes("placeholder")
+          !img.url.includes("placeholder") &&
+          !img.url.includes("blank") &&
+          !img.url.includes("spacer") &&
+          !img.url.includes("data:image")
         )
         .sort((a, b) => (b.width * b.height) - (a.width * a.height))
-    }, MIN_IMAGE_WIDTH, MIN_IMAGE_AREA)
+    }, MIN_IMAGE_WIDTH)
 
     // Also check for background images on large elements
     const bgImages = await page.evaluate((minWidth: number) => {
