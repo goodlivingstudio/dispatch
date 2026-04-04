@@ -226,16 +226,28 @@ async function loadExistingUrls(): Promise<Set<string>> {
   const token = process.env.ARENA_ACCESS_TOKEN
   if (!token) return new Set()
   try {
-    const res = await fetch(`${ARENA_API}/channels/${ARENA_CHANNEL_SLUG}/contents?per=200`, {
-      headers: { "Authorization": `Bearer ${token}` },
-      signal: AbortSignal.timeout(10000),
-    })
-    if (!res.ok) return new Set()
-    const data = await res.json()
+    // Fetch all pages of blocks (Are.na paginates at 100)
     const urls = new Set<string>()
-    for (const block of (data.contents || [])) {
-      if (block.image?.display?.url) urls.add(block.image.display.url)
-      if (block.source?.url) urls.add(block.source.url)
+    let page = 1
+    while (true) {
+      const res = await fetch(`${ARENA_API}/channels/${ARENA_CHANNEL_SLUG}/contents?per=100&page=${page}`, {
+        headers: { "Authorization": `Bearer ${token}` },
+        signal: AbortSignal.timeout(10000),
+      })
+      if (!res.ok) break
+      const data = await res.json()
+      const blocks = data.contents || []
+      if (blocks.length === 0) break
+      for (const block of blocks) {
+        // Store both Are.na's hosted URL and the original source URL
+        if (block.image?.display?.url) urls.add(block.image.display.url)
+        if (block.image?.original?.url) urls.add(block.image.original.url)
+        if (block.source?.url) urls.add(block.source.url)
+        // Also store the title for fuzzy matching
+        if (block.title) urls.add(block.title)
+      }
+      if (blocks.length < 100) break // last page
+      page++
     }
     console.log(`  Loaded ${urls.size} existing URLs from Are.na for dedup\n`)
     return urls
@@ -322,13 +334,13 @@ async function main() {
     }
 
     for (const img of images) {
-      // Skip if already in Are.na
-      if (existingUrls.has(img.url)) {
+      const title = img.alt || `${target.name} — visual`
+
+      // Skip if URL or title already in Are.na
+      if (existingUrls.has(img.url) || existingUrls.has(title)) {
         totalSkipped++
         continue
       }
-
-      const title = img.alt || `${target.name} — visual`
       if (dryRun) {
         console.log(`  [preview] ${img.width}×${img.height} ${img.url.slice(0, 80)}`)
       } else {
