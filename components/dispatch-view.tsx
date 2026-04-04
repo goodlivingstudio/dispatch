@@ -26,6 +26,7 @@ interface Pitch {
 interface DispatchData {
   available: boolean
   weekSummary: string | null
+  headerImageUrl?: string
   pitches: Pitch[]
   articleCount?: number
   generatedAt?: string
@@ -214,6 +215,16 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
         {!loading && data && (
           <div style={{ padding: "0 0 48px" }}>
 
+            {/* ─ Header image ─ */}
+            {data.headerImageUrl && (
+              <div style={{
+                height: 200, overflow: "hidden",
+                animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
+              }}>
+                <img src={data.headerImageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+
             {/* ─ WEEK SUMMARY — editorial lead ─ */}
             <div style={{
               padding: "40px 20px 36px",
@@ -268,13 +279,16 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                       </div>
                       {/* Text content — right side */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* Mode indicator */}
+                        {/* Mode + platform indicator */}
                         <div style={{
                           ...TYPE.xs, textTransform: "uppercase", letterSpacing: "0.06em",
-                          color: pitch.mode === "thought_leadership" ? "#5A9EB0" : "#C87A6A",
                           fontWeight: 600, marginBottom: 8,
                         }}>
-                          {pitch.mode === "thought_leadership" ? "Thought Leadership" : "Creative"} · {pitch.platforms.primary}
+                          <span style={{ color: pitch.mode === "thought_leadership" ? "#5A9EB0" : "#C87A6A" }}>
+                            {pitch.mode === "thought_leadership" ? "Thought Leadership" : "Creative"}
+                          </span>
+                          <span style={{ color: "var(--text-tertiary)", margin: "0 6px" }}>·</span>
+                          <span style={{ color: "var(--text-primary)" }}>{pitch.platforms.primary}</span>
                         </div>
                         {/* Title */}
                         <div style={{
@@ -289,9 +303,21 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                           ...TYPE.body,
                           color: "var(--text-secondary)",
                           lineHeight: 1.7,
+                          marginBottom: pitch.evidence?.length > 0 ? 8 : 0,
                         }}>
                           {pitch.thesis}
                         </div>
+                        {/* Evidence sources */}
+                        {pitch.evidence && pitch.evidence.length > 0 && (
+                          <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.5 }}>
+                            {pitch.evidence.slice(0, 2).map((e, ei) => (
+                              <span key={ei}>
+                                {ei > 0 && <span style={{ opacity: 0.4 }}> · </span>}
+                                {e.length > 60 ? e.slice(0, 60) + "..." : e}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

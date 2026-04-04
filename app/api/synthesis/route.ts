@@ -42,7 +42,8 @@ Return JSON:
       "title": "Pattern name",
       "description": "What's converging, with specific signal references.",
       "layers": ["opportunity", "discipline"],
-      "signalCount": 4
+      "signalCount": 4,
+      "sources": ["STAT News: Article title", "The Verge: Article title"]
     }
   ],  // EXACTLY 4 patterns required
   "blindSpotNote": "What dropped off or should be present but isn't.",
@@ -116,18 +117,22 @@ export async function POST(req: Request) {
 
     const result = JSON.parse(match[0])
 
-    // Generate images for each convergence pattern
-    if (result.patterns?.length > 0 && process.env.REPLICATE_API_TOKEN) {
+    // Generate images: header + each convergence pattern
+    if (process.env.REPLICATE_API_TOKEN) {
       try {
-        const imageUrls = await generateCardImages(
-          result.patterns.map((p: { title: string; layers?: string[] }) => ({
+        const allCards = [
+          { title: result.headline || result.briefing?.split(/[.!?]/)[0] || "Weekly intelligence", layers: ["landscape"] },
+          ...(result.patterns || []).map((p: { title: string; layers?: string[] }) => ({
             title: p.title,
             layers: p.layers,
           }))
-        )
+        ]
+        const imageUrls = await generateCardImages(allCards)
+        result.headerImageUrl = imageUrls[0] || undefined
+        const patternImageUrls = imageUrls.slice(1)
         result.patterns = result.patterns.map((p: Record<string, unknown>, i: number) => ({
           ...p,
-          imageUrl: imageUrls[i] || undefined,
+          imageUrl: patternImageUrls[i] || undefined,
         }))
       } catch {
         // Image generation failure shouldn't break synthesis

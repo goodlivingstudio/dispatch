@@ -133,19 +133,24 @@ export async function GET() {
 
     const result = JSON.parse(match[0])
 
-    // Generate images for each pitch
+    // Generate images: header + each pitch
     let pitches = result.pitches || []
-    if (pitches.length > 0 && process.env.REPLICATE_API_TOKEN) {
+    let headerImageUrl: string | undefined
+    if (process.env.REPLICATE_API_TOKEN) {
       try {
-        const imageUrls = await generateCardImages(
-          pitches.map((p: { title: string; layers?: string[] }) => ({
+        const allCards = [
+          { title: result.weekSummary?.split(/[.!?]/)[0] || "Weekly dispatch", layers: ["landscape"] },
+          ...pitches.map((p: { title: string; layers?: string[] }) => ({
             title: p.title,
             layers: p.layers,
           }))
-        )
+        ]
+        const imageUrls = await generateCardImages(allCards)
+        headerImageUrl = imageUrls[0] || undefined
+        const pitchImageUrls = imageUrls.slice(1)
         pitches = pitches.map((p: Record<string, unknown>, i: number) => ({
           ...p,
-          imageUrl: imageUrls[i] || undefined,
+          imageUrl: pitchImageUrls[i] || undefined,
         }))
       } catch {
         // Image generation failure shouldn't break dispatch
@@ -155,6 +160,7 @@ export async function GET() {
     const responseData = {
       weekSummary: result.weekSummary || null,
       pitches,
+      headerImageUrl,
       articleCount: articles.length,
       generatedAt: new Date().toISOString(),
     }

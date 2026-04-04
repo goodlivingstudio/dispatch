@@ -73,17 +73,23 @@ export async function generateCardImage(
   }
 }
 
-// Generate images for multiple cards with rate limiting
+// Generate images for multiple cards with rate limiting and retry
 export async function generateCardImages(
   cards: { title: string; layers?: string[] }[],
 ): Promise<(string | undefined)[]> {
   const results: (string | undefined)[] = []
-  for (const card of cards) {
-    const url = await generateCardImage(card.title, card.layers)
+  for (let i = 0; i < cards.length; i++) {
+    // First attempt
+    let url = await generateCardImage(cards[i].title, cards[i].layers)
+    // Retry once on failure (rate limit recovery)
+    if (!url && i > 0) {
+      await new Promise(r => setTimeout(r, 8000))
+      url = await generateCardImage(cards[i].title, cards[i].layers)
+    }
     results.push(url)
-    // Rate limit: wait between requests
-    if (cards.indexOf(card) < cards.length - 1) {
-      await new Promise(r => setTimeout(r, 3000))
+    // Rate limit: longer delay between requests
+    if (i < cards.length - 1) {
+      await new Promise(r => setTimeout(r, 5000))
     }
   }
   return results

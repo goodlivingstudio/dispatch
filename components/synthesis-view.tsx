@@ -36,6 +36,7 @@ interface AIPattern {
   layers: string[]
   signalCount: number
   imageUrl?: string
+  sources?: string[] // article titles / source names backing this pattern
 }
 
 interface SynthesisData {
@@ -44,6 +45,7 @@ interface SynthesisData {
   patterns: AIPattern[]
   blindSpotNote: string
   cerebroProvocation?: string
+  headerImageUrl?: string
 }
 
 const SYNTHESIS_STATUSES = [
@@ -135,6 +137,16 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
         {/* ── Editorial layout ── */}
         {!loading && data && (
           <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+
+            {/* ─ Header image ─ */}
+            {data.headerImageUrl && (
+              <div style={{
+                height: 200, overflow: "hidden",
+                animation: "signal-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+              }}>
+                <img src={data.headerImageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
 
             {/* ─ THE BRIEFING — headline + evidence ─ */}
             <div style={{
@@ -243,6 +255,19 @@ export function SynthesisView({ articles, onDeliberate }: SynthesisViewProps) {
                           </div>
                         ))}
                       </div>
+                      {/* Sources */}
+                      {pattern.sources && pattern.sources.length > 0 && (
+                        <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                          <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
+                            {pattern.sources.map((src, si) => (
+                              <span key={si}>
+                                {si > 0 && <span style={{ opacity: 0.4 }}> · </span>}
+                                {src}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
