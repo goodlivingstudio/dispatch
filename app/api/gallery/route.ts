@@ -1,5 +1,6 @@
 // Gallery API — aggregates images from Are.na and RSS feeds
 import { GALLERY_SOURCES, type GalleryImage, type ColorMood } from "@/lib/gallery"
+import { storePaletteSnapshot, loadPaletteHistory, type PaletteSnapshot } from "@/lib/article-store"
 import sharp from "sharp"
 
 export const revalidate = 1800 // 30 min cache
@@ -260,9 +261,106 @@ export async function GET() {
     ;[classified[i], classified[j]] = [classified[j], classified[i]]
   }
 
+  // ── Capture palette snapshot for trend detection ──────────────────────────
+  const today = new Date().toISOString().slice(0, 10)
+  const moods: Record<string, number> = { warm: 0, cool: 0, earth: 0, vivid: 0, neutral: 0 }
+  let hueSum = 0, satSum = 0, lightSum = 0, colorCount = 0
+  const sourceData: Record<string, { count: number; hueSum: number; moods: Record<string, number> }> = {}
+
+  for (const img of classified) {
+    if (img.mood) moods[img.mood]++
+    if (img.hue !== undefined) {
+      hueSum += img.hue
+      satSum += (img.saturation ?? 0)
+      lightSum += (img.lightness ?? 0)
+      colorCount++
+    }
+    if (!sourceData[img.source]) sourceData[img.source] = { count: 0, hueSum: 0, moods: {} }
+    sourceData[img.source].count++
+    if (img.hue !== undefined) sourceData[img.source].hueSum += img.hue
+    if (img.mood) sourceData[img.source].moods[img.mood] = (sourceData[img.source].moods[img.mood] || 0) + 1
+  }
+
+  const snapshot: PaletteSnapshot = {
+    date: today,
+    totalImages: classified.length,
+    moods,
+    avgHue: colorCount > 0 ? Math.round(hueSum / colorCount) : 0,
+    avgSaturation: colorCount > 0 ? Math.round((satSum / colorCount) * 100) / 100 : 0,
+    avgLightness: colorCount > 0 ? Math.round((lightSum / colorCount) * 100) / 100 : 0,
+    sourceBreakdown: Object.fromEntries(
+      Object.entries(sourceData).map(([name, data]) => {
+        const topMood = Object.entries(data.moods).sort((a, b) => b[1] - a[1])[0]
+        return [name, {
+          count: data.count,
+          dominantMood: topMood?.[0] || "neutral",
+          avgHue: data.count > 0 ? Math.round(data.hueSum / data.count) : 0,
+        }]
+      })
+    ),
+  }
+
+  storePaletteSnapshot(snapshot).catch(() => {})
+
+  // ── Load history for trend analysis ─────────────────────────────────────
+  const history = await loadPaletteHistory(7).catch(() => [])
+
+  // Calculate trends: compare today vs 7-day average
+  let paletteIntel: {
+    trend: string
+    moodShifts: { mood: string; direction: "rising" | "falling"; delta: number }[]
+    hueShift: number
+    saturationShift: number
+  } | null = null
+
+  const priorDays = history.filter(h => h.date !== today)
+  if (priorDays.length >= 1) {
+    // Average mood percentages across prior days
+    const avgMoods: Record<string, number> = {}
+    for (const day of priorDays) {
+      const dayTotal = day.totalImages || 1
+      for (const [mood, count] of Object.entries(day.moods)) {
+        avgMoods[mood] = (avgMoods[mood] || 0) + (count / dayTotal) / priorDays.length
+      }
+    }
+
+    const todayTotal = classified.length || 1
+    const moodShifts: { mood: string; direction: "rising" | "falling"; delta: number }[] = []
+    for (const mood of Object.keys(moods)) {
+      const todayPct = (moods[mood] || 0) / todayTotal
+      const avgPct = avgMoods[mood] || 0
+      const delta = Math.round((todayPct - avgPct) * 100)
+      if (Math.abs(delta) >= 3) {
+        moodShifts.push({ mood, direction: delta > 0 ? "rising" : "falling", delta: Math.abs(delta) })
+      }
+    }
+    moodShifts.sort((a, b) => b.delta - a.delta)
+
+    const avgHue = priorDays.reduce((s, d) => s + d.avgHue, 0) / priorDays.length
+    const avgSat = priorDays.reduce((s, d) => s + d.avgSaturation, 0) / priorDays.length
+
+    // Build trend description
+    const rising = moodShifts.filter(m => m.direction === "rising")
+    const falling = moodShifts.filter(m => m.direction === "falling")
+    let trend = ""
+    if (rising.length > 0) trend += `${rising.map(m => `${m.mood} +${m.delta}%`).join(", ")} rising`
+    if (rising.length > 0 && falling.length > 0) trend += ". "
+    if (falling.length > 0) trend += `${falling.map(m => `${m.mood} -${m.delta}%`).join(", ")} falling`
+    if (!trend) trend = "Palette stable — no significant shifts from the weekly average"
+
+    paletteIntel = {
+      trend,
+      moodShifts,
+      hueShift: Math.round(snapshot.avgHue - avgHue),
+      saturationShift: Math.round((snapshot.avgSaturation - avgSat) * 100),
+    }
+  }
+
   return Response.json({
     images: classified,
     count: classified.length,
     sources: GALLERY_SOURCES.length,
+    paletteIntel,
+    snapshot: { moods, avgHue: snapshot.avgHue, avgSaturation: snapshot.avgSaturation, avgLightness: snapshot.avgLightness },
   })
 }

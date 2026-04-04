@@ -137,5 +137,48 @@ export async function loadSourceFailures(): Promise<SourceFailures> {
   }
 }
 
+// ─── Palette Snapshots — daily mood distribution for trend detection ────────
+
+export interface PaletteSnapshot {
+  date: string
+  totalImages: number
+  moods: Record<string, number>      // { warm: 44, cool: 15, ... }
+  avgHue: number                      // 0-360
+  avgSaturation: number               // 0-1
+  avgLightness: number                // 0-1
+  sourceBreakdown: Record<string, {   // per-source mood + avg hue
+    count: number
+    dominantMood: string
+    avgHue: number
+  }>
+}
+
+const PALETTE_KEY_PREFIX = "palette:"
+const PALETTE_TTL = 14 * 24 * 60 * 60 // 14 days
+
+export async function storePaletteSnapshot(snapshot: PaletteSnapshot): Promise<void> {
+  if (!KV_AVAILABLE) return
+  try {
+    await kv.set(`${PALETTE_KEY_PREFIX}${snapshot.date}`, snapshot, { ex: PALETTE_TTL })
+  } catch { /* never break on storage failure */ }
+}
+
+export async function loadPaletteHistory(days: number = 7): Promise<PaletteSnapshot[]> {
+  if (!KV_AVAILABLE) return []
+  try {
+    const promises: Promise<PaletteSnapshot | null>[] = []
+    for (let i = 0; i < days; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const key = `${PALETTE_KEY_PREFIX}${date.toISOString().slice(0, 10)}`
+      promises.push(kv.get<PaletteSnapshot>(key))
+    }
+    const results = await Promise.all(promises)
+    return results.filter(Boolean) as PaletteSnapshot[]
+  } catch {
+    return []
+  }
+}
+
 export { KV_AVAILABLE as ARTICLE_STORE_AVAILABLE }
 export type { StoredArticle }

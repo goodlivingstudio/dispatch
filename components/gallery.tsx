@@ -169,11 +169,23 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true)
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
   const [activeMood, setActiveMood] = useState<ColorMood | null>(null)
+  const [paletteIntel, setPaletteIntel] = useState<{
+    trend: string
+    moodShifts: { mood: string; direction: "rising" | "falling"; delta: number }[]
+    hueShift: number
+    saturationShift: number
+  } | null>(null)
+  const [snapshot, setSnapshot] = useState<{ moods: Record<string, number>; avgHue: number; avgSaturation: number; avgLightness: number } | null>(null)
 
   useEffect(() => {
     fetch("/api/gallery")
       .then(r => r.json())
-      .then(data => { setAllImages(data.images || []); setLoading(false) })
+      .then(data => {
+        setAllImages(data.images || [])
+        if (data.paletteIntel) setPaletteIntel(data.paletteIntel)
+        if (data.snapshot) setSnapshot(data.snapshot)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -295,6 +307,56 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
         </div>
 
       </div>
+
+      {/* ── Palette Intelligence — trend annotation ── */}
+      {(paletteIntel || snapshot) && !loading && (
+        <div style={{
+          padding: "12px 32px 0",
+          display: "flex", alignItems: "center", gap: 16,
+          flexShrink: 0,
+        }}>
+          {/* Hue indicator — a subtle color swatch showing today's average */}
+          {snapshot && (
+            <div style={{
+              width: 24, height: 24, borderRadius: 6, flexShrink: 0,
+              background: `hsl(${snapshot.avgHue}, ${Math.round(snapshot.avgSaturation * 100)}%, ${Math.round(snapshot.avgLightness * 100)}%)`,
+              border: "1px solid rgba(255,255,255,0.1)",
+            }} />
+          )}
+
+          {/* Trend text */}
+          <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.5 }}>
+            {paletteIntel ? (
+              <>
+                {paletteIntel.moodShifts.length > 0 ? (
+                  paletteIntel.moodShifts.map((shift, i) => (
+                    <span key={shift.mood}>
+                      {i > 0 && <span style={{ opacity: 0.4 }}> · </span>}
+                      <span style={{ color: MOOD_COLORS[shift.mood as ColorMood] || "var(--text-tertiary)" }}>
+                        {shift.mood}
+                      </span>
+                      <span style={{ color: shift.direction === "rising" ? "var(--live)" : "var(--text-tertiary)" }}>
+                        {" "}{shift.direction === "rising" ? "↑" : "↓"}{shift.delta}%
+                      </span>
+                    </span>
+                  ))
+                ) : (
+                  <span>Palette stable — no significant shifts from weekly average</span>
+                )}
+                {paletteIntel.hueShift !== 0 && (
+                  <span style={{ opacity: 0.5 }}>
+                    {" · "}hue {paletteIntel.hueShift > 0 ? "+" : ""}{paletteIntel.hueShift}°
+                  </span>
+                )}
+              </>
+            ) : snapshot ? (
+              <span>
+                avg hue {snapshot.avgHue}° · sat {Math.round(snapshot.avgSaturation * 100)}% · light {Math.round(snapshot.avgLightness * 100)}%
+              </span>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {/* Masonry grid — manual 3-column distribution, vertical scroll */}
       <div style={{
