@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { TYPE, MONO } from "@/lib/styles"
 import type { GalleryImage, ColorMood } from "@/lib/gallery"
+import { PaletteTrends } from "@/components/palette-trends"
 
 // ─── Color Mood Display ─────────────────────────────────────────────────────
 
@@ -169,11 +170,30 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true)
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
   const [activeMood, setActiveMood] = useState<ColorMood | null>(null)
+  const [showTrends, setShowTrends] = useState(false)
+  const [paletteIntel, setPaletteIntel] = useState<{
+    trend: string
+    moodShifts: { mood: string; direction: "rising" | "falling"; delta: number }[]
+    hueShift: number
+    saturationShift: number
+  } | null>(null)
+  const [snapshot, setSnapshot] = useState<{
+    moods: Record<string, number>
+    avgHue: number
+    avgSaturation: number
+    avgLightness: number
+    trendingPalettes: { colors: string[]; sources: string[]; frequency: number }[]
+  } | null>(null)
 
   useEffect(() => {
     fetch("/api/gallery")
       .then(r => r.json())
-      .then(data => { setAllImages(data.images || []); setLoading(false) })
+      .then(data => {
+        setAllImages(data.images || [])
+        if (data.paletteIntel) setPaletteIntel(data.paletteIntel)
+        if (data.snapshot) setSnapshot(data.snapshot)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -272,6 +292,22 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
                 </button>
               )
             })}
+            {/* Trends toggle — inline with mood filters */}
+            <span style={{ width: 1, height: 14, background: "var(--border)", flexShrink: 0 }} />
+            <button
+              onClick={() => { setShowTrends(!showTrends); if (!showTrends) setActiveMood(null) }}
+              style={{
+                ...TYPE.sm, padding: "3px 10px", borderRadius: 9999, border: "none",
+                background: showTrends ? "var(--accent-primary)" : "transparent",
+                color: showTrends ? "var(--accent-secondary)" : "var(--text-tertiary)",
+                fontWeight: showTrends ? 600 : 400,
+                cursor: "pointer", transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { if (!showTrends) e.currentTarget.style.background = "var(--bg-elevated)" }}
+              onMouseLeave={e => { if (!showTrends) e.currentTarget.style.background = showTrends ? "var(--accent-primary)" : "transparent" }}
+            >
+              Trends
+            </button>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
@@ -296,8 +332,20 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
 
       </div>
 
-      {/* Masonry grid — manual 3-column distribution, vertical scroll */}
-      <div style={{
+      {/* Trends panel — replaces grid when active */}
+      {showTrends && (
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+          <PaletteTrends
+            snapshot={snapshot}
+            paletteIntel={paletteIntel}
+            totalImages={allImages.length}
+            images={allImages}
+          />
+        </div>
+      )}
+
+      {/* Masonry grid — hidden when trends is active */}
+      {!showTrends && <div style={{
         flex: 1, overflowY: "auto", overflowX: "hidden",
         padding: 32,
       }}>
@@ -372,7 +420,7 @@ export function GalleryOverlay({ onClose }: { onClose: () => void }) {
             </div>
           )
         })()}
-      </div>
+      </div>}
 
       {/* Lightbox */}
       {lightboxIdx !== null && images[lightboxIdx] && (
