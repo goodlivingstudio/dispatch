@@ -434,7 +434,7 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
 
             /* ── Assistant: the body text — proper paragraph typography ── */
             ) : (
-              <div style={{ padding: "0 32px", maxWidth: 680 }}>
+              <div style={{ padding: "0 32px", maxWidth: 620 }}>
                 {(() => {
                   // Split on double newlines into real paragraphs.
                   // Book rule: space between paragraphs, never indent + space.
@@ -466,28 +466,36 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
           )
         })}
 
-        {/* Follow-up directions — provocations, not quiz answers */}
+        {/* Follow-up directions — part of the response flow, not separate UI */}
         {followUps && !loading && (
-          <div style={{ margin: "8px 20px 24px", animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
-            {/* Primary question — the station chief's next move */}
+          <div style={{
+            padding: "0 32px", maxWidth: 620, marginTop: 32,
+            animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
+          }}>
+            {/* Primary question — Cerebro's parting thought, left-aligned with the response */}
             <button
               onClick={() => send(followUps.question)}
               style={{
-                display: "block", width: "100%", textAlign: "left",
-                background: "var(--bg-surface)", border: "1px solid var(--border)",
-                borderRadius: 10, padding: "10px 14px", marginBottom: 8,
-                cursor: "pointer", transition: "all 0.2s",
+                display: "block", textAlign: "left",
+                background: "transparent", border: "none",
+                padding: 0, marginBottom: followUps.alternatives.length > 0 ? 16 : 0,
+                cursor: "pointer", transition: "color 0.15s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.borderColor = "var(--accent-muted)" }}
-              onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.borderColor = "var(--border)" }}
             >
-              <div style={{ fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", color: "var(--accent-muted)", lineHeight: 1.6 }}>
+              <div style={{
+                fontSize: 12.5, fontFamily: "var(--font-geist-mono), monospace",
+                color: "var(--accent-muted)", lineHeight: 1.8,
+                transition: "color 0.15s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)" }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-muted)" }}
+              >
                 {followUps.question}
               </div>
             </button>
-            {/* Alternative directions — shorter, open-ended */}
+            {/* Alternative threads — quiet, subordinate */}
             {followUps.alternatives.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 2 }}>
                 {followUps.alternatives.map((alt, i) => (
                   <button
                     key={i}
@@ -495,15 +503,16 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
                     style={{
                       display: "flex", alignItems: "baseline", gap: 8,
                       background: "transparent", border: "none",
-                      padding: "6px 14px", borderRadius: 8,
+                      padding: "4px 0", borderRadius: 0,
                       fontSize: 11, fontFamily: "var(--font-geist-mono), monospace",
                       color: "var(--text-tertiary)", cursor: "pointer",
-                      transition: "all 0.15s", textAlign: "left", lineHeight: 1.5,
+                      transition: "color 0.15s", textAlign: "left", lineHeight: 1.5,
+                      opacity: 0.6,
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.background = "var(--bg-surface)" }}
-                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.background = "transparent" }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "var(--accent-secondary)"; e.currentTarget.style.opacity = "1" }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-tertiary)"; e.currentTarget.style.opacity = "0.6" }}
                   >
-                    <span style={{ color: "var(--accent-muted)", flexShrink: 0 }}>→</span>
+                    <span style={{ color: "var(--text-tertiary)", flexShrink: 0, opacity: 0.4 }}>·</span>
                     <span>{alt}</span>
                   </button>
                 ))}
