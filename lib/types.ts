@@ -71,6 +71,14 @@ export function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
+// ─── Citation sources ────────────────────────────────────────────────────────
+
+export interface CitationSource {
+  title: string
+  url: string
+  source?: string
+}
+
 // ─── Layer colors ────────────────────────────────────────────────────────────
 
 export const LAYER_COLOR: Record<string, string> = {

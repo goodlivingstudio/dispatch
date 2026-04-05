@@ -589,7 +589,7 @@ export function AudioView({ onDeliberate, excludedSources, sortBy = "urgency" }:
 
       {/* Layer pills + artwork toggle — sticky band */}
       {!loading && (
-        <div style={{ flexShrink: 0, padding: "10px 16px", display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ flexShrink: 0, padding: "10px 16px", display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           {LAYER_FILTERS.map(layer => {
             const isActive = activeLayer === layer.id
             // Use triage-filtered pool for counts (urgency-gated before layer selection)

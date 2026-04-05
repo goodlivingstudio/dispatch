@@ -3,14 +3,8 @@
 import { useState, useRef } from "react"
 import { createPortal } from "react-dom"
 import { TYPE, labelStyle } from "@/lib/styles"
-
-// ─── Citation types ─────────────────────────────────────────────────────────
-
-export interface CitationSource {
-  title: string
-  url: string
-  source?: string
-}
+import type { CitationSource } from "@/lib/types"
+export type { CitationSource }
 
 // ─── Citation chip — fixed popover with source details ──────────────────────
 

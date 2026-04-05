@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Copy, Check, ArrowUpRight, X, RefreshCw } from "lucide-react"
-import { TYPE, MONO, labelStyle, bodyStyle, metaStyle } from "@/lib/styles"
+import { TYPE, MONO, labelStyle, metaStyle } from "@/lib/styles"
+import { renderCitedBody } from "@/components/citation"
+import type { CitationSource } from "@/lib/types"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -17,20 +19,59 @@ interface Pitch {
     adaptations: string[]
   }
   evidence: string[]
+  evidenceSources?: CitationSource[][]
   angle?: string
   urgency: string
   wordCount?: number
   imageUrl?: string
 }
 
+interface Perspective {
+  title: string
+  body: string
+  layer: string
+  sources?: CitationSource[]
+}
+
 interface DispatchData {
   available: boolean
   weekSummary: string | null
+  weekSummarySources?: CitationSource[]
+  perspectives?: Perspective[]
   headerImageUrl?: string
   pitches: Pitch[]
   articleCount?: number
   generatedAt?: string
   message?: string
+}
+
+const LAYER_DOT: Record<string, string> = {
+  opportunity: "#D4A05A",
+  position: "#5A9EB0",
+  discipline: "#7BAF6A",
+  landscape: "#9A85B8",
+  culture: "#C87A6A",
+}
+
+const LAYER_LABELS: Record<string, string> = {
+  opportunity: "Opportunity",
+  position: "Position",
+  discipline: "Discipline",
+  landscape: "Landscape",
+  culture: "Culture",
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function formatWeekRange(generatedAt?: string): string {
+  const ref = generatedAt ? new Date(generatedAt) : new Date()
+  const day = ref.getDay()
+  const monday = new Date(ref)
+  monday.setDate(ref.getDate() - (day === 0 ? 6 : day - 1))
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  return `${fmt(monday)} – ${fmt(sunday)}`
 }
 
 // ─── Copy Button ────────────────────────────────────────────────────────────
@@ -57,6 +98,64 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       {copied ? <Check size={12} /> : <Copy size={12} />}
       {copied ? "Copied" : label}
     </button>
+  )
+}
+
+// ─── Perspective Card ──────────────────────────────────────────────────────
+
+function PerspectiveCard({ perspective, index, onDeliberate }: {
+  perspective: Perspective
+  index: number
+  onDeliberate: (text: string) => void
+}) {
+  return (
+    <div
+      onClick={() => onDeliberate(
+        `I want to explore this perspective from the weekly dispatch:\n\n"${perspective.title}"\n\n${perspective.body}\n\nDevelop this into a strategic argument. What are the implications and what should I do about it?`
+      )}
+      style={{
+        background: "var(--bg-surface)",
+        borderRadius: 12,
+        padding: "20px 24px",
+        cursor: "pointer",
+        transition: "background 0.15s",
+        animation: `signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${150 + index * 80}ms both`,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-elevated)" }}
+      onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)" }}
+    >
+      {/* Layer dot + label */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <span style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: LAYER_DOT[perspective.layer] || "var(--text-tertiary)",
+        }} />
+        <span style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          {LAYER_LABELS[perspective.layer] || perspective.layer}
+        </span>
+      </div>
+      {/* Title */}
+      <div style={{
+        ...TYPE.heading,
+        color: "var(--text-primary)",
+        marginBottom: 8,
+      }}>
+        {perspective.title}
+      </div>
+      {/* Body with citations */}
+      <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: 12 }}>
+        {renderCitedBody(perspective.body, perspective.sources)}
+      </div>
+      {/* Cerebro action */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 4,
+        ...TYPE.xs, color: "var(--text-tertiary)",
+        transition: "color 0.15s",
+      }}>
+        <ArrowUpRight size={10} />
+        Develop in Cerebro
+      </div>
+    </div>
   )
 }
 
@@ -117,7 +216,9 @@ function PitchOverlay({ pitch, onClose, onDeliberate }: { pitch: Pitch; onClose:
         <div style={{ marginBottom: 24 }}>
           <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Evidence</div>
           {pitch.evidence.map((e, i) => (
-            <div key={i} style={{ ...TYPE.body, color: "var(--text-secondary)", marginBottom: 6 }}>{e}</div>
+            <div key={i} style={{ ...TYPE.body, color: "var(--text-secondary)", marginBottom: 6, lineHeight: 1.7 }}>
+              {renderCitedBody(e, pitch.evidenceSources?.[i])}
+            </div>
           ))}
         </div>
 
@@ -265,21 +366,33 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
           <div style={{ padding: "0 0 48px" }}>
 
             {/* ─ Header image ─ */}
-            {data.headerImageUrl && (
-              <div style={{
-                height: 200, overflow: "hidden",
-                animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
-              }}>
-                <img src={data.headerImageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-            )}
-
-            {/* ─ WEEK SUMMARY — editorial lead ─ */}
             <div style={{
-              padding: "40px 20px 36px",
+              height: 200, overflow: "hidden",
+              background: data.headerImageUrl
+                ? "transparent"
+                : "linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)",
+              animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
+            }}>
+              {data.headerImageUrl && (
+                <img src={data.headerImageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              )}
+            </div>
+
+            {/* ─ EDITORIAL HEADER ─ */}
+            <div style={{
+              padding: "32px 20px 28px",
               borderBottom: "1px solid var(--border)",
               animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
             }}>
+              {/* Eyebrow */}
+              <div style={{
+                ...TYPE.xs, color: "var(--text-tertiary)",
+                textTransform: "uppercase", letterSpacing: "0.08em",
+                marginBottom: 12,
+              }}>
+                New ideas and opportunities for week of {formatWeekRange(data.generatedAt)}
+              </div>
+              {/* Headline */}
               <div style={{
                 fontSize: 17,
                 fontWeight: 400,
@@ -288,7 +401,10 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                 maxWidth: 580,
                 letterSpacing: "-0.01em",
               }}>
-                {data.message || data.weekSummary || "Weekly intelligence brief and content pitches."}
+                {renderCitedBody(
+                  data.message || data.weekSummary || "Weekly intelligence brief and content pitches.",
+                  data.weekSummarySources
+                )}
               </div>
               {data.articleCount && data.generatedAt && (
                 <div style={{ ...metaStyle, marginTop: 14 }}>
@@ -296,6 +412,33 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                 </div>
               )}
             </div>
+
+            {/* ─ PERSPECTIVES — intelligence layer cards ─ */}
+            {data.perspectives && data.perspectives.length > 0 && (
+              <div style={{
+                padding: "24px 20px",
+                borderBottom: "1px solid var(--border)",
+                animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) 100ms both",
+              }}>
+                <div style={{ ...labelStyle, letterSpacing: "0.04em", marginBottom: 14 }}>
+                  Perspectives
+                </div>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 12,
+                }}>
+                  {data.perspectives.map((p, i) => (
+                    <PerspectiveCard
+                      key={i}
+                      perspective={p}
+                      index={i}
+                      onDeliberate={onDeliberate}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ─ PITCHES — editorial grid ─ */}
             {data.pitches && data.pitches.length > 0 && (
@@ -356,13 +499,16 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                         }}>
                           {pitch.thesis}
                         </div>
-                        {/* Evidence sources */}
+                        {/* Evidence sources — with interactive citations */}
                         {pitch.evidence && pitch.evidence.length > 0 && (
                           <div style={{ ...TYPE.xs, color: "var(--text-tertiary)", lineHeight: 1.5 }}>
                             {pitch.evidence.slice(0, 2).map((e, ei) => (
                               <span key={ei}>
                                 {ei > 0 && <span style={{ opacity: 0.4 }}> · </span>}
-                                {e.length > 60 ? e.slice(0, 60) + "..." : e}
+                                {renderCitedBody(
+                                  e.length > 80 ? e.slice(0, 77) + "..." : e,
+                                  pitch.evidenceSources?.[ei]
+                                )}
                               </span>
                             ))}
                           </div>
