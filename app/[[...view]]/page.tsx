@@ -712,6 +712,7 @@ export default function Page() {
           <div style={{
             flexShrink: 0, borderBottom: "1px solid var(--border)",
             display: "flex", alignItems: "stretch", gap: 0,
+            minHeight: 52,
           }}>
             {/* Exit focus mode button */}
             <button
