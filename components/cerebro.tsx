@@ -335,7 +335,7 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
         role="log"
         aria-label="Cerebro conversation"
         aria-live="polite"
-        style={{ flex: 1, overflowY: "auto", padding: "12px 0", display: "flex", flexDirection: "column", alignItems: maxWidth ? "center" : "stretch" }}
+        style={{ flex: 1, overflowY: "auto", padding: "24px 0 40px", display: "flex", flexDirection: "column", alignItems: maxWidth ? "center" : "stretch" }}
       ><div style={maxWidth ? { width: "100%", maxWidth } : undefined}>
         {messages.length === 0 && (
           <div style={{ padding: "32px 24px" }}>
@@ -357,22 +357,30 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
         )}
 
         {messages.map((m, i) => {
-          // Contextual spacing: more space before user messages (new turn),
-          // tight between search results, generous after responses
           const prev = i > 0 ? messages[i - 1] : null
-          const mb = m.role === "search" ? 6
-            : m.role === "user" ? 32
-            : 32 // assistant
-          const mt = m.role === "user" && prev?.role === "assistant" ? 36
-            : m.role === "assistant" && prev?.role === "search" ? 20
-            : m.role === "assistant" && prev?.role === "user" ? 28
-            : 0
+          const next = i < messages.length - 1 ? messages[i + 1] : null
+
+          // ── Vertical rhythm ──
+          // Book design: generous space between turns, tight within.
+          // Search results are marginalia — compact, subordinate.
+          // A new speaker gets a section break. Paragraphs within a
+          // response get proper block spacing (not pre-wrap cramming).
+
+          const isNewTurn = m.role === "user" && prev?.role === "assistant"
+          const isFirstResponse = m.role === "assistant" && (prev?.role === "user" || prev?.role === "search")
+          const isSearchCluster = m.role === "search"
+          const isLastSearch = isSearchCluster && next?.role === "assistant"
 
           return (
           <div
             key={i}
             className="cerebro-msg"
-            style={{ marginBottom: mb, marginTop: mt, position: "relative" }}
+            style={{
+              // Turn breaks: generous. Within a turn: measured.
+              marginTop: isNewTurn ? 40 : isFirstResponse ? 24 : 0,
+              marginBottom: isSearchCluster ? (isLastSearch ? 20 : 4) : 0,
+              position: "relative",
+            }}
             onMouseEnter={e => { const actions = e.currentTarget.querySelector('.msg-actions') as HTMLElement; if (actions) actions.style.opacity = "1" }}
             onMouseLeave={e => { const actions = e.currentTarget.querySelector('.msg-actions') as HTMLElement; if (actions) actions.style.opacity = "0" }}
           >
@@ -399,22 +407,59 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode, maxWidth }: {
                 )}
               </div>
             )}
+
+            {/* ── User: right-aligned, the questioner's voice ── */}
             {m.role === "user" ? (
-              <div style={{ padding: "0 24px", display: "flex", justifyContent: "flex-end" }}>
-                <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7, wordBreak: "break-word", fontWeight: 500, textAlign: "right", maxWidth: "72%" }}>
+              <div style={{ padding: "0 32px", display: "flex", justifyContent: "flex-end" }}>
+                <div style={{
+                  fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7,
+                  wordBreak: "break-word", fontWeight: 500, textAlign: "right",
+                  maxWidth: "68%",
+                }}>
                   {m.content}
                 </div>
               </div>
+
+            /* ── Search: marginalia — small, grouped, subordinate ── */
             ) : m.role === "search" ? (
-              <div style={{ padding: "0 24px", fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)", lineHeight: 1.5, display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ color: "var(--accent-muted)", opacity: 0.7 }}>↗</span>
-                <span style={{ opacity: 0.6 }}>searched &ldquo;{m.content}&rdquo;</span>
+              <div style={{
+                padding: "0 32px", fontSize: 10,
+                fontFamily: "var(--font-geist-mono), monospace",
+                color: "var(--text-tertiary)", lineHeight: 1.5,
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <span style={{ color: "var(--accent-muted)", opacity: 0.5 }}>↗</span>
+                <span style={{ opacity: 0.45 }}>searched &ldquo;{m.content}&rdquo;</span>
               </div>
+
+            /* ── Assistant: the body text — proper paragraph typography ── */
             ) : (
-              <div style={{ padding: "0 24px" }}>
-                <div style={{ fontSize: 12.5, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-secondary)", lineHeight: 1.85, whiteSpace: "pre-wrap", wordBreak: "break-word", maxWidth: 680 }}>
-                  {sourcesByMsg[i] ? renderCitedBody(m.content, sourcesByMsg[i]) : m.content}
-                </div>
+              <div style={{ padding: "0 32px", maxWidth: 680 }}>
+                {(() => {
+                  // Split on double newlines into real paragraphs.
+                  // Book rule: space between paragraphs, never indent + space.
+                  const raw = m.content
+                  const sources = sourcesByMsg[i]
+                  const paragraphs = raw.split(/\n\n+/).filter(Boolean)
+
+                  return paragraphs.map((para, pi) => (
+                    <div
+                      key={pi}
+                      style={{
+                        fontSize: 12.5,
+                        fontFamily: "var(--font-geist-mono), monospace",
+                        color: "var(--text-secondary)",
+                        lineHeight: 1.9,
+                        wordBreak: "break-word",
+                        // Paragraph spacing: generous but not equal to turn spacing.
+                        // Last paragraph gets no bottom margin.
+                        marginBottom: pi < paragraphs.length - 1 ? 20 : 0,
+                      }}
+                    >
+                      {sources ? renderCitedBody(para, sources) : para}
+                    </div>
+                  ))
+                })()}
               </div>
             )}
           </div>
