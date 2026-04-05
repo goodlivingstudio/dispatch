@@ -65,7 +65,7 @@ CONTEXT: The operator is a senior design leader positioning for CDO/Head of Desi
 PRODUCE:
 1. A one-line editorial headline for the week (weekSummary)
 2. 3-4 perspectives — each analyzing the week through a different intelligence layer lens, with [N] source citations
-3. 4-5 content pitches with evidence citations
+3. 7 content pitches with evidence citations
 
 TWO MODES for pitches — distribute across both:
 
@@ -106,7 +106,7 @@ Return a JSON object:
 
 PERSPECTIVES: Generate 3-4 perspectives. Each must analyze the week through a DIFFERENT intelligence layer. Cover at least opportunity, position, and one of discipline/landscape/culture. Use [N] citations referencing the numbered articles.
 
-PITCHES: Generate 4-5 pitches. Be specific. Name companies, cite data points, reference real trends from the articles. Every pitch must trace to multiple signals.
+PITCHES: Generate exactly 7 pitches. Be specific. Name companies, cite data points, reference real trends from the articles. Every pitch must trace to multiple signals.
 
 Return only valid JSON. No prose outside the JSON.`
 
