@@ -359,7 +359,7 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode }: {
           <div
             key={i}
             className="cerebro-msg"
-            style={{ marginBottom: m.role === "search" ? 4 : 16, position: "relative" }}
+            style={{ marginBottom: m.role === "search" ? 12 : 20, position: "relative" }}
             onMouseEnter={e => { const actions = e.currentTarget.querySelector('.msg-actions') as HTMLElement; if (actions) actions.style.opacity = "1" }}
             onMouseLeave={e => { const actions = e.currentTarget.querySelector('.msg-actions') as HTMLElement; if (actions) actions.style.opacity = "0" }}
           >
@@ -387,8 +387,10 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode }: {
               </div>
             )}
             {m.role === "user" ? (
-              <div style={{ padding: "0 16px", fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6, wordBreak: "break-word", fontWeight: 500 }}>
-                {m.content}
+              <div style={{ padding: "0 16px", display: "flex", justifyContent: "flex-end" }}>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6, wordBreak: "break-word", fontWeight: 500, textAlign: "right", maxWidth: "85%" }}>
+                  {m.content}
+                </div>
               </div>
             ) : m.role === "search" ? (
               <div style={{ padding: "0 16px", fontSize: 11, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-tertiary)", lineHeight: 1.5, display: "flex", alignItems: "center", gap: 6 }}>
@@ -397,7 +399,7 @@ export function Cerebro({ articles, pendingPrompt, onFocusMode }: {
               </div>
             ) : (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 12.5, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-secondary)", lineHeight: 1.75, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                <div style={{ fontSize: 12.5, fontFamily: "var(--font-geist-mono), monospace", color: "var(--text-secondary)", lineHeight: 1.75, whiteSpace: "pre-wrap", wordBreak: "break-word", maxWidth: "85%" }}>
                   {sourcesByMsg[i] ? renderCitedBody(m.content, sourcesByMsg[i]) : m.content}
                 </div>
               </div>
