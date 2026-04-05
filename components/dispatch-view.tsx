@@ -143,17 +143,8 @@ function PerspectiveCard({ perspective, index, onDeliberate }: {
         {perspective.title}
       </div>
       {/* Body with citations */}
-      <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: 12 }}>
+      <div style={{ ...TYPE.body, color: "var(--text-secondary)", lineHeight: 1.7 }}>
         {renderCitedBody(perspective.body, perspective.sources)}
-      </div>
-      {/* Cerebro action */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 4,
-        ...TYPE.xs, color: "var(--text-tertiary)",
-        transition: "color 0.15s",
-      }}>
-        <ArrowUpRight size={10} />
-        Develop in Cerebro
       </div>
     </div>
   )
@@ -365,9 +356,9 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
         {!loading && data && (
           <div style={{ padding: "0 0 48px" }}>
 
-            {/* ─ Header image ─ */}
+            {/* ─ Header image — full width ─ */}
             <div style={{
-              height: 200, overflow: "hidden",
+              height: 240, overflow: "hidden",
               background: data.headerImageUrl
                 ? "transparent"
                 : "linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)",
@@ -378,28 +369,30 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
               )}
             </div>
 
-            {/* ─ EDITORIAL HEADER ─ */}
+            {/* ─ EDITORIAL HEADER — centered broadsheet ─ */}
             <div style={{
-              padding: "32px 20px 28px",
+              padding: "36px 48px 32px",
               borderBottom: "1px solid var(--border)",
+              textAlign: "center",
               animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
             }}>
               {/* Eyebrow */}
               <div style={{
                 ...TYPE.xs, color: "var(--text-tertiary)",
                 textTransform: "uppercase", letterSpacing: "0.08em",
-                marginBottom: 12,
+                marginBottom: 16,
               }}>
                 New ideas and opportunities for week of {formatWeekRange(data.generatedAt)}
               </div>
-              {/* Headline */}
+              {/* Headline — large, light weight, centered */}
               <div style={{
-                fontSize: 17,
-                fontWeight: 400,
+                fontSize: 26,
+                fontWeight: 300,
                 color: "var(--text-primary)",
-                lineHeight: 1.75,
-                maxWidth: 580,
-                letterSpacing: "-0.01em",
+                lineHeight: 1.5,
+                letterSpacing: "-0.02em",
+                maxWidth: 640,
+                margin: "0 auto",
               }}>
                 {renderCitedBody(
                   data.message || data.weekSummary || "Weekly intelligence brief and content pitches.",
@@ -407,7 +400,7 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                 )}
               </div>
               {data.articleCount && data.generatedAt && (
-                <div style={{ ...metaStyle, marginTop: 14 }}>
+                <div style={{ ...metaStyle, marginTop: 18 }}>
                   {data.articleCount} articles · {new Date(data.generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </div>
               )}
@@ -420,7 +413,7 @@ export function DispatchView({ onDeliberate }: { onDeliberate: (text: string) =>
                 borderBottom: "1px solid var(--border)",
                 animation: "signal-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) 100ms both",
               }}>
-                <div style={{ ...labelStyle, letterSpacing: "0.04em", marginBottom: 14 }}>
+                <div style={{ ...labelStyle, letterSpacing: "0.04em", marginBottom: 14, textAlign: "center" }}>
                   Perspectives
                 </div>
                 <div style={{
