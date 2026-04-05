@@ -730,7 +730,7 @@ export default function Page() {
               <Minimize2 size={16} strokeWidth={1.5} style={{ color: "var(--accent-secondary)" }} />
             </button>
             {/* DCOS cards as compact clickable strips */}
-            {signals.filter(s => s.body).map((signal, i) => (
+            {signals.filter(s => s.body).length > 0 ? signals.filter(s => s.body).map((signal, i) => (
               <button
                 key={i}
                 onClick={() => handleDeliberate(signal)}
@@ -750,7 +750,13 @@ export default function Page() {
                   {signal.body.replace(/\[\d+\]/g, "").slice(0, 80)}
                 </span>
               </button>
-            ))}
+            )) : (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 16px" }}>
+                <span className="loading-pulse" style={{ ...TYPE.sm, fontFamily: MONO, color: "var(--accent-muted)" }}>
+                  Loading signals...
+                </span>
+              </div>
+            )}
           </div>
           {/* Cerebro — constrained width, open background */}
           <div style={{ flex: 1, overflow: "hidden" }}>
