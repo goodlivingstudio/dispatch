@@ -714,7 +714,7 @@ export default function Page() {
       {focusMode && !isMobile && (
         <div style={{
           flex: 1, display: "flex", flexDirection: "column", overflow: "hidden",
-          animation: "focus-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
+          animation: "focus-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
         }}>
           {/* Compact DCOS strip */}
           <div style={{
@@ -772,7 +772,10 @@ export default function Page() {
       )}
 
       {/* Three-column workspace — hidden in focus mode */}
-      <div style={{ flex: 1, display: focusMode ? "none" : "flex", overflow: "hidden" }}>
+      <div style={{
+        flex: 1, display: focusMode ? "none" : "flex", overflow: "hidden",
+        animation: !focusMode ? "focus-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both" : undefined,
+      }}>
         <div
           style={{
             width: leftRailCollapsed ? 42 : leftWidth,
